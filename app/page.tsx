@@ -4,6 +4,7 @@ import { StaffSection } from "@/components/home/medical-staff/staff-section";
 import { FacilitySection } from "@/components/home/facility-tour/facility-section";
 import { AppointmentWidget } from "@/components/home/appointment-widget";
 import { OfficeHoursSection } from "@/components/home/office-hours-section";
+import { ReviewSection } from "@/components/home/reviews/review-section";
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <DepartmentsSection />
       <StaffSection />
       <FacilitySection />
+      <ReviewSection />
       <div className="container mx-auto px-4 py-16 grid gap-8 md:grid-cols-2">
         <AppointmentWidget />
         <OfficeHoursSection />
