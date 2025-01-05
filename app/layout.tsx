@@ -6,7 +6,11 @@ import { Footer } from "@/components/layout/footer";
 
 export const metadata: Metadata = {
   title: "소리철 일곡에스한방병원",
-  description: "광주 북구 일곡동 소재 한방병원, 전문적인 한방 의료 서비스를 제공합니다.",
+  description: "소리철 일곡에스한방병원 공식 홈페이지입니다.",
+  icons: {
+    icon: [{ url: "/favicon.ico" }],
+    apple: [{ url: "/apple-touch-icon.png" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
