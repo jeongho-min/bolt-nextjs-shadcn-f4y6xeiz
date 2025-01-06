@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 
 export const metadata: Metadata = {
   title: "소리철 일곡에스한방병원",
-  description: "소리철 일곡에스한방병원 공식 홈페이지입니다.",
+  description: "소리청 일곡에스한방병원 공식 홈페이지입니다.",
   icons: {
     icon: [{ url: "/favicon.ico" }],
     apple: [{ url: "/apple-touch-icon.png" }],
