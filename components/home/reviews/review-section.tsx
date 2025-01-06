@@ -18,7 +18,7 @@ export function ReviewSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold mb-4">진료 후기</h2>
-          <p className="text-gray-600">소리철 일곡에스한방병원을 믿고 찾아주신 환자분들의 소중한 후기입니다</p>
+          <p className="text-gray-600">소리청 일곡에스한방병원을 믿고 찾아주신 환자분들의 소중한 후기입니다</p>
         </motion.div>
       </div>
 

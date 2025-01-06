@@ -1,48 +1,35 @@
-import { 
-  Stethoscope, 
-  Brain, 
-  Heart, 
-  Baby, 
-  Bone, 
-  Activity 
-} from "lucide-react";
+import { Ear, Brain, Syringe, Stethoscope, Scale } from "lucide-react";
 import type { Department } from "./types";
 
 export const departments: Department[] = [
   {
-    icon: Stethoscope,
-    title: "내과",
-    description: "소화기 질환, 호흡기 질환, 순환기 질환 등",
-    specialties: ["소화불량", "위장질환", "변비/설사", "호흡기 질환"]
+    icon: Ear,
+    title: "이비인후과",
+    description: "이명, 어지럼증, 돌발성난청, 메니에르, 이석증",
+    specialties: ["이명", "어지럼증", "돌발성난청", "메니에르", "이석증"],
   },
   {
     icon: Brain,
     title: "신경과",
-    description: "두통, 어지럼증, 안면마비, 중풍 등",
-    specialties: ["두통", "어지럼증", "안면마비", "뇌졸중 후유증"]
+    description: "두통, 편두통, 어지럼증, 치매",
+    specialties: ["두통", "편두통", "어지럼증", "치매"],
   },
   {
-    icon: Heart,
-    title: "심장내과",
-    description: "고혈압, 부정맥, 협심증 등",
-    specialties: ["고혈압", "부정맥", "협심증", "심장질환"]
+    icon: Syringe,
+    title: "침구과",
+    description: "관절 척추질환, 경추/요추 디스크 질환, 오십견, 재활치료",
+    specialties: ["관절 척추질환", "경추/요추 디스크", "오십견", "재활치료"],
   },
   {
-    icon: Baby,
-    title: "소아과",
-    description: "소아 성장, 소화기 질환, 호흡기 질환 등",
-    specialties: ["성장발달", "소아비만", "소아천식", "소아변비"]
+    icon: Stethoscope,
+    title: "내과",
+    description: "소화기, 호흡기, 순환기, 비뇨기 질환",
+    specialties: ["소화기 질환", "호흡기 질환", "순환기 질환", "비뇨기 질환"],
   },
   {
-    icon: Bone,
-    title: "정형외과",
-    description: "관절통, 요통, 디스크, 척추질환 등",
-    specialties: ["허리통증", "목통증", "관절통", "척추질환"]
+    icon: Scale,
+    title: "사상체질의학과",
+    description: "체질 감별 후 맞춤 처방 및 치료",
+    specialties: ["체질 감별", "맞춤 처방", "체질 치료"],
   },
-  {
-    icon: Activity,
-    title: "재활의학과",
-    description: "재활치료, 통증치료, 물리치료 등",
-    specialties: ["재활치료", "통증관리", "물리치료", "운동치료"]
-  }
 ];

@@ -2,33 +2,52 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export function AboutHero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.1, 1.2]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.2, 0.5]);
+  const brightness = useTransform(scrollYProgress, [0, 1], [1.1, 0.9]);
+
   return (
-    <section className="relative h-[60vh] min-h-[400px]">
-      <Image
-        src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80"
-        alt="병원 전경"
-        fill
-        className="object-cover"
-        priority
-      />
-      <div className="absolute inset-0 bg-black/40" />
-      
+    <section ref={sectionRef} className="relative h-[70vh] min-h-[600px] overflow-hidden">
+      <motion.div
+        initial={{ scale: 1.15, opacity: 0 }}
+        animate={{ scale: 1.1, opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        style={{ y, scale }}
+        className="absolute inset-0"
+      >
+        <motion.div style={{ filter: `brightness(${brightness})` }} className="relative w-full h-full">
+          <Image src="/sub/sub_vis_bg1.jpg" alt="소리청 소개 이미지" fill className="object-cover object-center" priority />
+        </motion.div>
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40"
+          style={{ opacity: overlayOpacity }}
+          transition={{ duration: 0.3 }}
+        />
+      </motion.div>
+
       <div className="relative h-full flex items-center">
         <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              소리청 일곡에스한방병원
-            </h1>
-            <p className="text-xl text-white/90 max-w-2xl">
-              정성과 신뢰로 여러분의 건강을 지켜드리는 소리청 일곡에스한방병원입니다.
-            </p>
-          </motion.div>
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }} className="space-y-6">
+              {/* <h1 className="text-4xl md:text-5xl font-bold text-white">소리청 소개</h1>
+              <p className="text-lg text-white/90 leading-relaxed">
+                전통 한의학과 현대 의료 시스템의 조화로운 결합으로
+                <br className="hidden md:block" />
+                최상의 치료 서비스를 제공합니다
+              </p> */}
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

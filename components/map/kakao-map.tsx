@@ -28,7 +28,7 @@ export function KakaoMap() {
 
       // 인포윈도우 생성
       const infowindow = new window.kakao.maps.InfoWindow({
-        content: '<div style="padding:5px;font-size:12px;">소리철 일곡에스한방병원</div>',
+        content: '<div style="padding:5px;font-size:12px;">소리청 일곡에스한방병원</div>',
       });
       infowindow.open(map, marker);
     }

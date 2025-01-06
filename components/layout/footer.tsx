@@ -14,7 +14,7 @@ export function Footer() {
               <p className="text-primary">일요일/공휴일 휴진</p>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-4">연락처</h3>
             <div className="space-y-2 text-sm text-gray-600">
@@ -29,7 +29,7 @@ export function Footer() {
               <p className="ml-6">(양일로 307)</p>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-4">진료과목</h3>
             <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
@@ -42,11 +42,9 @@ export function Footer() {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <p className="text-center text-sm text-gray-500">
-            © 2024 소리철 일곡에스한방병원. All rights reserved.
-          </p>
+          <p className="text-center text-sm text-gray-500">© 2024 소리청 일곡에스한방병원. All rights reserved.</p>
         </div>
       </div>
     </footer>
