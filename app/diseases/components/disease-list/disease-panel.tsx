@@ -2,6 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import Image from "next/image";
+import { useEffect } from "react";
 import type { Disease } from "./types";
 
 interface DiseasePanelProps {
@@ -10,6 +12,15 @@ interface DiseasePanelProps {
 }
 
 export function DiseasePanel({ disease, onClose }: DiseasePanelProps) {
+  useEffect(() => {
+    if (disease) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [disease]);
+
   return (
     <AnimatePresence>
       {disease && (
@@ -28,12 +39,11 @@ export function DiseasePanel({ disease, onClose }: DiseasePanelProps) {
               </button>
 
               <div className="pt-8">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="p-4 rounded-xl bg-primary/5">
-                    <disease.icon className="w-8 h-8 text-primary" />
+                {disease.imagePath && (
+                  <div className="w-[calc(100%+4rem)] -mx-8 mb-8">
+                    <Image src={disease.imagePath} alt={disease.title} width={1200} height={800} className="w-full h-auto" />
                   </div>
-                  <h2 className="text-3xl font-bold">{disease.title}</h2>
-                </div>
+                )}
 
                 <div className="prose prose-gray max-w-none">
                   {disease.description.split("\n").map((paragraph, index) => (

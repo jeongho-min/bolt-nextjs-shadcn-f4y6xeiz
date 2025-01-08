@@ -19,6 +19,7 @@ export const diseases: Disease[] = [
     • 침 치료
     • 약침 치료
     • 추나 요법`,
+    imagePath: "/diseases/이명.png",
   },
   {
     id: "sudden-hearing-loss",
@@ -26,6 +27,7 @@ export const diseases: Disease[] = [
     icon: AlertCircle,
     shortDescription: "갑작스러운 청력 저하",
     description: "...",
+    imagePath: "/diseases/돌발성난청.png",
   },
   {
     id: "dizziness",
@@ -33,6 +35,7 @@ export const diseases: Disease[] = [
     icon: Activity,
     shortDescription: "균형감각 상실과 어지러움",
     description: "...",
+    imagePath: "/diseases/어지럼증.png",
   },
   {
     id: "bppv",
@@ -40,6 +43,7 @@ export const diseases: Disease[] = [
     icon: Ear,
     shortDescription: "자세 변화시 심한 어지러움",
     description: "...",
+    imagePath: "/diseases/이석증.png",
   },
   {
     id: "meniere",
@@ -47,6 +51,7 @@ export const diseases: Disease[] = [
     icon: Ear,
     shortDescription: "어지럼증과 청력 변동",
     description: "...",
+    imagePath: "/diseases/메니에르.png",
   },
   {
     id: "vestibular-neuritis",
@@ -54,6 +59,7 @@ export const diseases: Disease[] = [
     icon: Brain,
     shortDescription: "급성 어지럼증",
     description: "...",
+    imagePath: "/diseases/전정신경염.png",
   },
   {
     id: "ear-fullness",
@@ -61,6 +67,7 @@ export const diseases: Disease[] = [
     icon: Ear,
     shortDescription: "귀가 막힌 듯한 느낌",
     description: "...",
+    imagePath: "/diseases/귀먹먹함.png",
   },
   {
     id: "headache",
@@ -68,5 +75,6 @@ export const diseases: Disease[] = [
     icon: Brain,
     shortDescription: "다양한 원인의 두통",
     description: "...",
+    imagePath: "/diseases/두통.png",
   },
 ];

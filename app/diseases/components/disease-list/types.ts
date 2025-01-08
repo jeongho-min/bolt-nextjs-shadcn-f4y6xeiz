@@ -6,4 +6,5 @@ export interface Disease {
   icon: LucideIcon;
   shortDescription: string;
   description: string;
+  imagePath?: string;
 }
