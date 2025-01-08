@@ -40,14 +40,14 @@ const QUICK_LINKS = [
     bgColor: "bg-purple-50",
     hoverColor: "hover:bg-purple-100",
   },
-  {
-    icon: MessagesSquare,
-    label: "N상담",
-    href: "/chat",
-    color: "text-yellow-500",
-    bgColor: "bg-yellow-50",
-    hoverColor: "hover:bg-yellow-100",
-  },
+  // {
+  //   icon: MessagesSquare,
+  //   label: "N상담",
+  //   href: "/chat",
+  //   color: "text-yellow-500",
+  //   bgColor: "bg-yellow-50",
+  //   hoverColor: "hover:bg-yellow-100",
+  // },
   {
     icon: ArrowUp,
     label: "TOP",
