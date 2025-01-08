@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { MapPin, MessageCircle, FileText, ArrowUp, MessagesSquare } from "lucide-react";
+import { MapPin, MessageCircle, FileText, ArrowUp, MessagesSquare, Clock } from "lucide-react";
 
 const HOSPITAL_ADDRESS = "광주광역시 북구 일곡동 840-2번지";
 const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/to/${encodeURIComponent("소리청한의원")},35.2034,126.8969`;
+const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
 
 const QUICK_LINKS = [
   {
@@ -25,9 +26,25 @@ const QUICK_LINKS = [
     hoverColor: "hover:bg-emerald-100",
   },
   {
+    icon: Clock,
+    label: "운영정보",
+    href: "/contact",
+    color: "text-amber-500",
+    bgColor: "bg-amber-50",
+    hoverColor: "hover:bg-amber-100",
+  },
+  {
     icon: MessageCircle,
     label: "상담하기",
-    href: "/contact",
+    onClick: () => {
+      // 모바일에서는 카카오채널 앱으로 연결
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.location.href = `kakaoopen://plusfriend/home/@${KAKAO_CHANNEL_ID}`;
+      } else {
+        // PC에서는 카카오채널 웹으로 연결
+        window.open(`https://pf.kakao.com/_${KAKAO_CHANNEL_ID}`, "_blank");
+      }
+    },
     color: "text-blue-500",
     bgColor: "bg-blue-50",
     hoverColor: "hover:bg-blue-100",
