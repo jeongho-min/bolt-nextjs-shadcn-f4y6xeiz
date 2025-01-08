@@ -16,7 +16,7 @@ export function GreetingSection() {
               className="mx-auto"
             >
               <div className="rounded-lg overflow-hidden shadow-xl">
-                <img src="/enhanced_image.png" alt="원장 프로필" className="w-full h-auto" />
+                <img src="/min_yongtea_image.jpg" alt="원장 프로필" className="w-full h-auto" />
               </div>
             </motion.div>
 
@@ -40,7 +40,7 @@ export function GreetingSection() {
 
               <div className="pt-6 border-t border-gray-100">
                 <p className="text-lg font-medium">소리청 일곡에스한방병원</p>
-                <p className="text-primary font-medium">원장 김태호</p>
+                <p className="text-primary font-medium">원장 민용태</p>
               </div>
             </motion.div>
           </div>

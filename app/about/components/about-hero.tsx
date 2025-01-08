@@ -27,7 +27,13 @@ export function AboutHero() {
         className="absolute inset-0"
       >
         <motion.div style={{ filter: `brightness(${brightness})` }} className="relative w-full h-full">
-          <Image src="/sub/sub_vis_bg1.jpg" alt="소리청 소개 이미지" fill className="object-cover object-center" priority />
+          <Image
+            src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80"
+            alt="현대식 병원 시설 이미지"
+            fill
+            className="object-cover object-center"
+            priority
+          />
         </motion.div>
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40"
@@ -36,20 +42,20 @@ export function AboutHero() {
         />
       </motion.div>
 
-      <div className="relative h-full flex items-center">
+      {/* <div className="relative h-full flex items-center">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.5 }} className="space-y-6">
-              {/* <h1 className="text-4xl md:text-5xl font-bold text-white">소리청 소개</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-white">원장 인사말</h1>
               <p className="text-lg text-white/90 leading-relaxed">
-                전통 한의학과 현대 의료 시스템의 조화로운 결합으로
+                20년 이상의 임상 경험을 바탕으로
                 <br className="hidden md:block" />
-                최상의 치료 서비스를 제공합니다
-              </p> */}
+                정성을 다해 진료하겠습니다
+              </p>
             </motion.div>
           </div>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }
