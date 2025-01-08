@@ -13,7 +13,7 @@ export function HeroSection() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5000);
+    }, 8000);
 
     return () => clearInterval(timer);
   }, []);
@@ -29,9 +29,12 @@ export function HeroSection() {
                 key={slide.id}
                 className="absolute inset-0"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 2 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.7 }}
+                transition={{
+                  duration: 1.5,
+                  ease: "easeInOut",
+                }}
               >
                 <Image src={slide.image} alt="배경 이미지" fill className="object-cover" priority={index === 0} />
                 <div className="absolute inset-0 bg-black/30" />
