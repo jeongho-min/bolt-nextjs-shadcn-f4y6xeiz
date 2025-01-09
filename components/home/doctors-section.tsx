@@ -41,7 +41,7 @@ const doctors: Doctor[] = [
     name: "김광형",
     role: "양방원장",
     department: "양방과",
-    image: "/doctors/kim_gwanghyung.jpg",
+    image: "/min_yongtea_image_cut.png",
     education: ["조선대학교 의과대학 졸업(1977)", "가정의학과 전문의 취득(1987)", "중국 연변대학 침구과 연수(1986~1987)", "IMS, TPI 연수(2006)"],
     career: ["김광형의원 개원(1983)", "온누리 가정의원 개원(2002)", "現 소리청 일곡에스한방병원 양방원장(2024.12~)"],
     // 한방에서 양방 전문의
@@ -52,7 +52,7 @@ const doctors: Doctor[] = [
 function DoctorCard({ doctor }: { doctor: Doctor }) {
   return (
     <Card className="bg-white h-full rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] overflow-hidden">
-      <div className="relative h-[240px]">
+      <div className="relative h-[300px]">
         <Image src={doctor.image} alt={doctor.name} fill className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 text-white">

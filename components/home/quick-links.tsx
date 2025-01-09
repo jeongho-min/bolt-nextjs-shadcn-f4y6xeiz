@@ -1,23 +1,59 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowUp, Clock, MapPin, MessageCircle, Phone, Copy } from "lucide-react";
 import Link from "next/link";
-import { MapPin, MessageCircle, FileText, ArrowUp, MessagesSquare, Clock } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const HOSPITAL_ADDRESS = "광주광역시 북구 일곡동 840-2번지";
 const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/to/${encodeURIComponent("소리청한의원")},35.2034,126.8969`;
 const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
+const PHONE_NUMBER = "062-369-2075";
+
+function PhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(PHONE_NUMBER);
+      alert("전화번호가 복사되었습니다.");
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>전화 문의</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col items-center gap-4 py-4">
+          <p className="text-2xl font-bold text-primary">{PHONE_NUMBER}</p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={copyToClipboard}>
+              <Copy className="w-4 h-4 mr-2" />
+              복사하기
+            </Button>
+            <Button onClick={() => (window.location.href = `tel:${PHONE_NUMBER}`)}>
+              <Phone className="w-4 h-4 mr-2" />
+              전화걸기
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 const QUICK_LINKS = [
   {
     icon: MapPin,
     label: "길찾기",
     onClick: () => {
-      // 모바일에서는 카카오맵 앱으로 연결
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         window.location.href = `kakaomap://route?ep=35.2034,126.8969&epa=${encodeURIComponent(HOSPITAL_ADDRESS)}&by=CAR`;
       } else {
-        // PC에서는 카카오맵 웹으로 연결
         window.open(KAKAO_MAPS_SEARCH_URL, "_blank");
       }
     },
@@ -37,11 +73,9 @@ const QUICK_LINKS = [
     icon: MessageCircle,
     label: "상담하기",
     onClick: () => {
-      // 모바일에서는 카카오채널 앱으로 연결
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         window.location.href = `kakaoopen://plusfriend/home/@${KAKAO_CHANNEL_ID}`;
       } else {
-        // PC에서는 카카오채널 웹으로 연결
         window.open(`https://pf.kakao.com/_${KAKAO_CHANNEL_ID}`, "_blank");
       }
     },
@@ -50,21 +84,12 @@ const QUICK_LINKS = [
     hoverColor: "hover:bg-blue-100",
   },
   {
-    icon: FileText,
-    label: "치료사례",
-    href: "/cases",
-    color: "text-purple-500",
-    bgColor: "bg-purple-50",
-    hoverColor: "hover:bg-purple-100",
+    icon: Phone,
+    label: "전화문의",
+    color: "text-rose-500",
+    bgColor: "bg-rose-50",
+    hoverColor: "hover:bg-rose-100",
   },
-  // {
-  //   icon: MessagesSquare,
-  //   label: "N상담",
-  //   href: "/chat",
-  //   color: "text-yellow-500",
-  //   bgColor: "bg-yellow-50",
-  //   hoverColor: "hover:bg-yellow-100",
-  // },
   {
     icon: ArrowUp,
     label: "TOP",
@@ -76,63 +101,71 @@ const QUICK_LINKS = [
 ];
 
 export function QuickLinks() {
+  const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
+
+  const handlePhoneClick = () => {
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      window.location.href = `tel:${PHONE_NUMBER}`;
+    } else {
+      setIsPhoneDialogOpen(true);
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2.5"
-    >
-      {QUICK_LINKS.map((link) => {
-        const IconComponent = link.icon;
-        const content = (
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="relative group">
-            <div
-              className={`
-                w-14 h-14 rounded-2xl flex items-center justify-center
-                bg-white/95 backdrop-blur-sm
-                transition-all duration-300 ease-out
-                shadow-lg shadow-black/5
-                group-hover:shadow-xl group-hover:shadow-black/10
-                border border-gray-100
-              `}
-            >
-              <IconComponent
-                className={`
-                  w-6 h-6 ${link.color}
-                  transition-all duration-300
-                  group-hover:scale-110
-                `}
-              />
+    <>
+      <motion.div
+        initial={{ opacity: 0, x: 100 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2.5"
+      >
+        {QUICK_LINKS.map((link) => {
+          const IconComponent = link.icon;
+          const content = (
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="relative group">
               <div
                 className={`
-                absolute right-full mr-3 top-1/2 -translate-y-1/2
-                px-3 py-1.5 rounded-lg
-                bg-white/95 backdrop-blur-sm
-                border border-gray-100
-                shadow-lg shadow-black/5
-                opacity-0 -translate-x-3
-                group-hover:opacity-100 group-hover:translate-x-0
-                transition-all duration-300 ease-out
-                whitespace-nowrap
-              `}
+                  w-14 h-14 rounded-2xl flex flex-col items-center justify-center
+                  bg-white/95 backdrop-blur-sm
+                  transition-all duration-300 ease-out
+                  shadow-lg shadow-black/5
+                  group-hover:shadow-xl group-hover:shadow-black/10
+                  border border-gray-100
+                `}
               >
-                <span className="text-sm font-medium text-gray-700">{link.label}</span>
+                <IconComponent
+                  className={`
+                    w-5 h-5 ${link.color}
+                    transition-all duration-300
+                    group-hover:scale-110 mb-0.5
+                  `}
+                />
+                <span className={`text-[10px] font-medium ${link.color}`}>{link.label}</span>
               </div>
-            </div>
-          </motion.div>
-        );
+            </motion.div>
+          );
 
-        return link.onClick ? (
-          <button key={link.label} onClick={link.onClick} className="focus:outline-none" aria-label={link.label}>
-            {content}
-          </button>
-        ) : (
-          <Link key={link.label} href={link.href} className="focus:outline-none" aria-label={link.label}>
-            {content}
-          </Link>
-        );
-      })}
-    </motion.div>
+          if (link.label === "전화문의") {
+            return (
+              <button key={link.label} onClick={handlePhoneClick} className="focus:outline-none" aria-label={link.label}>
+                {content}
+              </button>
+            );
+          }
+
+          return link.onClick ? (
+            <button key={link.label} onClick={link.onClick} className="focus:outline-none" aria-label={link.label}>
+              {content}
+            </button>
+          ) : link.href ? (
+            <Link key={link.label} href={link.href} className="focus:outline-none" aria-label={link.label}>
+              {content}
+            </Link>
+          ) : null;
+        })}
+      </motion.div>
+
+      <PhoneDialog open={isPhoneDialogOpen} onOpenChange={setIsPhoneDialogOpen} />
+    </>
   );
 }
