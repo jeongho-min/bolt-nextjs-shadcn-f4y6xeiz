@@ -136,7 +136,7 @@ export const cases: Case[] = [
   },
   {
     id: 19,
-    category: "�지럼증",
+    category: "어지럼증",
     title: "2개월 전부터 시작된 심한 어지럼증",
     description: "걸을 때마다 중심을 잡기 힘들고 구토 증상도 있었습니다. 전문적인 치료 후 증상이 크게 개선되었습니다.",
     date: "24.10.25",

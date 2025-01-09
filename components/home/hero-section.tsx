@@ -73,7 +73,6 @@ export function HeroSection() {
       <SlideNavigation total={HERO_SLIDES.length} current={currentSlide} onSelect={setCurrentSlide} />
 
       {/* Quick Links */}
-      <QuickLinks />
     </section>
   );
 }

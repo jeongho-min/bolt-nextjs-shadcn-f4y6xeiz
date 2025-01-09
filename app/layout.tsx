@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { HeaderProvider } from "./providers/header-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { QuickLinks } from "@/components/home/quick-links";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -21,7 +22,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <HeaderProvider>
             <Header />
-            <main className="pt-16">{children}</main>
+            <main className="pt-16">
+              {children}
+              <QuickLinks />
+            </main>
             <Footer />
           </HeaderProvider>
         </Providers>

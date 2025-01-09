@@ -6,6 +6,12 @@ export const HERO_SLIDES = [
   //   description: "소리청은 여러분의 또 다른 가족입니다.",
   // },
   {
+    id: 5,
+    image: "/main/main_5.jpg",
+    title: "정성어린 치료",
+    description: "환자 한 분 한 분을 정성껏 치료합니다.",
+  },
+  {
     id: 2,
     image: "/main/main_2.jpg",
     title: "전문 의료진",
@@ -22,11 +28,5 @@ export const HERO_SLIDES = [
     image: "/main/main_4.jpg",
     title: "편안한 환경",
     description: "쾌적하고 편안한 환경에서 치료받으실 수 있습니다.",
-  },
-  {
-    id: 5,
-    image: "/main/main_5.jpg",
-    title: "정성어린 치료",
-    description: "환자 한 분 한 분을 정성껏 치료합니다.",
   },
 ];

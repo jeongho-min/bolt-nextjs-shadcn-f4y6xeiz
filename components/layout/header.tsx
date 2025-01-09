@@ -23,7 +23,7 @@ const navigation = [
       { name: "두통", href: "/diseases/headache" },
     ],
   },
-  { name: "진료안내", href: "/services" },
+  { name: "진료사례", href: "/services" },
   { name: "시설안내", href: "/facilities" },
   { name: "예약문의", href: "/contact" },
 ];
@@ -67,10 +67,6 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
-            <Button variant="default" className="ml-4">
-              <Phone className="mr-2 h-4 w-4" />
-              062-369-2075
-            </Button>
           </div>
 
           {/* Mobile menu button */}
