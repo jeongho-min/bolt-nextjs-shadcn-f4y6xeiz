@@ -265,10 +265,7 @@ export function Header() {
                     {item.name}
                   </Link>
                 ))}
-                <Button variant="default" className="w-full mt-4">
-                  <Phone className="mr-2 h-4 w-4" />
-                  062-369-2075
-                </Button>
+
                 {userNickname ? (
                   <div className="mt-4 px-3">
                     <button
