@@ -6,6 +6,8 @@ import { FacilitySection } from "@/components/home/facility-tour/facility-sectio
 import { AppointmentWidget } from "@/components/home/appointment-widget";
 import { OfficeHoursSection } from "@/components/home/office-hours-section";
 import { ReviewSection } from "@/components/home/reviews/review-section";
+import { DoctorsSection } from "@/components/home/doctors-section";
+import { StaffSection } from "@/components/home/medical-staff/staff-section";
 
 export default function HomePage() {
   return (
@@ -13,9 +15,10 @@ export default function HomePage() {
       <HeroSection />
       <CertificationSection />
       <HistorySection />
-      <DepartmentsSection />
-      {/* <FacilitySection /> */}
+      <DoctorsSection />
+      {/* <DepartmentsSection /> */}
       <ReviewSection />
+      {/* <FacilitySection /> */}
       <div className="container mx-auto px-4 py-16 grid gap-8 md:grid-cols-2">
         {/* <AppointmentWidget /> */}
         {/* <OfficeHoursSection /> */}
