@@ -67,7 +67,7 @@ export const diseases: Disease[] = [
     icon: Ear,
     shortDescription: "귀가 막힌 듯한 느낌",
     description: "...",
-    imagePath: "/diseases/귀먹먹함.png",
+    imagePath: "/diseases/귀먹먹.png",
   },
   {
     id: "headache",

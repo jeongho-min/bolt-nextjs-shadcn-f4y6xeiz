@@ -9,18 +9,6 @@ export function GreetingSection() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="mx-auto"
-            >
-              <div className="rounded-lg overflow-hidden shadow-xl">
-                <img src="/min_yongtea_image.jpg" alt="원장 프로필" className="w-full h-auto" />
-              </div>
-            </motion.div>
-
-            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -41,6 +29,18 @@ export function GreetingSection() {
               <div className="pt-6 border-t border-gray-100">
                 <p className="text-lg font-medium">소리청 일곡에스한방병원</p>
                 <p className="text-primary font-medium">원장 민용태</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="mx-auto"
+            >
+              <div className="rounded-lg overflow-hidden shadow-xl">
+                <img src="/min_yongtea_image.jpg" alt="원장 프로필" className="w-full h-auto" />
               </div>
             </motion.div>
           </div>
