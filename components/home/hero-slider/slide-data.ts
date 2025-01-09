@@ -14,7 +14,7 @@ export const HERO_SLIDES = [
   {
     id: 2,
     image: "/main/main_2.jpg",
-    title: "전문 의료진",
+    title: "의료진",
     description: "최고의 실력과 정성으로 진료합니다.",
   },
   // {

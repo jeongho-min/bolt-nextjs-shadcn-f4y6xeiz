@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, Phone, Clock, X, Calendar, LogOut } from "lucide-react";
+import { Menu, Phone, Clock, X, Calendar, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useHeader } from "@/app/providers/header-provider";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 declare global {
   interface Window {
@@ -36,10 +39,33 @@ const navigation = [
   { name: "예약문의", href: "/contact" },
 ];
 
+// 예시 예약 데이터
+const sampleReservations = [
+  {
+    id: 1,
+    date: new Date(2024, 1, 15, 14, 30),
+    department: "이명클리닉",
+    status: "예약확정",
+  },
+  {
+    id: 2,
+    date: new Date(2024, 1, 20, 11, 0),
+    department: "어지럼증클리닉",
+    status: "대기중",
+  },
+  {
+    id: 3,
+    date: new Date(2024, 1, 10, 15, 30),
+    department: "난청클리닉",
+    status: "진료완료",
+  },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userNickname, setUserNickname] = useState<string | null>(null);
+  const [showReservations, setShowReservations] = useState(false);
   const { isHeaderVisible } = useHeader();
 
   useEffect(() => {
@@ -119,103 +145,161 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "예약확정":
+        return "text-blue-600";
+      case "대기중":
+        return "text-yellow-600";
+      case "진료완료":
+        return "text-gray-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
   if (!isHeaderVisible) return null;
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/70 backdrop-blur-md shadow-sm" : "bg-white shadow-sm"}`}
-    >
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="소리청 일곡에스한방병원 로고" width={150} height={40} className="object-contain" priority />
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-6">
-            {navigation.map((item) => (
-              <Link key={item.name} href={item.href} className="nav-link">
-                {item.name}
-              </Link>
-            ))}
-            {userNickname ? (
-              <div className="flex items-center gap-2">
-                <Link href="/reservations" className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors">
-                  <Calendar className="h-4 w-4" />
-                  예약내역
-                </Link>
-                <div className="h-4 w-px bg-gray-300" />
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  로그아웃
-                </button>
-              </div>
+    <>
+      <Dialog open={showReservations} onOpenChange={setShowReservations}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">예약 내역</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            {sampleReservations.length > 0 ? (
+              <>
+                {sampleReservations.map((reservation) => (
+                  <div key={reservation.id} className="flex justify-between items-start p-4 bg-gray-100 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{format(reservation.date, "M월 d일 (EEE) HH:mm", { locale: ko })}</p>
+                      <p className="text-sm text-gray-600 mt-0.5">{reservation.department}</p>
+                    </div>
+                    <span className={`text-sm font-medium ${getStatusColor(reservation.status)}`}>{reservation.status}</span>
+                  </div>
+                ))}
+                <div className="pt-4 text-center">
+                  <Link href="/reservations" className="text-sm text-blue-500 hover:text-blue-600 font-medium" onClick={() => setShowReservations(false)}>
+                    전체 예약내역 보기
+                  </Link>
+                </div>
+              </>
             ) : (
-              <button onClick={handleKakaoLogin} className="flex items-center gap-2 px-4 py-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors">
-                <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
-                <span className="text-sm font-medium text-[#000000]">로그인</span>
-              </button>
+              <div className="py-8 text-center">
+                <p className="text-gray-500">예약 내역이 없습니다.</p>
+              </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden">
-            <button type="button" className="text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? "bg-white/70 backdrop-blur-md shadow-sm" : "bg-white shadow-sm"
+        }`}
+      >
+        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center">
+                <Image src="/logo.png" alt="소리청 일곡에스한방병원 로고" width={150} height={40} className="object-contain" priority />
+              </Link>
+            </div>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex md:items-center md:space-x-6">
               {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                <Link key={item.name} href={item.href} className="nav-link">
                   {item.name}
                 </Link>
               ))}
-              <Button variant="default" className="w-full mt-4">
-                <Phone className="mr-2 h-4 w-4" />
-                062-369-2075
-              </Button>
               {userNickname ? (
-                <div className="flex flex-col gap-2 mt-4 px-3">
-                  <div className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg">
-                    <Link href="/reservations" className="inline-flex items-center gap-1.5 hover:text-blue-500 transition-colors">
-                      <Calendar className="h-4 w-4" />
-                      예약내역
-                    </Link>
-                    <div className="h-4 w-px bg-gray-300" />
-                    <button onClick={handleLogout} className="inline-flex items-center gap-1.5 hover:text-blue-500 transition-colors">
-                      <LogOut className="h-4 w-4" />
-                      로그아웃
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowReservations(true)}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    예약내역
+                  </button>
+                  <div className="h-4 w-px bg-gray-300" />
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    로그아웃
+                  </button>
                 </div>
               ) : (
                 <button
                   onClick={handleKakaoLogin}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
                 >
                   <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
                   <span className="text-sm font-medium text-[#000000]">로그인</span>
                 </button>
               )}
             </div>
+
+            {/* Mobile menu button */}
+            <div className="flex md:hidden">
+              <button type="button" className="text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
-        )}
-      </nav>
-    </header>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="space-y-1 px-2 pb-3 pt-2">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Button variant="default" className="w-full mt-4">
+                  <Phone className="mr-2 h-4 w-4" />
+                  062-369-2075
+                </Button>
+                {userNickname ? (
+                  <div className="mt-4 px-3">
+                    <button
+                      onClick={() => setShowReservations(true)}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      예약내역 보기
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mt-3 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      로그아웃
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleKakaoLogin}
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
+                  >
+                    <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
+                    <span className="text-sm font-medium text-[#000000]">로그인</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </nav>
+      </header>
+    </>
   );
 }

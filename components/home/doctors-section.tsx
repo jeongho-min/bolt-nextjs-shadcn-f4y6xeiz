@@ -126,7 +126,7 @@ export function DoctorsSection() {
           className="text-center max-w-2xl mx-auto mb-12"
         >
           <h2 className="text-3xl font-bold mb-3">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">전문 의료진 소개</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">의료진 소개</span>
           </h2>
           <p className="text-gray-600 text-sm">정성과 신뢰로 여러분의 건강을 책임지겠습니다</p>
         </motion.div>

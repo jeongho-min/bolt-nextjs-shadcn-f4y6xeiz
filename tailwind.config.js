@@ -18,6 +18,9 @@ module.exports = {
             },
         },
         extend: {
+            fontFamily: {
+                sans: ["Pretendard Variable", "Pretendard", "-apple-system", "BlinkMacSystemFont", "system-ui", "Roboto", "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif"],
+            },
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
@@ -59,16 +62,23 @@ module.exports = {
                 sm: "calc(var(--radius) - 4px)",
             },
             keyframes: {
+                "accordion-down": {
+                    from: { height: 0 },
+                    to: { height: "var(--radix-accordion-content-height)" },
+                },
+                "accordion-up": {
+                    from: { height: "var(--radix-accordion-content-height)" },
+                    to: { height: 0 },
+                },
                 marquee: {
                     '0%': { transform: 'translateX(0)' },
                     '100%': { transform: 'translateX(-50%)' }
                 }
             },
             animation: {
-                marquee: 'marquee 40s linear infinite'
-            },
-            fontFamily: {
-                sans: ["var(--font-sans)", ...fontFamily.sans],
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                "marquee": "marquee 40s linear infinite"
             },
         },
     },
