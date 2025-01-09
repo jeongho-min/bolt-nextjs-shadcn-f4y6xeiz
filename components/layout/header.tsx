@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, Phone, Clock, X, LogIn, ChevronDown, Calendar } from "lucide-react";
+import { Menu, Phone, Clock, X, Calendar, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeader } from "@/app/providers/header-provider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 declare global {
   interface Window {
@@ -138,37 +136,29 @@ export function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-6">
             {navigation.map((item) => (
-              <Link key={item.name} href={item.href} className="text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors">
+              <Link key={item.name} href={item.href} className="nav-link">
                 {item.name}
               </Link>
             ))}
             {userNickname ? (
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-gray-50 border border-gray-200 shadow-sm transition-all">
-                    <span className="text-gray-700 font-medium text-sm">{userNickname}님</span>
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1 bg-white rounded-lg border border-gray-200 shadow-lg">
-                  <DropdownMenuItem asChild className="focus:bg-gray-50">
-                    <Link href="/reservations" className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md hover:bg-gray-50 transition-colors">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span className="text-gray-700">예약내역</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogIn className="h-4 w-4" />
-                    <span>로그아웃</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-2">
+                <Link href="/reservations" className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors">
+                  <Calendar className="h-4 w-4" />
+                  예약내역
+                </Link>
+                <div className="h-4 w-px bg-gray-300" />
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  로그아웃
+                </button>
+              </div>
             ) : (
-              <button onClick={handleKakaoLogin} className="focus:outline-none hover:opacity-90 transition-opacity">
-                <Image src="/kakao_login_medium.png" alt="카카오 로그인" width={90} height={22} className="h-auto" />
+              <button onClick={handleKakaoLogin} className="flex items-center gap-2 px-4 py-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors">
+                <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
+                <span className="text-sm font-medium text-[#000000]">로그인</span>
               </button>
             )}
           </div>
@@ -184,45 +174,42 @@ export function Header() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden">
-            <div className="space-y-2 px-2 pb-3 pt-2">
+            <div className="space-y-1 px-2 pb-3 pt-2">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              <div className="h-px bg-gray-100 my-4" />
-              <Button variant="default" className="w-full">
+              <Button variant="default" className="w-full mt-4">
                 <Phone className="mr-2 h-4 w-4" />
                 062-369-2075
               </Button>
               {userNickname ? (
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center justify-center px-4 py-2 rounded-md border border-gray-200 bg-gray-50">
-                    <span className="text-gray-700 font-medium">{userNickname}님</span>
+                <div className="flex flex-col gap-2 mt-4 px-3">
+                  <div className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg">
+                    <Link href="/reservations" className="inline-flex items-center gap-1.5 hover:text-blue-500 transition-colors">
+                      <Calendar className="h-4 w-4" />
+                      예약내역
+                    </Link>
+                    <div className="h-4 w-px bg-gray-300" />
+                    <button onClick={handleLogout} className="inline-flex items-center gap-1.5 hover:text-blue-500 transition-colors">
+                      <LogOut className="h-4 w-4" />
+                      로그아웃
+                    </button>
                   </div>
-                  <Link
-                    href="/reservations"
-                    className="flex items-center justify-center w-full gap-2 px-4 py-2 text-primary bg-primary/5 hover:bg-primary/10 rounded-md transition-colors"
-                  >
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium">예약내역</span>
-                  </Link>
-                  <Button variant="outline" className="w-full border-red-100 text-red-500 hover:bg-red-50 hover:text-red-600" onClick={handleLogout}>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    로그아웃
-                  </Button>
                 </div>
               ) : (
                 <button
                   onClick={handleKakaoLogin}
-                  className="w-full mt-4 flex items-center justify-center focus:outline-none hover:opacity-90 transition-opacity"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
                 >
-                  <Image src="/kakao_login_medium.png" alt="카카오 로그인" width={110} height={27} className="h-auto" />
+                  <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
+                  <span className="text-sm font-medium text-[#000000]">로그인</span>
                 </button>
               )}
             </div>
