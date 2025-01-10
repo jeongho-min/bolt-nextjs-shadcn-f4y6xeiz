@@ -15,8 +15,10 @@ import { initializeKakao, kakaoLogin, getCurrentUser, KakaoUserInfo } from "@/ut
 import { useKakao } from "@/app/providers/kakao-provider";
 
 const HOSPITAL_NAME = "소리청일곡에스한방병원";
-const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/search/${encodeURIComponent(HOSPITAL_NAME)}`;
-const KAKAO_MAPS_NAVI_URL = `kakaomap://search?q=${encodeURIComponent(HOSPITAL_NAME)}&rt=`;
+const HOSPITAL_LAT = 35.202698;
+const HOSPITAL_LNG = 126.89739;
+const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/map/${HOSPITAL_NAME},${HOSPITAL_LAT},${HOSPITAL_LNG}`;
+const KAKAO_MAPS_NAVI_URL = `kakaomap://route?ep=${HOSPITAL_LAT},${HOSPITAL_LNG}&by=CAR`;
 const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
 const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 const PHONE_NUMBER = "062-369-2075";

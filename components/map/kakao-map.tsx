@@ -9,12 +9,16 @@ declare global {
   }
 }
 
+const HOSPITAL_NAME = "소리청일곡에스한방병원";
+const HOSPITAL_LAT = 35.202698;
+const HOSPITAL_LNG = 126.89739;
+
 export function KakaoMap() {
   const mapRef = useRef<HTMLDivElement>(null);
 
   const initMap = () => {
     if (mapRef.current) {
-      const coords = new window.kakao.maps.LatLng(35.2034, 126.8969); // 병원 좌표
+      const coords = new window.kakao.maps.LatLng(HOSPITAL_LAT, HOSPITAL_LNG);
       const mapOptions = {
         center: coords,
         level: 3,
@@ -28,7 +32,7 @@ export function KakaoMap() {
 
       // 인포윈도우 생성
       const infowindow = new window.kakao.maps.InfoWindow({
-        content: '<div style="padding:5px;font-size:12px;">소리청 일곡에스한방병원</div>',
+        content: `<div style="padding:5px;font-size:12px;">${HOSPITAL_NAME}</div>`,
       });
       infowindow.open(map, marker);
     }
