@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { QuickLinks } from "@/components/home/quick-links";
 import { AnimatePresence } from "framer-motion";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <QuickLinks />
             </main>
             <Footer />
+            <Toaster />
           </HeaderProvider>
         </Providers>
       </body>

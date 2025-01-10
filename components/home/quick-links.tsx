@@ -1,11 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowUp, Clock, MapPin, MessageCircle, Phone, Copy } from "lucide-react";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { ArrowUp, CalendarPlus, Copy, LucideIcon, MapPin, MessageCircle, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { ko } from "date-fns/locale";
 
 const HOSPITAL_NAME = "소리청일곡에스한방병원";
 const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/search/${encodeURIComponent(HOSPITAL_NAME)}`;
@@ -42,6 +47,295 @@ function PhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
             </Button>
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { toast } = useToast();
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [symptoms, setSymptoms] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+
+    if (value.length <= 11) {
+      let formattedNumber = "";
+      if (value.length <= 3) {
+        formattedNumber = value;
+      } else if (value.length <= 7) {
+        formattedNumber = `${value.slice(0, 3)}-${value.slice(3)}`;
+      } else {
+        formattedNumber = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+      }
+      setPhone(formattedNumber);
+    }
+  };
+
+  const handleKakaoLogin = () => {
+    // TODO: Implement Kakao Login
+    console.log("Kakao login");
+  };
+
+  const handleNext = () => {
+    setStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setStep((prev) => prev - 1);
+  };
+
+  const handleDirectSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // TODO: Implement reservation API
+      console.log("Reservation submitted:", {
+        name,
+        phone,
+        symptoms,
+        date: selectedDate,
+        time: selectedTime,
+      });
+
+      onOpenChange(false);
+      setStep(1);
+
+      toast({
+        title: "예약이 완료되었습니다",
+        description: `${selectedDate?.toLocaleDateString("ko-KR")} ${selectedTime} 예약이 접수되었습니다.`,
+        duration: 5000,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "예약 실패",
+        description: "예약 접수 중 오류가 발생했습니다. 다시 시도해주세요.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const generateTimeSlots = () => {
+    if (!selectedDate) return [];
+
+    const slots = [];
+    const day = selectedDate.getDay();
+
+    // 기본 시간 설정
+    let start = 9; // 9:00
+    let end = 17.5; // 17:30
+    const lunchStart = 12.5; // 12:30
+    const lunchEnd = 14.5; // 14:30
+
+    // 토요일인 경우 13:00까지만
+    if (day === 6) {
+      end = 13;
+    }
+
+    for (let i = start; i <= end; i += 0.5) {
+      // 점심시간 제외
+      if (i < lunchStart || i >= lunchEnd) {
+        const hour = Math.floor(i);
+        const minute = i % 1 === 0 ? "00" : "30";
+        const timeString = `${hour.toString().padStart(2, "0")}:${minute}`;
+        slots.push(timeString);
+      }
+    }
+    return slots;
+  };
+
+  const getNextBusinessDay = () => {
+    const today = new Date();
+    let nextDay = new Date(today);
+
+    do {
+      nextDay.setDate(nextDay.getDate() + 1);
+    } while (
+      nextDay.getDay() === 0 || // 일요일
+      nextDay.getDay() === 6 // 토요일 오후
+    );
+
+    return nextDay;
+  };
+
+  useEffect(() => {
+    if (step === 4 && !selectedDate) {
+      setSelectedDate(getNextBusinessDay());
+    }
+  }, [step]);
+
+  const isDisabledDay = (date: Date) => {
+    const day = date.getDay();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 과거 날짜 비활성화
+    if (date < today) return true;
+
+    // 일요일 비활성화
+    if (day === 0) return true;
+
+    // 토요일인 경우 오후 예약 불가
+    if (day === 6 && selectedTime) {
+      const [hours] = selectedTime.split(":").map(Number);
+      if (hours >= 13) return true;
+    }
+
+    return false;
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4 py-4">
+            <Button onClick={() => handleNext()} className="w-full h-12 text-lg">
+              직접 입력하기
+            </Button>
+            <Button onClick={handleKakaoLogin} className="w-full h-12 text-lg bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] hover:text-[#000000]/90">
+              카카오로 시작하기
+            </Button>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">이름</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">연락처</Label>
+              <Input id="phone" type="tel" value={phone} onChange={handlePhoneChange} placeholder="010-0000-0000" maxLength={13} required />
+            </div>
+            <div className="flex justify-between gap-3">
+              <Button variant="outline" onClick={handleBack} className="flex-1">
+                이전
+              </Button>
+              <Button onClick={handleNext} className="flex-1" disabled={!name || !phone}>
+                다음
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="symptoms">증상</Label>
+              <Textarea
+                id="symptoms"
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder="증상을 자세히 설명해주세요."
+                className="min-h-[150px]"
+                required
+              />
+            </div>
+            <div className="flex justify-between gap-3">
+              <Button variant="outline" onClick={handleBack} className="flex-1">
+                이전
+              </Button>
+              <Button onClick={handleNext} className="flex-1" disabled={!symptoms}>
+                다음
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-center block">예약 날짜 선택</Label>
+              <div className="flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={isDisabledDay}
+                  className="rounded-md"
+                  fromDate={new Date()}
+                  locale={ko}
+                />
+              </div>
+            </div>
+            <div className="flex justify-between gap-3">
+              <Button variant="outline" onClick={handleBack} className="flex-1">
+                이전
+              </Button>
+              <Button onClick={handleNext} className="flex-1" disabled={!selectedDate}>
+                다음
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 5:
+        const availableTimeSlots = generateTimeSlots();
+        return (
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>예약 시간 선택</Label>
+              <div className="text-sm text-muted-foreground mb-2">
+                {selectedDate?.getDay() === 6 ? "토요일: 09:00 - 13:00" : "평일: 09:00 - 17:30"}
+                {selectedDate && " (점심시간 12:30 - 14:30 제외)"}
+              </div>
+              <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
+                {availableTimeSlots.map((time) => (
+                  <Button key={time} variant={selectedTime === time ? "default" : "outline"} onClick={() => setSelectedTime(time)} className="h-10">
+                    {time}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-between gap-3 mt-4">
+              <Button variant="outline" onClick={handleBack} className="flex-1">
+                이전
+              </Button>
+              <Button onClick={handleDirectSubmit} className="flex-1" disabled={!selectedTime || isSubmitting}>
+                {isSubmitting ? "예약 접수 중..." : "예약하기"}
+              </Button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setStep(1);
+        }
+        onOpenChange(open);
+      }}
+    >
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>진료 예약</DialogTitle>
+          <DialogDescription>
+            {step === 1 && "예약 방식을 선택해주세요."}
+            {step === 2 && "예약자 정보를 입력해주세요."}
+            {step === 3 && "증상을 설명해주세요."}
+            {step === 4 && "예약 날짜를 선택해주세요."}
+            {step === 5 && "예약 시간을 선택해주세요."}
+          </DialogDescription>
+        </DialogHeader>
+        {renderStep()}
       </DialogContent>
     </Dialog>
   );
@@ -172,7 +466,16 @@ function BusinessHours() {
   );
 }
 
-const QUICK_LINKS = [
+type QuickLink = {
+  icon: LucideIcon;
+  label: string;
+  onClick?: () => void;
+  color: string;
+  bgColor: string;
+  hoverColor: string;
+};
+
+const QUICK_LINKS: QuickLink[] = [
   {
     icon: MapPin,
     label: "길찾기",
@@ -188,9 +491,9 @@ const QUICK_LINKS = [
     hoverColor: "hover:bg-emerald-100",
   },
   {
-    icon: Clock,
-    label: "운영정보",
-    href: "/contact",
+    icon: CalendarPlus,
+    label: "예약하기",
+    onClick: undefined,
     color: "text-amber-500",
     bgColor: "bg-amber-50",
     hoverColor: "hover:bg-amber-100",
@@ -212,6 +515,7 @@ const QUICK_LINKS = [
   {
     icon: Phone,
     label: "전화문의",
+    onClick: undefined,
     color: "text-rose-500",
     bgColor: "bg-rose-50",
     hoverColor: "hover:bg-rose-100",
@@ -228,6 +532,7 @@ const QUICK_LINKS = [
 
 export function QuickLinks() {
   const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
+  const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false);
 
   const handlePhoneClick = () => {
     if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -250,22 +555,9 @@ export function QuickLinks() {
           const content = (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} className="relative group">
               <div
-                className={`
-                  w-14 h-14 rounded-2xl flex flex-col items-center justify-center
-                  bg-white/95 backdrop-blur-sm
-                  transition-all duration-300 ease-out
-                  shadow-lg shadow-black/5
-                  group-hover:shadow-xl group-hover:shadow-black/10
-                  border border-gray-100
-                `}
+                className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm transition-all duration-300 ease-out shadow-lg shadow-black/5 group-hover:shadow-xl group-hover:shadow-black/10 border border-gray-100`}
               >
-                <IconComponent
-                  className={`
-                    w-5 h-5 ${link.color}
-                    transition-all duration-300
-                    group-hover:scale-110 mb-0.5
-                  `}
-                />
+                <IconComponent className={`w-5 h-5 ${link.color} transition-all duration-300 group-hover:scale-110 mb-0.5`} />
                 <span className={`text-[10px] font-medium ${link.color}`}>{link.label}</span>
               </div>
             </motion.div>
@@ -279,19 +571,24 @@ export function QuickLinks() {
             );
           }
 
+          if (link.label === "예약하기") {
+            return (
+              <button key={link.label} onClick={() => setIsReservationDialogOpen(true)} className="focus:outline-none" aria-label={link.label}>
+                {content}
+              </button>
+            );
+          }
+
           return link.onClick ? (
             <button key={link.label} onClick={link.onClick} className="focus:outline-none" aria-label={link.label}>
               {content}
             </button>
-          ) : link.href ? (
-            <Link key={link.label} href={link.href} className="focus:outline-none" aria-label={link.label}>
-              {content}
-            </Link>
           ) : null;
         })}
       </motion.div>
 
       <PhoneDialog open={isPhoneDialogOpen} onOpenChange={setIsPhoneDialogOpen} />
+      <ReservationDialog open={isReservationDialogOpen} onOpenChange={setIsReservationDialogOpen} />
       <BusinessHours />
     </>
   );
