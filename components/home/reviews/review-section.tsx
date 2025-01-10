@@ -22,14 +22,14 @@ export function ReviewSection() {
         </motion.div>
       </div>
 
-      <div className="relative">
+      <div className="relative pb-4">
         <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-gray-50/50 to-transparent z-10" />
         <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-gray-50/50 to-transparent z-10" />
 
-        <div className="overflow-hidden mx-4">
+        <div className="overflow-hidden mx-4 py-2">
           <div className="flex animate-marquee">
             {duplicatedReviews.map((review, idx) => (
-              <div key={`${review.id}-${idx}`} className="w-[320px] flex-shrink-0 px-6">
+              <div key={`${review.id}-${idx}`} className="w-[320px] flex-shrink-0 px-6 py-2">
                 <ReviewCard {...review} />
               </div>
             ))}

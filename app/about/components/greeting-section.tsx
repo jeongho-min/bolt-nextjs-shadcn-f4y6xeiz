@@ -28,7 +28,7 @@ export function GreetingSection() {
 
               <div className="pt-6 border-t border-gray-100">
                 <p className="text-lg font-medium">소리청 일곡에스한방병원</p>
-                <p className="text-primary font-medium">원장 민용태</p>
+                <p className="text-primary font-medium">대표원장 한의학박사 민용태</p>
               </div>
             </motion.div>
 
