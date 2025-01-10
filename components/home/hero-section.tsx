@@ -7,6 +7,48 @@ import { HERO_SLIDES } from "./hero-slider/slide-data";
 import { SlideNavigation } from "./hero-slider/slide-navigation";
 import { QuickLinks } from "./quick-links";
 
+const slideVariants = {
+  enter: {
+    opacity: 0,
+    scale: 1.05,
+  },
+  center: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 1,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 1.05,
+    transition: {
+      duration: 0.6,
+      ease: "easeIn",
+    },
+  },
+};
+
+const overlayVariants = {
+  enter: {
+    opacity: 0,
+  },
+  center: {
+    opacity: 1,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      duration: 0.4,
+    },
+  },
+};
+
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -21,27 +63,25 @@ export function HeroSection() {
   return (
     <section className="relative h-[calc(100vh-50px)]">
       {/* Background Images */}
-      <AnimatePresence mode="wait">
-        {HERO_SLIDES.map(
-          (slide, index) =>
-            currentSlide === index && (
-              <motion.div
-                key={slide.id}
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: 1.0,
-                  ease: "easeInOut",
-                }}
-              >
-                <Image src={slide.image} alt="배경 이미지" fill className="object-cover" priority={index === 0} />
-                <div className="absolute inset-0 bg-black/30" />
-              </motion.div>
-            )
-        )}
-      </AnimatePresence>
+      <div className="relative h-full overflow-hidden">
+        {HERO_SLIDES.map((slide, index) => (
+          <motion.div
+            key={slide.id}
+            className="absolute inset-0"
+            initial={false}
+            animate={{
+              opacity: currentSlide === index ? 1 : 0,
+              zIndex: currentSlide === index ? 1 : 0,
+            }}
+            transition={{
+              opacity: { duration: 1.5, ease: "easeInOut" },
+            }}
+          >
+            <Image src={slide.image} alt="배경 이미지" fill className="object-cover" priority={index === 0} />
+            <div className="absolute inset-0 bg-black/30" />
+          </motion.div>
+        ))}
+      </div>
 
       {/* Fixed Content */}
       <div className="relative h-full flex items-center">
