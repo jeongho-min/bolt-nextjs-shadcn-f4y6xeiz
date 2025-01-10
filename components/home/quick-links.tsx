@@ -7,8 +7,9 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const HOSPITAL_ADDRESS = "광주광역시 북구 일곡동 840-2번지";
-const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/to/${encodeURIComponent("소리청한의원")},35.2034,126.8969`;
+const HOSPITAL_NAME = "소리청일곡에스한방병원";
+const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/search/${encodeURIComponent(HOSPITAL_NAME)}`;
+const KAKAO_MAPS_NAVI_URL = `kakaomap://search?q=${encodeURIComponent(HOSPITAL_NAME)}&rt=`;
 const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
 const PHONE_NUMBER = "062-369-2075";
 
@@ -52,7 +53,7 @@ const QUICK_LINKS = [
     label: "길찾기",
     onClick: () => {
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.location.href = `kakaomap://route?ep=35.2034,126.8969&epa=${encodeURIComponent(HOSPITAL_ADDRESS)}&by=CAR`;
+        window.location.href = KAKAO_MAPS_NAVI_URL;
       } else {
         window.open(KAKAO_MAPS_SEARCH_URL, "_blank");
       }
