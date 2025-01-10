@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import { QuickLinks } from "@/components/home/quick-links";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
+import { KakaoProvider } from "@/app/providers/kakao-provider";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -21,17 +22,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className="!scroll-smooth">
       <body className="min-h-screen">
-        <Providers>
-          <HeaderProvider>
-            <Header />
-            <main className="pt-16">
-              <AnimatePresence mode="wait">{children}</AnimatePresence>
-              <QuickLinks />
-            </main>
-            <Footer />
-            <Toaster />
-          </HeaderProvider>
-        </Providers>
+        <KakaoProvider>
+          <Providers>
+            <HeaderProvider>
+              <Header />
+              <main className="pt-16">
+                <AnimatePresence mode="wait">{children}</AnimatePresence>
+                <QuickLinks />
+              </main>
+              <Footer />
+              <Toaster />
+            </HeaderProvider>
+          </Providers>
+        </KakaoProvider>
       </body>
     </html>
   );

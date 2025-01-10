@@ -11,12 +11,21 @@ import { ArrowUp, CalendarPlus, Copy, LucideIcon, MapPin, MessageCircle, Phone }
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { ko } from "date-fns/locale";
+import { initializeKakao, kakaoLogin, getCurrentUser, KakaoUserInfo } from "@/utils/kakao";
+import { useKakao } from "@/app/providers/kakao-provider";
 
 const HOSPITAL_NAME = "소리청일곡에스한방병원";
 const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/search/${encodeURIComponent(HOSPITAL_NAME)}`;
 const KAKAO_MAPS_NAVI_URL = `kakaomap://search?q=${encodeURIComponent(HOSPITAL_NAME)}&rt=`;
 const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
+const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 const PHONE_NUMBER = "062-369-2075";
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 function PhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const copyToClipboard = async () => {
@@ -61,10 +70,11 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const { userInfo, updateLoginStatus } = useKakao();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
-
     if (value.length <= 11) {
       let formattedNumber = "";
       if (value.length <= 3) {
@@ -78,39 +88,44 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
     }
   };
 
-  const handleKakaoLogin = () => {
-    // TODO: Implement Kakao Login
-    console.log("Kakao login");
+  const handleKakaoLogin = async () => {
+    try {
+      const user = await kakaoLogin();
+      await updateLoginStatus();
+      setName(user.nickname);
+      setStep(2);
+    } catch (error) {
+      console.error("Login Failed:", error);
+      toast({
+        variant: "destructive",
+        title: "로그인 실패",
+        description: "카카오 로그인 중 오류가 발생했습니다.",
+      });
+    }
   };
 
-  const handleNext = () => {
-    setStep((prev) => prev + 1);
-  };
-
-  const handleBack = () => {
-    setStep((prev) => prev - 1);
-  };
-
-  const handleDirectSubmit = async () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Implement reservation API
-      console.log("Reservation submitted:", {
-        name,
-        phone,
-        symptoms,
-        date: selectedDate,
-        time: selectedTime,
-      });
-
-      onOpenChange(false);
-      setStep(1);
+      // TODO: API 호출로 변경
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast({
         title: "예약이 완료되었습니다",
         description: `${selectedDate?.toLocaleDateString("ko-KR")} ${selectedTime} 예약이 접수되었습니다.`,
         duration: 5000,
       });
+
+      // 모든 입력 내용 초기화
+      setStep(1);
+      setName("");
+      setPhone("");
+      setSymptoms("");
+      setSelectedDate(undefined);
+      setSelectedTime("");
+      setShowConfirmation(false);
+
+      onOpenChange(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -124,82 +139,80 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
   const generateTimeSlots = () => {
     if (!selectedDate) return [];
-
     const slots = [];
     const day = selectedDate.getDay();
+    let start = 9;
+    let end = 17.5;
+    const lunchStart = 12.5;
+    const lunchEnd = 14.5;
 
-    // 기본 시간 설정
-    let start = 9; // 9:00
-    let end = 17.5; // 17:30
-    const lunchStart = 12.5; // 12:30
-    const lunchEnd = 14.5; // 14:30
-
-    // 토요일인 경우 13:00까지만
-    if (day === 6) {
-      end = 13;
-    }
+    if (day === 6) end = 13;
 
     for (let i = start; i <= end; i += 0.5) {
-      // 점심시간 제외
       if (i < lunchStart || i >= lunchEnd) {
         const hour = Math.floor(i);
         const minute = i % 1 === 0 ? "00" : "30";
-        const timeString = `${hour.toString().padStart(2, "0")}:${minute}`;
-        slots.push(timeString);
+        slots.push(`${hour.toString().padStart(2, "0")}:${minute}`);
       }
     }
     return slots;
   };
 
-  const getNextBusinessDay = () => {
-    const today = new Date();
-    let nextDay = new Date(today);
-
-    do {
-      nextDay.setDate(nextDay.getDate() + 1);
-    } while (
-      nextDay.getDay() === 0 || // 일요일
-      nextDay.getDay() === 6 // 토요일 오후
-    );
-
-    return nextDay;
-  };
-
-  useEffect(() => {
-    if (step === 4 && !selectedDate) {
-      setSelectedDate(getNextBusinessDay());
-    }
-  }, [step]);
-
   const isDisabledDay = (date: Date) => {
     const day = date.getDay();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    // 과거 날짜 비활성화
-    if (date < today) return true;
-
-    // 일요일 비활성화
-    if (day === 0) return true;
-
-    // 토요일인 경우 오후 예약 불가
-    if (day === 6 && selectedTime) {
-      const [hours] = selectedTime.split(":").map(Number);
-      if (hours >= 13) return true;
-    }
-
-    return false;
+    return date < today || day === 0;
   };
 
-  const renderStep = () => {
+  const renderConfirmationContent = () => {
+    return (
+      <div className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">예약자</span>
+            <span className="font-medium">{name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">연락처</span>
+            <span className="font-medium">{phone}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">예약일시</span>
+            <span className="font-medium">
+              {selectedDate?.toLocaleDateString("ko-KR")} {selectedTime}
+            </span>
+          </div>
+          <div className="border-t pt-3">
+            <span className="text-muted-foreground block mb-1">증상</span>
+            <p className="text-sm whitespace-pre-wrap">{symptoms}</p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setShowConfirmation(false)} className="flex-1">
+            수정하기
+          </Button>
+          <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? "예약 접수 중..." : "예약하기"}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderStepContent = () => {
+    if (showConfirmation) {
+      return renderConfirmationContent();
+    }
+
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4 py-4">
-            <Button onClick={() => handleNext()} className="w-full h-12 text-lg">
+          <div className="flex flex-col gap-4">
+            <Button onClick={() => setStep(2)} className="h-12 text-lg">
               직접 입력하기
             </Button>
-            <Button onClick={handleKakaoLogin} className="w-full h-12 text-lg bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] hover:text-[#000000]/90">
+            <Button onClick={handleKakaoLogin} className="h-12 text-lg bg-[#FEE500] hover:bg-[#FEE500]/90 text-black">
               카카오로 시작하기
             </Button>
           </div>
@@ -207,7 +220,13 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
       case 2:
         return (
-          <div className="space-y-4 py-4">
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setStep(3);
+            }}
+          >
             <div className="space-y-2">
               <Label htmlFor="name">이름</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required />
@@ -216,20 +235,26 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
               <Label htmlFor="phone">연락처</Label>
               <Input id="phone" type="tel" value={phone} onChange={handlePhoneChange} placeholder="010-0000-0000" maxLength={13} required />
             </div>
-            <div className="flex justify-between gap-3">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
                 이전
               </Button>
-              <Button onClick={handleNext} className="flex-1" disabled={!name || !phone}>
+              <Button type="submit" className="flex-1" disabled={!name || !phone}>
                 다음
               </Button>
             </div>
-          </div>
+          </form>
         );
 
       case 3:
         return (
-          <div className="space-y-4 py-4">
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setStep(4);
+            }}
+          >
             <div className="space-y-2">
               <Label htmlFor="symptoms">증상</Label>
               <Textarea
@@ -237,43 +262,43 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
                 placeholder="증상을 자세히 설명해주세요."
-                className="min-h-[150px]"
+                className="min-h-[150px] resize-none"
                 required
               />
             </div>
-            <div className="flex justify-between gap-3">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1">
                 이전
               </Button>
-              <Button onClick={handleNext} className="flex-1" disabled={!symptoms}>
+              <Button type="submit" className="flex-1" disabled={!symptoms}>
                 다음
               </Button>
             </div>
-          </div>
+          </form>
         );
 
       case 4:
         return (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-center block">예약 날짜 선택</Label>
+              <Label>예약 날짜 선택</Label>
               <div className="flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={isDisabledDay}
-                  className="rounded-md"
+                  className="rounded-md border"
                   fromDate={new Date()}
                   locale={ko}
                 />
               </div>
             </div>
-            <div className="flex justify-between gap-3">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
                 이전
               </Button>
-              <Button onClick={handleNext} className="flex-1" disabled={!selectedDate}>
+              <Button onClick={() => setStep(5)} className="flex-1" disabled={!selectedDate}>
                 다음
               </Button>
             </div>
@@ -281,61 +306,63 @@ function ReservationDialog({ open, onOpenChange }: { open: boolean; onOpenChange
         );
 
       case 5:
-        const availableTimeSlots = generateTimeSlots();
         return (
-          <div className="space-y-4 py-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label>예약 시간 선택</Label>
-              <div className="text-sm text-muted-foreground mb-2">
+              <div className="text-sm text-muted-foreground">
                 {selectedDate?.getDay() === 6 ? "토요일: 09:00 - 13:00" : "평일: 09:00 - 17:30"}
                 {selectedDate && " (점심시간 12:30 - 14:30 제외)"}
               </div>
-              <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
-                {availableTimeSlots.map((time) => (
-                  <Button key={time} variant={selectedTime === time ? "default" : "outline"} onClick={() => setSelectedTime(time)} className="h-10">
+              <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-1">
+                {generateTimeSlots().map((time) => (
+                  <Button
+                    key={time}
+                    type="button"
+                    variant={selectedTime === time ? "default" : "outline"}
+                    onClick={() => setSelectedTime(time)}
+                    className="h-10"
+                  >
                     {time}
                   </Button>
                 ))}
               </div>
             </div>
-            <div className="flex justify-between gap-3 mt-4">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setStep(4)} className="flex-1">
                 이전
               </Button>
-              <Button onClick={handleDirectSubmit} className="flex-1" disabled={!selectedTime || isSubmitting}>
-                {isSubmitting ? "예약 접수 중..." : "예약하기"}
+              <Button onClick={() => setShowConfirmation(true)} className="flex-1" disabled={!selectedTime}>
+                다음
               </Button>
             </div>
           </div>
         );
-
-      default:
-        return null;
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          setStep(1);
-        }
-        onOpenChange(open);
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>진료 예약</DialogTitle>
+          <DialogTitle>{showConfirmation ? "예약 확인" : "진료 예약"}</DialogTitle>
           <DialogDescription>
-            {step === 1 && "예약 방식을 선택해주세요."}
-            {step === 2 && "예약자 정보를 입력해주세요."}
-            {step === 3 && "증상을 설명해주세요."}
-            {step === 4 && "예약 날짜를 선택해주세요."}
-            {step === 5 && "예약 시간을 선택해주세요."}
+            {showConfirmation
+              ? "예약 내용을 확인해주세요."
+              : step === 1
+              ? "예약 방식을 선택해주세요."
+              : step === 2
+              ? userInfo
+                ? "예약을 위해 연락처를 입력해주세요."
+                : "예약자 정보를 입력해주세요."
+              : step === 3
+              ? "증상을 설명해주세요."
+              : step === 4
+              ? "예약 날짜를 선택해주세요."
+              : "예약 시간을 선택해주세요."}
           </DialogDescription>
         </DialogHeader>
-        {renderStep()}
+        <div className="py-4">{renderStepContent()}</div>
       </DialogContent>
     </Dialog>
   );

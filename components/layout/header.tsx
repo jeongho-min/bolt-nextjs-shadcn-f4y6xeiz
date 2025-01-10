@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { initializeKakao, kakaoLogin, kakaoLogout, getCurrentUser, KakaoUserInfo } from "@/utils/kakao";
+import { useKakao } from "@/app/providers/kakao-provider";
 
 declare global {
   interface Window {
@@ -196,76 +198,12 @@ function NonMemberReservationDialog({
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [userNickname, setUserNickname] = useState<string | null>(null);
   const [showReservations, setShowReservations] = useState(false);
   const [showNonMemberDialog, setShowNonMemberDialog] = useState(false);
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
   const { isHeaderVisible } = useHeader();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://developers.kakao.com/sdk/js/kakao.js";
-    script.async = true;
-
-    script.onload = () => {
-      if (window.Kakao && !window.Kakao.isInitialized() && KAKAO_JS_KEY) {
-        window.Kakao.init(KAKAO_JS_KEY);
-        console.log("Kakao SDK initialized");
-      }
-    };
-
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  const handleKakaoLogin = () => {
-    if (!window.Kakao) {
-      console.error("Kakao SDK not loaded");
-      return;
-    }
-
-    if (!window.Kakao.isInitialized()) {
-      console.error("Kakao SDK not initialized");
-      return;
-    }
-
-    window.Kakao.Auth.login({
-      success: (authObj: any) => {
-        console.log("Login Token Info:", authObj);
-        // 사용자 정보 가져오기
-        window.Kakao.API.request({
-          url: "/v2/user/me",
-          success: (res: any) => {
-            const kakaoAccount = res.kakao_account;
-            console.log("User Info:", kakaoAccount);
-            if (kakaoAccount?.profile?.nickname) {
-              setUserNickname(kakaoAccount.profile.nickname);
-            }
-          },
-          fail: (error: any) => {
-            console.error("Failed to get user info", error);
-          },
-        });
-      },
-      fail: (error: any) => {
-        console.error("Login Failed", error);
-      },
-      scope: "profile_nickname,profile_image",
-    });
-  };
-
-  const handleLogout = () => {
-    if (!window.Kakao) return;
-
-    window.Kakao.Auth.logout(() => {
-      setUserNickname(null);
-      console.log("로그아웃 되었습니다.");
-    });
-  };
+  const { userInfo, setUserInfo, updateLoginStatus } = useKakao();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -279,6 +217,35 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleKakaoLogin = async () => {
+    try {
+      const user = await kakaoLogin();
+      await updateLoginStatus();
+    } catch (error) {
+      console.error("Login Failed:", error);
+      toast({
+        variant: "destructive",
+        title: "로그인 실패",
+        description: "카카오 로그인 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await kakaoLogout();
+      setUserInfo(null);
+      console.log("로그아웃 되었습니다.");
+    } catch (error) {
+      console.error("Logout Failed:", error);
+      toast({
+        variant: "destructive",
+        title: "로그아웃 실패",
+        description: "로그아웃 중 오류가 발생했습니다.",
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -317,15 +284,25 @@ export function Header() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-center">예약 내역</DialogTitle>
-            {nonMemberPhone && <DialogDescription className="text-center">{nonMemberPhone} 님의 예약 내역입니다.</DialogDescription>}
+            {nonMemberPhone && !userInfo?.nickname && <DialogDescription className="text-center">{nonMemberPhone} 님의 예약 내역입니다.</DialogDescription>}
+            {userInfo?.nickname && <DialogDescription className="text-center">{userInfo.nickname} 님의 예약 내역입니다.</DialogDescription>}
           </DialogHeader>
           <div className="mt-4 space-y-4">
-            {userNickname || nonMemberPhone ? (
+            {userInfo?.nickname || nonMemberPhone ? (
               <>
                 {sampleReservations.length > 0 ? (
                   <>
                     {sampleReservations
-                      .filter((r) => !nonMemberPhone || r.phone === nonMemberPhone)
+                      .filter((r) => {
+                        if (userInfo?.nickname) {
+                          // 카카오 로그인 사용자의 경우 닉네임으로 필터링 (실제로는 사용자 ID나 다른 식별자를 사용해야 함)
+                          return r.patientName === userInfo.nickname;
+                        } else if (nonMemberPhone) {
+                          // 비회원의 경우 전화번호로 필터링
+                          return r.phone === nonMemberPhone;
+                        }
+                        return false;
+                      })
                       .map((reservation) => (
                         <div key={reservation.id} className="flex justify-between items-start p-4 bg-gray-100 rounded-lg">
                           <div className="flex-1">
@@ -402,7 +379,7 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              {userNickname ? (
+              {userInfo?.nickname ? (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowReservations(true)}
@@ -464,7 +441,7 @@ export function Header() {
                   </Link>
                 ))}
 
-                {userNickname ? (
+                {userInfo?.nickname ? (
                   <div className="mt-4 px-3">
                     <button
                       onClick={() => setShowReservations(true)}
