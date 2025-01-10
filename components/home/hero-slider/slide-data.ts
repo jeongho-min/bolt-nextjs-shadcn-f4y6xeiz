@@ -1,15 +1,15 @@
 export const HERO_SLIDES = [
-  // {
-  //   id: 1,
-  //   image: "/main/main_1.jpg",
-  //   title: "소리청한의원",
-  //   description: "소리청은 여러분의 또 다른 가족입니다.",
-  // },
   {
     id: 5,
     image: "/main/main_5.jpg",
     title: "정성어린 치료",
     description: "환자 한 분 한 분을 정성껏 치료합니다.",
+  },
+  {
+    id: 1,
+    image: "/main/main_6.jpg",
+    title: "소리청한의원",
+    description: "소리청은 여러분의 또 다른 가족입니다.",
   },
   {
     id: 2,
