@@ -18,17 +18,14 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       <div className="flex flex-col h-full p-4">
         <div className="space-y-1 mt-16">
           {navigation.map((item) => (
-            <NavLink
-              key={item.name}
-              href={item.href}
-              onClick={onClose}
-            >
+            <NavLink key={item.name} href={item.href} onClick={onClose}>
               {item.name}
             </NavLink>
           ))}
           <Button variant="default" className="w-full mt-4">
             <Phone className="mr-2 h-4 w-4" />
-            062-369-2075
+            062-369-2075 (이명치료)
+            <span className="ml-2 text-primary">(062-571-2222)</span>
           </Button>
         </div>
       </div>

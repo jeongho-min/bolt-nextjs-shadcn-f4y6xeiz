@@ -26,7 +26,8 @@ export default function ContactPage() {
               <KakaoMap />
               <div className="text-gray-600">
                 <p>주소: 광주광역시 북구 양일로 307 (일곡동 840-2)</p>
-                <p>전화: 062-369-2075</p>
+                <p>전화: 062-369-2075 (이명치료)</p>
+                <p>전화: 062-571-2222</p>
               </div>
             </div>
           </Card>

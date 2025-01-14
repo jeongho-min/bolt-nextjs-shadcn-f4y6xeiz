@@ -1,18 +1,18 @@
 "use client";
 
+import { useKakao } from "@/app/providers/kakao-provider";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { kakaoLogin } from "@/utils/kakao";
+import { ko } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { ArrowUp, CalendarPlus, Copy, LucideIcon, MapPin, MessageCircle, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
-import { ko } from "date-fns/locale";
-import { initializeKakao, kakaoLogin, getCurrentUser, KakaoUserInfo } from "@/utils/kakao";
-import { useKakao } from "@/app/providers/kakao-provider";
 
 const HOSPITAL_NAME = "소리청일곡에스한방병원";
 const HOSPITAL_LAT = 35.202698;
@@ -21,7 +21,10 @@ const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/map/${HOSPITAL_NAME},$
 const KAKAO_MAPS_NAVI_URL = `kakaomap://route?ep=${HOSPITAL_LAT},${HOSPITAL_LNG}&by=CAR`;
 const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
 const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-const PHONE_NUMBER = "062-369-2075";
+const PHONE_NUMBERS = [
+  { number: "062-369-2075", label: "이명치료" },
+  { number: "062-571-2222", label: null },
+];
 
 declare global {
   interface Window {
@@ -30,9 +33,9 @@ declare global {
 }
 
 function PhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (number: string) => {
     try {
-      await navigator.clipboard.writeText(PHONE_NUMBER);
+      await navigator.clipboard.writeText(number);
       alert("전화번호가 복사되었습니다.");
     } catch (err) {
       console.error("Failed to copy text: ", err);
@@ -45,18 +48,25 @@ function PhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
         <DialogHeader>
           <DialogTitle>전화 문의</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col items-center gap-4 py-4">
-          <p className="text-2xl font-bold text-primary">{PHONE_NUMBER}</p>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={copyToClipboard}>
-              <Copy className="w-4 h-4 mr-2" />
-              복사하기
-            </Button>
-            <Button onClick={() => (window.location.href = `tel:${PHONE_NUMBER}`)}>
-              <Phone className="w-4 h-4 mr-2" />
-              전화걸기
-            </Button>
-          </div>
+        <div className="flex flex-col items-center gap-6 py-4">
+          {PHONE_NUMBERS.map((phone, index) => (
+            <div key={phone.number} className="flex flex-col items-center gap-3">
+              <div className="flex items-center">
+                <p className="text-2xl font-bold text-primary">{phone.number}</p>
+                {phone.label && <span className="ml-2 text-sm text-primary">({phone.label})</span>}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => copyToClipboard(phone.number)}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  복사하기
+                </Button>
+                <Button onClick={() => (window.location.href = `tel:${phone.number}`)}>
+                  <Phone className="w-4 h-4 mr-2" />
+                  전화걸기
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
       </DialogContent>
     </Dialog>
@@ -564,11 +574,7 @@ export function QuickLinks() {
   const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false);
 
   const handlePhoneClick = () => {
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      window.location.href = `tel:${PHONE_NUMBER}`;
-    } else {
-      setIsPhoneDialogOpen(true);
-    }
+    setIsPhoneDialogOpen(true);
   };
 
   return (

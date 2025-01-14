@@ -21,6 +21,11 @@ export function Footer() {
               <p className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
                 062-369-2075
+                <span className="ml-2 text-primary">(이명치료)</span>
+              </p>
+              <p className="flex items-center">
+                <Phone className="h-4 w-4 mr-2" />
+                062-571-2222
               </p>
               <p className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
