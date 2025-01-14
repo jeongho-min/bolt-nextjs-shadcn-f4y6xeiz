@@ -63,35 +63,34 @@ const specialEquipment = [
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const imageAnimation = {
-  initial: { scale: 0.8, opacity: 0 },
+  initial: { opacity: 0 },
   animate: {
-    scale: 1,
     opacity: 1,
     transition: {
-      duration: 0.8,
+      duration: 0.4,
       ease: "easeOut",
     },
   },
 };
 
 const cardAnimation = {
-  initial: { opacity: 0, y: 30 },
+  initial: { opacity: 0, y: 20 },
   animate: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.3,
       ease: "easeOut",
     },
   },
   hover: {
-    y: -5,
+    y: -3,
     transition: {
       duration: 0.2,
     },
@@ -103,10 +102,10 @@ export function EquipmentSection() {
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: "100px" }}
+          transition={{ duration: 0.4 }}
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold mb-4">의료장비</h2>
@@ -114,71 +113,60 @@ export function EquipmentSection() {
         </motion.div>
 
         {/* 특수 의료장비 섹션 */}
-        <motion.div className="mb-24" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true }}>
+        <motion.div className="mb-24" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true, margin: "50px" }}>
           <div className="grid grid-cols-1 gap-8">
             {specialEquipment.map((item, index) => (
-              <motion.div key={item.title} variants={cardAnimation} whileHover="hover" viewport={{ once: true }}>
+              <motion.div key={item.title} variants={cardAnimation} whileHover="hover" viewport={{ once: true }} className="will-change-transform">
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white">
                   <div className="flex flex-col lg:flex-row">
                     <div className="relative w-full lg:w-2/5 h-[300px] lg:h-[400px] bg-gray-50">
                       <motion.div className="absolute inset-0 flex items-center justify-center p-8" variants={imageAnimation}>
                         <div className="relative w-full h-full">
-                          <Image src={item.image} alt={item.title} fill className="object-contain" priority />
+                          <Image src={item.image} alt={item.title} fill className="object-contain" priority={index < 2} />
                         </div>
                       </motion.div>
                     </div>
                     <div className="flex-1 p-8">
-                      <motion.div
-                        className="max-w-xl"
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                      >
+                      <div className="max-w-xl">
                         <h4 className="text-2xl font-bold mb-2 text-primary">{item.title}</h4>
                         <p className="text-gray-600 mb-6 text-lg">{item.description}</p>
                         <div className="space-y-6">
-                          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.4 }}>
+                          <div>
                             <h5 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
                               <ArrowRight className="w-5 h-5 text-primary" />
                               주요 기능
                             </h5>
                             <div className="flex flex-wrap gap-2">
-                              {item.features.map((feature, idx) => (
-                                <motion.div
+                              {item.features.map((feature) => (
+                                <Badge
                                   key={feature}
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  whileInView={{ opacity: 1, scale: 1 }}
-                                  transition={{ duration: 0.3, delay: 0.1 * idx }}
+                                  variant="secondary"
+                                  className="font-normal px-4 py-2 text-sm bg-primary/5 hover:bg-primary/10 transition-colors"
                                 >
-                                  <Badge variant="secondary" className="font-normal px-4 py-2 text-sm bg-primary/5 hover:bg-primary/10 transition-colors">
-                                    {feature}
-                                  </Badge>
-                                </motion.div>
+                                  {feature}
+                                </Badge>
                               ))}
                             </div>
-                          </motion.div>
-                          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.6 }}>
+                          </div>
+                          <div>
                             <h5 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
                               <Activity className="w-5 h-5 text-primary" />
                               치료 효과
                             </h5>
                             <div className="flex flex-wrap gap-2">
-                              {item.effects.map((effect, idx) => (
-                                <motion.div
+                              {item.effects.map((effect) => (
+                                <Badge
                                   key={effect}
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  whileInView={{ opacity: 1, scale: 1 }}
-                                  transition={{ duration: 0.3, delay: 0.1 * idx }}
+                                  variant="outline"
+                                  className="font-normal px-4 py-2 text-sm border-primary/30 hover:bg-primary/5 transition-colors"
                                 >
-                                  <Badge variant="outline" className="font-normal px-4 py-2 text-sm border-primary/30 hover:bg-primary/5 transition-colors">
-                                    {effect}
-                                  </Badge>
-                                </motion.div>
+                                  {effect}
+                                </Badge>
                               ))}
                             </div>
-                          </motion.div>
+                          </div>
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 </Card>

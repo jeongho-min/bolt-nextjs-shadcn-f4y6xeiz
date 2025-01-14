@@ -25,7 +25,7 @@ export default function ContactPage() {
             <div className="space-y-4">
               <KakaoMap />
               <div className="text-gray-600">
-                <p>주소: 광주광역시 북구 양일로 307 (일곡동 840-2)</p>
+                <p>주소: 병원 지하 1층과 병원 뒷쪽 공영주차장(이용시까지 주차비 지급)</p>
                 <p>전화: 062-369-2075 (이명치료)</p>
                 <p>전화: 062-571-2222</p>
               </div>
