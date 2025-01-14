@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Ear, Brain, Syringe, Stethoscope, Scale, Heart, Baby, User, Activity, Image as ImageIcon } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const departments = {
   korean: [
@@ -76,30 +75,10 @@ export function DepartmentList() {
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center max-w-2xl mx-auto mb-12"
-        >
-          <h2 className="text-4xl font-bold mb-4">진료과목</h2>
-          <p className="text-gray-600">각 분야 전문의가 정성을 다해 진료합니다</p>
-        </motion.div>
-
-        <Tabs defaultValue="korean" className="max-w-6xl mx-auto">
-          <div className="flex justify-center mb-12">
-            <TabsList className="grid w-[400px] grid-cols-2">
-              <TabsTrigger value="korean" className="text-lg">
-                한방 진료과목
-              </TabsTrigger>
-              <TabsTrigger value="western" className="text-lg">
-                양방 진료과목
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="korean">
+        <div className="max-w-6xl mx-auto space-y-16">
+          {/* 한방 진료과목 */}
+          <div>
+            <h3 className="text-2xl font-bold text-center mb-8">한방 진료과목</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {departments.korean.map((department, index) => (
                 <motion.div
@@ -123,9 +102,11 @@ export function DepartmentList() {
                 </motion.div>
               ))}
             </div>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="western">
+          {/* 양방 진료과목 */}
+          <div>
+            <h3 className="text-2xl font-bold text-center mb-8">양방 진료과목</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {departments.western.map((department, index) => (
                 <motion.div
@@ -149,8 +130,8 @@ export function DepartmentList() {
                 </motion.div>
               ))}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </section>
   );

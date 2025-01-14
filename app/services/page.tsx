@@ -63,7 +63,6 @@ export default function ServicesPage() {
   return (
     <main className="min-h-screen">
       <ServicesHero />
-      <NonCoveredSection />
       <DepartmentList />
       <div id="cases-section" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
