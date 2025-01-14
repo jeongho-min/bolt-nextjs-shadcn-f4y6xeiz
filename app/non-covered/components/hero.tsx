@@ -3,13 +3,13 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export function FacilitiesHero() {
+export function NonCoveredHero() {
   return (
     <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
       {/* 배경 이미지 */}
       <Image
-        src="https://images.unsplash.com/photo-1512678080530-7760d81faba6?q=80&w=1920&auto=format&fit=crop"
-        alt="한약재와 침구가 있는 한의원 진료실"
+        src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1920&auto=format&fit=crop"
+        alt="의료비용 안내"
         fill
         className="object-cover object-center brightness-[0.6]"
         priority
@@ -18,11 +18,11 @@ export function FacilitiesHero() {
       {/* 콘텐츠 */}
       <div className="relative z-10 container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="text-center text-white">
-          <h1 className="text-5xl font-bold mb-6">시설안내</h1>
+          <h1 className="text-5xl font-bold mb-6">비급여 진료비 안내</h1>
           <p className="text-lg max-w-2xl mx-auto leading-relaxed">
-            최신 의료장비와 쾌적한 환경으로
+            다음 안내되는 비용은 참고용이며
             <br />
-            환자분들의 편안한 치료를 약속드립니다
+            실제 진료비는 진료 내용과 환자 상태에 따라 변동될 수 있습니다
           </p>
         </motion.div>
       </div>

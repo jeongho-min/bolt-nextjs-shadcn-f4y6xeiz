@@ -40,7 +40,8 @@ const navigation = [
       { name: "두통", href: "/diseases/headache" },
     ],
   },
-  { name: "진료사례", href: "/services" },
+  { name: "진료안내", href: "/services" },
+  { name: "비급여안내", href: "/non-covered" },
   { name: "시설안내", href: "/facilities" },
   { name: "예약문의", href: "/contact" },
 ];
