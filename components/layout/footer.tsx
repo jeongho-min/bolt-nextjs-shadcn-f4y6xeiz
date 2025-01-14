@@ -11,7 +11,7 @@ export function Footer() {
               <p>평일: 09:00 - 17:30</p>
               <p>토요일: 09:00 - 13:00</p>
               <p>점심시간: 12:30 - 14:30</p>
-              <p className="text-primary">일요일/공휴일 휴진</p>
+              <p className="text-primary text-red-600">일요일/공휴일 휴진</p>
             </div>
           </div>
 
