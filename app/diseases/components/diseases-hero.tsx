@@ -18,7 +18,7 @@ export function DiseasesHero() {
   const brightness = useTransform(scrollYProgress, [0, 1], [1.1, 0.9]);
 
   return (
-    <section ref={sectionRef} className="relative h-[70vh] min-h-[600px] overflow-hidden">
+    <section ref={sectionRef} className="relative h-[60vh] min-h-[400px] overflow-hidden">
       <motion.div
         initial={{ scale: 1.15, opacity: 0 }}
         animate={{ scale: 1.1, opacity: 1 }}
