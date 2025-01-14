@@ -46,7 +46,7 @@ export function DiseaseList() {
                       {disease.title}
                     </h3>
                     <p className="text-gray-600 text-lg leading-relaxed group-hover:translate-x-2 transition-all duration-300 delay-[50ms]">
-                      {disease.shortDescription}
+                      {disease.description}
                     </p>
                   </div>
                   <div className="ml-8 mt-2">
