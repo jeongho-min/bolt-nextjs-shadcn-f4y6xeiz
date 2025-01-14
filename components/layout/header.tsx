@@ -408,12 +408,8 @@ export function Header() {
                     예약조회
                   </button>
                   <div className="h-4 w-px bg-gray-300" />
-                  <button
-                    onClick={handleKakaoLogin}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
-                  >
-                    <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
-                    <span className="text-sm font-medium text-[#000000]">로그인</span>
+                  <button onClick={handleKakaoLogin} className="flex justify-center">
+                    <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={120} height={30} className="h-auto" />
                   </button>
                 </div>
               )}
@@ -468,12 +464,8 @@ export function Header() {
                       <Calendar className="h-4 w-4" />
                       예약조회
                     </button>
-                    <button
-                      onClick={handleKakaoLogin}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-md transition-colors"
-                    >
-                      <Image src="/kakaotalk_sharing_btn_small.png" alt="카카오 아이콘" width={20} height={20} className="h-auto" />
-                      <span className="text-sm font-medium text-[#000000]">로그인</span>
+                    <button onClick={handleKakaoLogin} className="flex justify-center">
+                      <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={120} height={30} className="h-auto" />
                     </button>
                   </div>
                 )}
