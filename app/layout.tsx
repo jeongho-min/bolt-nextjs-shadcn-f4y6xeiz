@@ -12,9 +12,24 @@ import { KakaoProvider } from "@/app/providers/kakao-provider";
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
   description: "소리청 일곡에스한방병원 - 이명, 난청, 어지럼증 전문 한방병원",
+  manifest: "/manifest.json",
   icons: {
     icon: [{ url: "/favicon.ico" }],
     apple: [{ url: "/apple-touch-icon.png" }],
+  },
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "소리청 일곡에스한방병원",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  formatDetection: {
+    telephone: true,
   },
 };
 
