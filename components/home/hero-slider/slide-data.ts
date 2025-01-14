@@ -1,4 +1,10 @@
 export const HERO_SLIDES = [
+  // {
+  //   id: 3,
+  //   image: "/main/main_1.png",
+  //   title: "체계적인 진료",
+  //   description: "체계적인 진료 과정으로 최상의 치료 결과를 제공합니다.",
+  // },
   {
     id: 5,
     image: "/main/main_5.jpg",
@@ -17,12 +23,6 @@ export const HERO_SLIDES = [
     title: "의료진",
     description: "최고의 실력과 정성으로 진료합니다.",
   },
-  // {
-  //   id: 3,
-  //   image: "/main/main_3.jpg",
-  //   title: "체계적인 진료",
-  //   description: "체계적인 진료 과정으로 최상의 치료 결과를 제공합니다.",
-  // },
   {
     id: 4,
     image: "/main/main_4.jpg",
