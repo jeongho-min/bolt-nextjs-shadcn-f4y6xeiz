@@ -9,7 +9,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { DepartmentList } from "./components/departments/department-list";
 import { ServicesHero } from "./components/hero";
-import { NonCoveredSection } from "./components/non-covered-section";
 
 const ITEMS_PER_PAGE = 9;
 const CASE_CATEGORIES = ["전체", ...Array.from(new Set(cases.map((item) => item.category)))];
