@@ -1,12 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Award, Stethoscope } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, GraduationCap, Stethoscope } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 interface Doctor {
   id: string;
@@ -25,13 +23,13 @@ const doctors: Doctor[] = [
     name: "민용태",
     role: "대표원장",
     department: "한방과",
-    image: "/민용태_원장_수정.jpg",
-    education: ["원광대학교 대학원 한의학박사 취득(1991년)", "전남대학교 정형외과학 최고경영자과정 수료"],
+    image: "/min_yongtea_image_cut.png",
+    education: ["원광대학교 대학원 한의학박사 취득(1991년)", "전남대학교 경영대학원 최고경영자과정 수료"],
     career: [
       "전 원광대학교 한의과대학 겸임교수",
       "전 동신대학교 한의과대학 교수 및 겸임교수",
-      "전 순천대학교 한약자원학과 외래교수",
-      "대우재단부속 대우한의원 개원(2007.4~2009.5)",
+      "민용태한의원 개원(1988.3~2006.12)",
+      "소리청한의원 개원(2009.8~)",
       "소리청한의원 네트워크 대표원장 역임",
     ],
     specialty: ["이명, 난청, 어지럼증", "안면마비, 두통"],

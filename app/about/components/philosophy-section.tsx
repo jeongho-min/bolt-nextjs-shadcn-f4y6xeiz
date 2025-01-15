@@ -13,7 +13,8 @@ const philosophies = [
   {
     icon: Target,
     title: "정확한 진단과 치료",
-    description: "현대 의학과 전통 한의학을 결합한 정확하고 효과적인 진단과 치료를 제공합니다.",
+    description:
+      "한의학과 양의학의 장점을 결합하여 한의학의 제질의학으로 정확한 제질을 감별하고 양의학의 X-ray, CT, MRI등 영상의학과 혈액검사 소견등을 종합하여 정확하고 효과적인 진단과 치료를 제공합니다.",
   },
   {
     icon: Clock,

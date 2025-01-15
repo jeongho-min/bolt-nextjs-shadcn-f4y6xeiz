@@ -6,6 +6,7 @@ import { EducationSection } from "./components/education-section";
 import { GreetingSection } from "./components/greeting-section";
 import { PhilosophySection } from "./components/philosophy-section";
 import { HistorySection } from "@/components/home/history-section";
+import { DoctorsSection } from "@/components/home/doctors-section";
 
 const pageVariants = {
   initial: {
@@ -58,6 +59,9 @@ export default function AboutPage() {
       </motion.div>
       <motion.div variants={childVariants}>
         <EducationSection />
+      </motion.div>
+      <motion.div variants={childVariants}>
+        <DoctorsSection />
       </motion.div>
       <motion.div variants={childVariants}>
         <PhilosophySection />

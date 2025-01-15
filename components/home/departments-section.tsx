@@ -29,7 +29,7 @@ const departments = [
   {
     name: "내과",
     icon: Stethoscope,
-    description: "소화기, 호흡기, 순환기, 비뇨기 질환",
+    description: "소화기, 호흡기, 순환기, 비뇨기 질환, 간담 질환",
   },
   {
     name: "사상체질의학과",

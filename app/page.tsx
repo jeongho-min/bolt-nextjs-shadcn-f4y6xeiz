@@ -10,7 +10,7 @@ export default function HomePage() {
       <HeroSection />
       <CertificationSection />
       <HistorySection />
-      <DoctorsSection />
+      {/* <DoctorsSection /> */}
       {/* <DepartmentsSection /> */}
       <ReviewSection />
       {/* <FacilitySection /> */}

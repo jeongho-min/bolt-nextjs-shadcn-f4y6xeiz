@@ -23,7 +23,7 @@ export const departments: Department[] = [
   {
     icon: Stethoscope,
     title: "내과",
-    description: "소화기, 호흡기, 순환기, 비뇨기 질환",
+    description: "소화기, 호흡기, 순환기, 비뇨기 질환, 간담 질환",
     specialties: ["소화기 질환", "호흡기 질환", "순환기 질환", "비뇨기 질환"],
   },
   {
