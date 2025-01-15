@@ -12,30 +12,25 @@ export function NonCoveredSection() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>기존명</TableHead>
-                    <TableHead>변경명</TableHead>
+                    <TableHead>명칭</TableHead>
                     <TableHead className="text-right">비용</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell>청뇌단</TableCell>
                     <TableCell>현훈단</TableCell>
                     <TableCell className="text-right">15,000원</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>으뜸환</TableCell>
                     <TableCell>이명환 (15일분)</TableCell>
                     <TableCell className="text-right">150,000원</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>우황청심환</TableCell>
                     <TableCell>슬림환 (30일분)</TableCell>
                     <TableCell className="text-right">250,000원</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>파스</TableCell>
-                    <TableCell>-</TableCell>
                     <TableCell className="text-right">3,000원~10,000원</TableCell>
                   </TableRow>
                 </TableBody>

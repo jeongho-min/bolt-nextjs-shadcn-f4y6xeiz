@@ -1,5 +1,5 @@
-import { NonCoveredSection } from "@/app/services/components/non-covered-section";
 import { NonCoveredHero } from "./components/hero";
+import { NonCoveredSection } from "./components/non-covered-section";
 
 export default function NonCoveredPage() {
   return (
