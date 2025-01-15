@@ -3,54 +3,193 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const facilities = [
   {
-    title: "제1진료실",
-    description: "한방병원 대표원장 한의학박사 민용태 원장",
-    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80",
+    title: "병원 전경",
+    description: "소리청 일곡에스한방병원 전경",
+    images: ["/facility/병원전경.jpg"],
   },
   {
-    title: "제3진료실",
-    description: "양방 가정의학과 전문의 김광형 원장",
-    image: "https://images.unsplash.com/photo-1519494140681-8b17d830a3e9?auto=format&fit=crop&q=80",
+    title: "접수실",
+    description: "친절한 상담과 접수를 도와드립니다",
+    images: ["/facility/접수실.jpg"],
   },
   {
-    title: "치료실",
-    description: "침, 뜸, 부항, 약침, 추나요법, 물리치료",
-    image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&q=80",
+    title: "간호사실",
+    description: "전문적인 간호 서비스를 제공합니다",
+    images: ["/facility/간호사실.jpg"],
   },
   {
-    title: "물리치료실",
-    description: "도수치료, 재활치료",
-    image: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?auto=format&fit=crop&q=80",
+    title: "X-ray실",
+    description: "정확한 진단을 위한 영상 검사실",
+    images: ["/facility/x-ray_1.jpg", "/facility/x-ray_2.jpg"],
+  },
+  {
+    title: "도수치료실",
+    description: "전문적인 도수치료와 재활치료를 제공합니다",
+    images: ["/facility/도수치료실.jpg"],
   },
   {
     title: "한방요법실",
-    description: "피부미용 맛사지실",
-    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80",
+    description: "다양한 한방치료를 제공합니다",
+    images: ["/facility/한방요법실_1.jpg", "/facility/한방요법실_2.jpg"],
   },
   {
-    title: "X-RAY실",
-    description: "정확한 진단을 위한 영상 검사실",
-    image: "https://images.unsplash.com/photo-1630699144867-37acec97df5a?auto=format&fit=crop&q=80",
-  },
-  {
-    title: "입원실",
-    description: "66병상 완비",
-    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80",
-  },
-  {
-    title: "황토찜질방",
+    title: "황토방",
     description: "건강한 치료를 위한 황토 찜질 시설",
-    image: "https://images.unsplash.com/photo-1630699144867-37acec97df5a?auto=format&fit=crop&q=80",
+    images: ["/facility/황토방_1.jpg", "/facility/황토방_2.jpg"],
   },
   {
-    title: "반신욕기",
+    title: "건식 반식욕기",
     description: "효과적인 치료를 위한 반신욕 시설",
-    image: "https://images.unsplash.com/photo-1630699144867-37acec97df5a?auto=format&fit=crop&q=80",
+    images: ["/facility/건식_반식욕기.jpg"],
   },
+  // {
+  //   title: "영양주사실",
+  //   description: "영양주사 치료실",
+  //   images: ["/facility/영양주사.jpg"],
+  // },
+  // {
+  //   title: "경옥고",
+  //   description: "전통 한방 보약 제조실",
+  //   images: ["/facility/경옥고.jpg"],
+  // },
 ];
+
+function ImageModal({ isOpen, onClose, images, currentIndex }: { isOpen: boolean; onClose: () => void; images: string[]; currentIndex: number }) {
+  const [imageIndex, setImageIndex] = useState(currentIndex);
+
+  useEffect(() => {
+    setImageIndex(currentIndex);
+  }, [currentIndex]);
+
+  if (!isOpen) return null;
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={onClose}>
+      <button
+        onClick={onClose}
+        className="absolute right-6 top-6 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors z-10"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      <div className="relative w-full h-full max-w-5xl max-h-[90vh] m-4">
+        <div className="relative w-full h-full">
+          <Image src={images[imageIndex]} alt="Facility image" fill className="object-contain" />
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FacilityCard({ facility }: { facility: (typeof facilities)[0] }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (facility.images.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
+        setIsTransitioning(false);
+      }, 300);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [facility.images.length]);
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentImageIndex((prev) => (prev - 1 + facility.images.length) % facility.images.length);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  return (
+    <>
+      <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setIsModalOpen(true)}>
+        <div className="relative h-64">
+          <Image
+            src={facility.images[currentImageIndex]}
+            alt={facility.title}
+            fill
+            className={`object-cover transition-all duration-300 group-hover:scale-105 ${isTransitioning ? "opacity-0" : "opacity-100"}`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+          {facility.images.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <h3 className="text-xl font-bold text-white mb-2">{facility.title}</h3>
+            <p className="text-white/90 text-sm">{facility.description}</p>
+          </div>
+        </div>
+      </Card>
+
+      <ImageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} images={facility.images} currentIndex={currentImageIndex} />
+    </>
+  );
+}
 
 export function FacilitiesList() {
   return (
@@ -76,16 +215,7 @@ export function FacilitiesList() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300">
-                <div className="relative h-64">
-                  <Image src={facility.image} alt={facility.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">{facility.title}</h3>
-                    <p className="text-white/90 text-sm">{facility.description}</p>
-                  </div>
-                </div>
-              </Card>
+              <FacilityCard facility={facility} />
             </motion.div>
           ))}
         </div>
