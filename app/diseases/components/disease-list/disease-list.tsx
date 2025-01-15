@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { diseases } from "./data";
-import { DiseasePanel } from "./disease-panel";
+import { TinnitusPanel } from "./panels/tinnitus-panel";
+import { SuddenHearingLossPanel } from "./panels/sudden-hearing-loss-panel";
+import { DizzinessPanel } from "./panels/dizziness-panel";
+import { BPPVPanel } from "./panels/bppv-panel";
+import { MenierePanel } from "./panels/meniere-panel";
+import { VestibularNeuritisPanel } from "./panels/vestibular-neuritis-panel";
+import { EarFullnessPanel } from "./panels/ear-fullness-panel";
+import { HeadachePanel } from "./panels/headache-panel";
 import { useHeader } from "@/app/providers/header-provider";
 import { ArrowUpRight } from "lucide-react";
 import type { Disease } from "./types";
@@ -20,6 +27,31 @@ export function DiseaseList() {
   const handlePanelClose = () => {
     setHeaderVisible(true);
     setSelectedDisease(null);
+  };
+
+  const renderDiseasePanel = () => {
+    if (!selectedDisease) return null;
+
+    switch (selectedDisease.id) {
+      case "tinnitus":
+        return <TinnitusPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "sudden-hearing-loss":
+        return <SuddenHearingLossPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "dizziness":
+        return <DizzinessPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "bppv":
+        return <BPPVPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "meniere":
+        return <MenierePanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "vestibular-neuritis":
+        return <VestibularNeuritisPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "ear-fullness":
+        return <EarFullnessPanel disease={selectedDisease} onClose={handlePanelClose} />;
+      case "headache":
+        return <HeadachePanel disease={selectedDisease} onClose={handlePanelClose} />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -64,7 +96,7 @@ export function DiseaseList() {
         </div>
       </div>
 
-      <DiseasePanel disease={selectedDisease} onClose={handlePanelClose} />
+      {renderDiseasePanel()}
     </section>
   );
 }

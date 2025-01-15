@@ -332,8 +332,8 @@ export function Header() {
               <div className="py-8 text-center space-y-4">
                 <p className="text-gray-500">로그인하고 예약 내역을 확인하세요.</p>
                 <div className="flex flex-col gap-2">
-                  <Button onClick={handleKakaoLogin} className="bg-[#FEE500] text-black hover:bg-[#FEE500]/90">
-                    카카오로 로그인
+                  <Button onClick={handleKakaoLogin} className="bg-[#FEE500] text-black hover:bg-[#FEE500]/90 h-[45px]">
+                    <Image src="/kakao_login_medium_wide.png" alt="카카오 로그인" width={300} height={45} className="w-full h-[45px] object-contain" />
                   </Button>
                   <Button
                     variant="outline"
@@ -373,8 +373,8 @@ export function Header() {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex md:items-center md:space-x-6">
+            {/* Desktop Navigation (lg 이상) */}
+            <div className="hidden lg:flex lg:items-center lg:space-x-6">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href} className="nav-link">
                   {item.name}
@@ -415,17 +415,17 @@ export function Header() {
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <div className="flex md:hidden">
+            {/* Mobile & Tablet menu button */}
+            <div className="flex lg:hidden">
               <button type="button" className="text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile & Tablet Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2">
                 {navigation.map((item) => (
                   <Link
@@ -464,8 +464,14 @@ export function Header() {
                       <Calendar className="h-4 w-4" />
                       예약조회
                     </button>
-                    <button onClick={handleKakaoLogin} className="flex justify-center">
-                      <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={120} height={30} className="h-auto" />
+                    <button onClick={handleKakaoLogin} className="flex justify-center w-full">
+                      <Image
+                        src="/kakao_login_medium_wide.png"
+                        alt="카카오 로그인"
+                        width={300}
+                        height={45}
+                        className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
+                      />
                     </button>
                   </div>
                 )}
