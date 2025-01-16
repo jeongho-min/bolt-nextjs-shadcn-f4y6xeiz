@@ -47,11 +47,11 @@ const facilities = [
     description: "효과적인 치료를 위한 반신욕 시설",
     images: ["/facility/건식_반식욕기.jpg"],
   },
-  // {
-  //   title: "영양주사실",
-  //   description: "영양주사 치료실",
-  //   images: ["/facility/영양주사.jpg"],
-  // },
+  {
+    title: "청각검사실",
+    description: "청각검사를 위한 시설",
+    images: ["/facility/청각검사실_1.jpg", "/facility/청각검사실_2.jpg", "/facility/청각검사실_3.jpg"],
+  },
   // {
   //   title: "경옥고",
   //   description: "전통 한방 보약 제조실",
