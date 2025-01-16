@@ -119,6 +119,7 @@ export function HistorySection() {
                     src={hoveredId === symptom.id ? symptom.hoverImage : symptom.image}
                     alt={symptom.label}
                     fill
+                    priority
                     className="object-contain p-4 transition-all duration-300"
                   />
                 </motion.div>
