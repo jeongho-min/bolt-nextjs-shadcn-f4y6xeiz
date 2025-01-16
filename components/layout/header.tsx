@@ -1,24 +1,27 @@
 "use client";
 
 import { useHeader } from "@/app/providers/header-provider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useKakao } from "@/app/providers/kakao-provider";
+import { useNaver } from "@/app/providers/naver-provider";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { kakaoLogin, kakaoLogout } from "@/utils/kakao";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Calendar, LogOut, Menu, X, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Calendar, LogIn, LogOut, Menu, MoreVertical, Pencil, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { initializeKakao, kakaoLogin, kakaoLogout, getCurrentUser, KakaoUserInfo } from "@/utils/kakao";
-import { useKakao } from "@/app/providers/kakao-provider";
+import { naverLogin, naverLogout } from "@/utils/naver";
 
 declare global {
   interface Window {
     Kakao: any;
+    naver: any;
   }
 }
 
@@ -201,10 +204,12 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showReservations, setShowReservations] = useState(false);
   const [showNonMemberDialog, setShowNonMemberDialog] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
   const { isHeaderVisible } = useHeader();
   const { toast } = useToast();
   const { userInfo, setUserInfo, updateLoginStatus } = useKakao();
+  const { userInfo: naverUserInfo, setUserInfo: setNaverUserInfo, updateLoginStatus: updateNaverLoginStatus } = useNaver();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -219,10 +224,61 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const initializeNaverLogin = () => {
+      try {
+        console.log("Initializing Naver Login...");
+        if (!window.naver) {
+          console.log("Naver SDK not loaded yet");
+          return;
+        }
+        const naverLogin = new window.naver.LoginWithNaverId({
+          clientId: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
+          callbackUrl: process.env.NEXT_PUBLIC_NAVER_CALLBACK_URL,
+          isPopup: false,
+          loginButton: { color: "green", type: 3, height: 45 },
+        });
+        console.log("Naver Login Config:", {
+          clientId: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
+          callbackUrl: process.env.NEXT_PUBLIC_NAVER_CALLBACK_URL,
+        });
+
+        naverLogin.init();
+        console.log("Naver Login initialized");
+
+        const naverLoginButton = document.getElementById("naverIdLogin");
+        console.log("Naver Login Button Element:", naverLoginButton);
+
+        if (naverLoginButton) {
+          const url = naverLogin.generateAuthorizeUrl();
+          console.log("Generated Authorize URL:", url);
+        }
+      } catch (error) {
+        console.error("Error initializing Naver Login:", error);
+      }
+    };
+
+    // SDK 로드 완료 확인을 위한 인터벌
+    const checkNaverSDK = setInterval(() => {
+      if (window.naver) {
+        console.log("Naver SDK loaded");
+        clearInterval(checkNaverSDK);
+        initializeNaverLogin();
+      }
+    }, 500);
+
+    // 컴포넌트 언마운트 시 인터벌 정리
+    return () => {
+      clearInterval(checkNaverSDK);
+    };
+  }, []);
+
   const handleKakaoLogin = async () => {
     try {
-      const user = await kakaoLogin();
+      await kakaoLogin();
       await updateLoginStatus();
+      setShowLoginDialog(false);
+      setShowReservations(false);
     } catch (error) {
       console.error("Login Failed:", error);
       toast({
@@ -233,18 +289,103 @@ export function Header() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleNaverLogin = async () => {
     try {
-      await kakaoLogout();
-      setUserInfo(null);
-      console.log("로그아웃 되었습니다.");
+      console.log("Starting Naver login process...");
+      const user = await naverLogin();
+      console.log("Raw Naver User Data:", user);
+
+      if (!user) {
+        throw new Error("Failed to get user info from Naver");
+      }
+
+      // 네이버 사용자 정보를 상태에 저장
+      const userInfoToStore = {
+        id: user.id,
+        email: user.email,
+        nickname: user.nickname || user.name || user.email.split("@")[0],
+        name: user.name || "",
+        profile_image: user.profile_image,
+      };
+
+      console.log("Processed Naver User Info to Store:", userInfoToStore);
+
+      // 먼저 상태를 업데이트
+      setNaverUserInfo(userInfoToStore);
+
+      // 상태 업데이트 후 로그인 상태 확인
+      await updateNaverLoginStatus();
+      console.log("Naver login status updated, current userInfo:", userInfoToStore);
+
+      // 모달 닫기
+      setShowLoginDialog(false);
+      setShowReservations(false);
+      setMobileMenuOpen(false);
+
+      toast({
+        title: "로그인 성공",
+        description: `${userInfoToStore.nickname}님 환영합니다.`,
+      });
     } catch (error) {
-      console.error("Logout Failed:", error);
+      console.error("Naver Login Failed:", error);
+      setNaverUserInfo(null);
+      toast({
+        variant: "destructive",
+        title: "로그인 실패",
+        description: "네이버 로그인 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
+  const handleNaverLogout = async () => {
+    try {
+      await naverLogout();
+      setNaverUserInfo(null);
+      toast({
+        title: "로그아웃",
+        description: "네이버 계정에서 로그아웃되었습니다.",
+      });
+    } catch (error) {
+      console.error("Naver Logout Failed:", error);
       toast({
         variant: "destructive",
         title: "로그아웃 실패",
-        description: "로그아웃 중 오류가 발생했습니다.",
+        description: "네이버 로그아웃 중 오류가 발생했습니다.",
       });
+    }
+  };
+
+  const handleKakaoLogout = async () => {
+    try {
+      await kakaoLogout();
+      setUserInfo(null);
+      toast({
+        title: "로그아웃",
+        description: "카카오 계정에서 로그아웃되었습니다.",
+      });
+    } catch (error) {
+      console.error("Kakao Logout Failed:", error);
+      toast({
+        variant: "destructive",
+        title: "로그아웃 실패",
+        description: "카카오 로그아웃 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (userInfo) {
+        await handleKakaoLogout();
+      } else if (naverUserInfo) {
+        await handleNaverLogout();
+      }
+      // 모든 모달 닫기
+      setShowLoginDialog(false);
+      setShowReservations(false);
+      setMobileMenuOpen(false);
+    } catch (error) {
+      console.error("Logout Failed:", error);
     }
   };
 
@@ -277,19 +418,31 @@ export function Header() {
     });
   };
 
+  // 로그인 상태 디버깅을 위한 useEffect 추가
+  useEffect(() => {
+    console.log("Login Status:", {
+      kakao: userInfo,
+      naver: naverUserInfo,
+    });
+  }, [userInfo, naverUserInfo]);
+
   if (!isHeaderVisible) return null;
 
   return (
     <>
+      <div id="naverIdLogin" className="hidden" />
       <Dialog open={showReservations} onOpenChange={setShowReservations}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-center">예약 내역</DialogTitle>
-            {nonMemberPhone && !userInfo?.nickname && <DialogDescription className="text-center">{nonMemberPhone} 님의 예약 내역입니다.</DialogDescription>}
+            {nonMemberPhone && !userInfo?.nickname && !naverUserInfo?.nickname && (
+              <DialogDescription className="text-center">{nonMemberPhone} 님의 예약 내역입니다.</DialogDescription>
+            )}
             {userInfo?.nickname && <DialogDescription className="text-center">{userInfo.nickname} 님의 예약 내역입니다.</DialogDescription>}
+            {naverUserInfo?.nickname && <DialogDescription className="text-center">{naverUserInfo.nickname} 님의 예약 내역입니다.</DialogDescription>}
           </DialogHeader>
           <div className="mt-4 space-y-4">
-            {userInfo?.nickname || nonMemberPhone ? (
+            {userInfo?.nickname || naverUserInfo?.nickname || nonMemberPhone ? (
               <>
                 {sampleReservations.length > 0 ? (
                   <>
@@ -332,9 +485,20 @@ export function Header() {
               <div className="py-8 text-center space-y-4">
                 <p className="text-gray-500">로그인하고 예약 내역을 확인하세요.</p>
                 <div className="flex flex-col gap-2">
-                  <Button onClick={handleKakaoLogin} className="bg-[#FEE500] text-black hover:bg-[#FEE500]/90 h-[45px]">
-                    <Image src="/kakao_login_medium_wide.png" alt="카카오 로그인" width={300} height={45} className="w-full h-[45px] object-contain" />
-                  </Button>
+                  <button onClick={handleNaverLogin} className="w-full">
+                    <div className="w-full h-[45px] bg-[#03C75A] rounded-lg  transition-colors flex items-center justify-center">
+                      <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
+                    </div>
+                  </button>
+                  <button onClick={handleKakaoLogin} className="w-full">
+                    <Image
+                      src="/kakao_login_medium_wide.png"
+                      alt="카카오 로그인"
+                      width={300}
+                      height={45}
+                      className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
+                    />
+                  </button>
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -360,6 +524,31 @@ export function Header() {
         }}
       />
 
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">로그인</DialogTitle>
+            <DialogDescription className="text-center">소셜 계정으로 간편하게 로그인하세요</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <button onClick={handleNaverLogin} className="w-full">
+              <div className="w-full h-[45px] bg-[#03C75A] rounded-lg hover:bg-[#03C75A]/90 transition-colors flex items-center justify-center">
+                <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
+              </div>
+            </button>
+            <button onClick={handleKakaoLogin} className="w-full">
+              <Image
+                src="/kakao_login_medium_wide.png"
+                alt="카카오 로그인"
+                width={300}
+                height={45}
+                className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
+              />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled ? "bg-white/70 backdrop-blur-md shadow-sm" : "bg-white shadow-sm"
@@ -380,7 +569,7 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              {userInfo?.nickname ? (
+              {userInfo?.nickname || naverUserInfo?.nickname ? (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowReservations(true)}
@@ -408,8 +597,12 @@ export function Header() {
                     예약조회
                   </button>
                   <div className="h-4 w-px bg-gray-300" />
-                  <button onClick={handleKakaoLogin} className="flex justify-center">
-                    <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={120} height={30} className="h-auto" />
+                  <button
+                    onClick={() => setShowLoginDialog(true)}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    로그인
                   </button>
                 </div>
               )}
@@ -438,7 +631,7 @@ export function Header() {
                   </Link>
                 ))}
 
-                {userInfo?.nickname ? (
+                {userInfo?.nickname || naverUserInfo?.nickname ? (
                   <div className="mt-4 px-3">
                     <button
                       onClick={() => setShowReservations(true)}
@@ -464,14 +657,12 @@ export function Header() {
                       <Calendar className="h-4 w-4" />
                       예약조회
                     </button>
-                    <button onClick={handleKakaoLogin} className="flex justify-center w-full">
-                      <Image
-                        src="/kakao_login_medium_wide.png"
-                        alt="카카오 로그인"
-                        width={300}
-                        height={45}
-                        className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
-                      />
+                    <button
+                      onClick={() => setShowLoginDialog(true)}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      로그인
                     </button>
                   </div>
                 )}

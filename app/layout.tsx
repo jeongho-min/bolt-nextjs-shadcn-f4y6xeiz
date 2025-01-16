@@ -1,13 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Providers } from "./providers";
-import { HeaderProvider } from "./providers/header-provider";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { QuickLinks } from "@/components/home/quick-links";
-import { AnimatePresence } from "framer-motion";
-import { Toaster } from "@/components/ui/toaster";
-import { KakaoProvider } from "@/app/providers/kakao-provider";
+import Script from "next/script";
+import { ClientLayout } from "./client-layout";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -33,23 +27,18 @@ export const metadata: Metadata = {
   },
 };
 
+function NaverScript() {
+  return <Script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" strategy="afterInteractive" />;
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className="!scroll-smooth">
+      <head>
+        <NaverScript />
+      </head>
       <body className="min-h-screen">
-        <KakaoProvider>
-          <Providers>
-            <HeaderProvider>
-              <Header />
-              <main className="pt-16">
-                <AnimatePresence mode="wait">{children}</AnimatePresence>
-                <QuickLinks />
-              </main>
-              <Footer />
-              <Toaster />
-            </HeaderProvider>
-          </Providers>
-        </KakaoProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
