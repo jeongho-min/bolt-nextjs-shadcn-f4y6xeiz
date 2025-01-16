@@ -532,7 +532,7 @@ export function Header() {
           </DialogHeader>
           <div className="mt-4 space-y-4">
             <button onClick={handleNaverLogin} className="w-full">
-              <div className="w-full h-[45px] bg-[#03C75A] rounded-lg hover:bg-[#03C75A]/90 transition-colors flex items-center justify-center">
+              <div className="w-full h-[45px] bg-[#03C75A] rounded-lg transition-colors flex items-center justify-center">
                 <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
               </div>
             </button>
