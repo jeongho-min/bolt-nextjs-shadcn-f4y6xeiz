@@ -92,11 +92,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        console.log("SignIn Callback - User:", user);
-        console.log("SignIn Callback - Account:", account);
-
         if (!user.email || !account) {
-          console.log("No email or account provided");
           return false;
         }
 
@@ -105,10 +101,7 @@ export const authOptions: NextAuthOptions = {
           include: { accounts: true },
         });
 
-        console.log("Existing User:", dbUser);
-
         if (!dbUser) {
-          console.log("Creating new user");
           dbUser = await prisma.user.create({
             data: {
               email: user.email,
@@ -136,10 +129,7 @@ export const authOptions: NextAuthOptions = {
               id_token: account.id_token ?? null,
             },
           });
-
-          console.log("New User Created:", dbUser);
         } else if (!dbUser.accounts.some((acc) => acc.provider === account.provider)) {
-          console.log("Linking new account to existing user");
           await prisma.account.create({
             data: {
               userId: dbUser.id,
@@ -163,9 +153,6 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async jwt({ token, user, account }) {
-      console.log("JWT Callback - Token:", token);
-      console.log("JWT Callback - User:", user);
-
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -174,13 +161,10 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      console.log("Session Callback - Token:", token);
-
       if (session.user) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email as string },
         });
-        console.log("Session Callback - DB User:", dbUser);
 
         if (dbUser) {
           session.user.id = dbUser.id;

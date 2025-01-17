@@ -12,6 +12,12 @@ import { ko } from "date-fns/locale";
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Department, Doctor } from "@prisma/client";
+
+type DoctorWithDepartment = Doctor & {
+  department: Department;
+};
 
 interface ReservationDialogProps {
   open: boolean;
@@ -31,6 +37,56 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [password, setPassword] = useState("");
   const [isDirectInput, setIsDirectInput] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [doctors, setDoctors] = useState<DoctorWithDepartment[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      fetchDepartments();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (selectedDepartmentId) {
+      fetchDoctors(selectedDepartmentId);
+    }
+  }, [selectedDepartmentId]);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch("/api/departments");
+      if (!response.ok) throw new Error("부서 정보를 불러오는데 실패했습니다.");
+      const data = await response.json();
+      setDepartments(data);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "오류",
+        description: "진료과 정보를 불러오는데 실패했습니다.",
+      });
+    }
+  };
+
+  const fetchDoctors = async (departmentId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/departments/${departmentId}/doctors`);
+      if (!response.ok) throw new Error("의사 정보를 불러오는데 실패했습니다.");
+      const data = await response.json();
+      setDoctors(data);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "오류",
+        description: "의사 정보를 불러오는데 실패했습니다.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (open && isAuthenticated) {
@@ -103,8 +159,29 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: API 호출로 변경
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          patientName: name,
+          phone,
+          doctorId: selectedDoctorId,
+          reservationDate: selectedDate?.toISOString(),
+          timeSlot: selectedTime,
+          symptoms,
+          userId: user?.id,
+          password: isDirectInput && !isAuthenticated ? password : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      const reservation = await response.json();
 
       toast({
         title: "예약이 완료되었습니다",
@@ -120,13 +197,16 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
       setSelectedDate(undefined);
       setSelectedTime("");
       setShowConfirmation(false);
+      setPassword("");
+      setSelectedDepartmentId("");
+      setSelectedDoctorId("");
 
       onOpenChange(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "예약 실패",
-        description: "예약 접수 중 오류가 발생했습니다. 다시 시도해주세요.",
+        description: error instanceof Error ? error.message : "예약 접수 중 오류가 발생했습니다. 다시 시도해주세요.",
       });
     } finally {
       setIsSubmitting(false);
@@ -162,6 +242,8 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   };
 
   const renderConfirmationContent = () => {
+    const selectedDoctor = doctors.find((doctor) => doctor.id === selectedDoctorId);
+
     if (isDirectInput && !isAuthenticated) {
       return (
         <div className="space-y-4">
@@ -173,6 +255,12 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
             <div className="flex justify-between">
               <span className="text-muted-foreground">연락처</span>
               <span className="font-medium">{phone}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">진료과/담당의</span>
+              <span className="font-medium">
+                {selectedDoctor?.department.name} / {selectedDoctor?.name} {selectedDoctor?.position}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">예약일시</span>
@@ -219,6 +307,12 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
           <div className="flex justify-between">
             <span className="text-muted-foreground">연락처</span>
             <span className="font-medium">{phone}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">진료과/담당의</span>
+            <span className="font-medium">
+              {selectedDoctor?.department.name} / {selectedDoctor?.name} {selectedDoctor?.position}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">예약일시</span>
@@ -312,6 +406,40 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
             }}
           >
             <div className="space-y-2">
+              <Label>진료과 선택</Label>
+              <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="진료과를 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((department) => (
+                    <SelectItem key={department.id} value={department.id}>
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedDepartmentId && (
+              <div className="space-y-2">
+                <Label>담당의 선택</Label>
+                <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="담당의를 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {doctors.map((doctor) => (
+                      <SelectItem key={doctor.id} value={doctor.id}>
+                        {doctor.name} {doctor.position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
               <Label htmlFor="symptoms">증상</Label>
               <Textarea
                 id="symptoms"
@@ -326,7 +454,7 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
               <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1">
                 이전
               </Button>
-              <Button type="submit" className="flex-1" disabled={!symptoms}>
+              <Button type="submit" className="flex-1" disabled={!symptoms || !selectedDoctorId}>
                 다음
               </Button>
             </div>
