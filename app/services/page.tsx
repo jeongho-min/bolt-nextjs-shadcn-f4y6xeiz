@@ -11,7 +11,8 @@ import { DepartmentList } from "./components/departments/department-list";
 import { ServicesHero } from "./components/hero";
 
 const ITEMS_PER_PAGE = 9;
-const CASE_CATEGORIES = ["전체", ...Array.from(new Set(cases.map((item) => item.category)))];
+
+const CASE_CATEGORIES = ["전체", "이명", "어지럼증", "편두통", "돌발성난청", "메니에르", "이석증"];
 
 const containerVariants = {
   hidden: { opacity: 0 },

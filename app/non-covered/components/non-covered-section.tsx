@@ -12,25 +12,66 @@ export function NonCoveredSection() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>명칭</TableHead>
-                    <TableHead className="text-right">비용</TableHead>
+                    <TableHead className="w-[25%]">항목</TableHead>
+                    <TableHead className="w-[35%]">구분</TableHead>
+                    <TableHead className="w-[20%]">용량</TableHead>
+                    <TableHead className="w-[25%] text-right">비용</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* 탕약 */}
                   <TableRow>
-                    <TableCell>현훈단</TableCell>
-                    <TableCell className="text-right">15,000원</TableCell>
+                    <TableCell rowSpan={3} className="align-top font-medium bg-gray-50">
+                      탕약
+                    </TableCell>
+                    <TableCell>일반 탕약</TableCell>
+                    <TableCell>15일분</TableCell>
+                    <TableCell className="text-right">250,000원~600,000원</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>이명환 (15일분)</TableCell>
+                    <TableCell>수험생 총명탕</TableCell>
+                    <TableCell>15일분</TableCell>
+                    <TableCell className="text-right">300,000원</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>현훈단</TableCell>
+                    <TableCell>15일분</TableCell>
+                    <TableCell className="text-right">225,000원</TableCell>
+                  </TableRow>
+                  {/* 환약 */}
+                  <TableRow>
+                    <TableCell rowSpan={5} className="align-top font-medium bg-gray-50">
+                      환약
+                    </TableCell>
+                    <TableCell>공진단</TableCell>
+                    <TableCell>10환</TableCell>
+                    <TableCell className="text-right">500,000원</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>공진단</TableCell>
+                    <TableCell>30환</TableCell>
+                    <TableCell className="text-right">1,400,000원</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>이명환</TableCell>
+                    <TableCell>15일분</TableCell>
                     <TableCell className="text-right">150,000원</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>슬림환 (30일분)</TableCell>
-                    <TableCell className="text-right">250,000원</TableCell>
+                    <TableCell>슬림환</TableCell>
+                    <TableCell>30일분</TableCell>
+                    <TableCell className="text-right">300,000원</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell>경옥고</TableCell>
+                    <TableCell>30일분</TableCell>
+                    <TableCell className="text-right">300,000원</TableCell>
+                  </TableRow>
+                  {/* 기타 */}
+                  <TableRow>
+                    <TableCell className="font-medium bg-gray-50">기타</TableCell>
                     <TableCell>파스</TableCell>
+                    <TableCell>1매</TableCell>
                     <TableCell className="text-right">3,000원~10,000원</TableCell>
                   </TableRow>
                 </TableBody>
@@ -43,9 +84,9 @@ export function NonCoveredSection() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>항목</TableHead>
-                    <TableHead>구분</TableHead>
-                    <TableHead className="text-right">비용</TableHead>
+                    <TableHead className="w-[20%]">항목</TableHead>
+                    <TableHead className="w-[35%]">구분</TableHead>
+                    <TableHead className="w-[25%] text-right">비용</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -77,8 +118,8 @@ export function NonCoveredSection() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>구분</TableHead>
-                    <TableHead className="text-right">비용</TableHead>
+                    <TableHead className="w-[75%]">구분</TableHead>
+                    <TableHead className="w-[25%] text-right">비용</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

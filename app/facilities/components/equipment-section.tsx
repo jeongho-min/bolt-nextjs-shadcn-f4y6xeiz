@@ -56,7 +56,7 @@ const specialEquipment = [
     description: "어깨 관절 전용 지속적 수동 운동(CPM) 치료기",
     features: ["어깨 관절 맞춤형 설계", "정밀한 각도 조절", "점진적 운동 범위 확장", "안전한 수동 운동 제공", "인체공학적 구조"],
     effects: ["관절 운동 범위 회복", "염증 완화", "근육 이완 및 재건", "수술 후 회복 가속화", "통증 감소"],
-    image: "/facility/artus-701es.png",
+    image: "/facility/01M707.png",
   },
 ];
 
