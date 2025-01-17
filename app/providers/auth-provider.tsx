@@ -4,18 +4,24 @@ import { useSession } from "next-auth/react";
 import { createContext, useContext } from "react";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
+import { UserRole } from "@prisma/client";
+
+interface AuthUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  phone?: string | null;
+  role: UserRole;
+}
 
 interface AuthContextType {
-  user: Session["user"] | null;
-  accessToken?: string | null;
-  refreshToken?: string | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  accessToken: null,
-  refreshToken: null,
   isAuthenticated: false,
 });
 
@@ -24,8 +30,6 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   const value = {
     user: session?.user ?? null,
-    accessToken: session?.accessToken ?? null,
-    refreshToken: session?.refreshToken ?? null,
     isAuthenticated: !!session?.user,
   };
 

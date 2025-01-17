@@ -23,6 +23,11 @@ enum ReservationStatus {
   cancelled
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 model User {
   id            String        @id @default(cuid())
   name          String?
@@ -30,6 +35,7 @@ model User {
   emailVerified DateTime?    @map("email_verified")
   phone         String?
   image         String?
+  role          UserRole     @default(USER)
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   
@@ -49,8 +55,10 @@ model Department {
   updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz
   doctors     Doctor[]
   diseases    Disease[]
+  reservations Reservation[]
+  nonMemberReservations NonMemberReservation[]
 
-  @@map("Department")
+  @@map("departments")
 }
 
 model Disease {
@@ -83,8 +91,10 @@ model Doctor {
   updatedAt    DateTime   @default(now()) @map("updated_at") @db.Timestamptz
   department   Department @relation(fields: [departmentId], references: [id])
   schedules    Schedule[]
+  reservations Reservation[]
+  nonMemberReservations NonMemberReservation[]
 
-  @@map("Doctor")
+  @@map("doctors")
 }
 
 model Schedule {
@@ -105,30 +115,44 @@ model Schedule {
 model Reservation {
   id              String           @id @default(uuid())
   userId          String?
-  patientName     String
+  doctorId        String          @map("doctor_id")
+  departmentId    String          @map("department_id")
+  patientName     String          @map("patient_name")
   phone           String
   symptoms        String
-  reservationDate DateTime
-  status          ReservationStatus
+  reservationDate DateTime        @map("reservation_date")
+  timeSlot        String          @map("time_slot")
+  status          ReservationStatus @default(pending)
   memo            String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  
   user            User?            @relation(fields: [userId], references: [id])
+  doctor          Doctor           @relation(fields: [doctorId], references: [id])
+  department      Department       @relation(fields: [departmentId], references: [id])
+
+  @@map("reservations")
 }
 
 model NonMemberReservation {
   id                 String            @id @default(uuid())
+  doctorId           String           @map("doctor_id")
+  departmentId       String           @map("department_id")
   patientName        String           @map("patient_name")
   phone              String
   symptoms           String?
   reservationDate    DateTime         @map("reservation_date") @db.Timestamptz
+  timeSlot           String           @map("time_slot")
   status             ReservationStatus @default(pending)
   reservationPassword String           @map("reservation_password")
   memo               String?
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime         @default(now()) @map("updated_at") @db.Timestamptz
 
-  @@map("NonMemberReservation")
+  doctor             Doctor           @relation(fields: [doctorId], references: [id])
+  department         Department       @relation(fields: [departmentId], references: [id])
+
+  @@map("non_member_reservations")
 }
 
 model Account {

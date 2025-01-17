@@ -3,10 +3,22 @@ import NaverProvider from "next-auth/providers/naver";
 import KakaoProvider from "next-auth/providers/kakao";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "./prisma";
+import { Adapter } from "next-auth/adapters";
+
+const customPrismaAdapter = Object.assign(PrismaAdapter(prisma), {
+  getUser: async (id: string) => {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return null;
+    return {
+      ...user,
+      role: user.role ?? "USER",
+    };
+  },
+}) as Adapter;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
-  adapter: PrismaAdapter(prisma),
+  adapter: customPrismaAdapter,
   providers: [
     NaverProvider({
       clientId: process.env.NAVER_CLIENT_ID!,
@@ -25,6 +37,7 @@ export const authOptions: NextAuthOptions = {
           email: profile.response.email,
           image: profile.response.profile_image,
           phone: profile.response.mobile,
+          role: "USER" as const,
         };
       },
     }),
@@ -67,6 +80,7 @@ export const authOptions: NextAuthOptions = {
           email: profile.kakao_account?.email ?? null,
           image: profile.properties?.profile_image ?? null,
           phone: null,
+          role: "USER" as const,
         };
       },
     }),
@@ -78,7 +92,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        if (!user.email) {
+        console.log("SignIn Callback - User:", user);
+        console.log("SignIn Callback - Account:", account);
+
+        if (!user.email || !account) {
+          console.log("No email or account provided");
           return false;
         }
 
@@ -87,43 +105,90 @@ export const authOptions: NextAuthOptions = {
           include: { accounts: true },
         });
 
+        console.log("Existing User:", dbUser);
+
         if (!dbUser) {
+          console.log("Creating new user");
           dbUser = await prisma.user.create({
             data: {
               email: user.email,
               name: user.name,
               image: user.image,
-              phone: account?.provider === "naver" ? user.phone : null,
+              phone: account.provider === "naver" ? (user as any).phone : null,
+              role: "USER",
             },
             include: {
               accounts: true,
+            },
+          });
+
+          await prisma.account.create({
+            data: {
+              userId: dbUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token ?? null,
+              refresh_token: account.refresh_token ?? null,
+              expires_at: account.expires_at ?? null,
+              token_type: account.token_type ?? null,
+              scope: account.scope ?? null,
+              id_token: account.id_token ?? null,
+            },
+          });
+
+          console.log("New User Created:", dbUser);
+        } else if (!dbUser.accounts.some((acc) => acc.provider === account.provider)) {
+          console.log("Linking new account to existing user");
+          await prisma.account.create({
+            data: {
+              userId: dbUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token ?? null,
+              refresh_token: account.refresh_token ?? null,
+              expires_at: account.expires_at ?? null,
+              token_type: account.token_type ?? null,
+              scope: account.scope ?? null,
+              id_token: account.id_token ?? null,
             },
           });
         }
 
         return true;
       } catch (error) {
+        console.error("SignIn Error:", error);
         return false;
       }
     },
     async jwt({ token, user, account }) {
+      console.log("JWT Callback - Token:", token);
+      console.log("JWT Callback - User:", user);
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("Session Callback - Token:", token);
+
       if (session.user) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email as string },
         });
+        console.log("Session Callback - DB User:", dbUser);
+
         if (dbUser) {
           session.user.id = dbUser.id;
-          session.user.email = dbUser.email ?? undefined;
-          session.user.name = dbUser.name ?? undefined;
-          session.user.image = dbUser.image ?? undefined;
-          session.user.phone = dbUser.phone ?? undefined;
+          session.user.email = dbUser.email;
+          session.user.name = dbUser.name;
+          session.user.image = dbUser.image;
+          session.user.phone = dbUser.phone;
+          session.user.role = dbUser.role;
         }
       }
       return session;
