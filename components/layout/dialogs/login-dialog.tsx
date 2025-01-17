@@ -53,13 +53,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             </div>
           </button>
           <button onClick={handleKakaoLogin} className="w-full">
-            <Image
-              src="/kakao_login_medium_wide.png"
-              alt="카카오 로그인"
-              width={300}
-              height={45}
-              className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
-            />
+            <div className="w-full h-[45px] bg-[#FEE500] rounded-lg transition-colors flex items-center justify-center">
+              <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={300} height={45} className="h-[45px] object-contain" />
+            </div>
           </button>
         </div>
       </DialogContent>

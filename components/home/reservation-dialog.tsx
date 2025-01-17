@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ko } from "date-fns/locale";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface ReservationDialogProps {
   open: boolean;
@@ -28,6 +29,19 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isDirectInput, setIsDirectInput] = useState(false);
+
+  useEffect(() => {
+    if (open && isAuthenticated) {
+      setName(user?.name || "");
+      setPhone(user?.phone || "");
+      // 로그인한 유저이고 전화번호가 있으면 증상 입력 단계(3)로, 없으면 연락처 입력 단계(2)로
+      setStep(user?.phone ? 3 : 2);
+    } else {
+      setStep(1);
+    }
+  }, [open, isAuthenticated, user]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -148,6 +162,53 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   };
 
   const renderConfirmationContent = () => {
+    if (isDirectInput && !isAuthenticated) {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">예약자</span>
+              <span className="font-medium">{name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">연락처</span>
+              <span className="font-medium">{phone}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">예약일시</span>
+              <span className="font-medium">
+                {selectedDate?.toLocaleDateString("ko-KR")} {selectedTime}
+              </span>
+            </div>
+            <div className="border-t pt-3">
+              <span className="text-muted-foreground block mb-1">증상</span>
+              <p className="text-sm whitespace-pre-wrap">{symptoms}</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">예약 비밀번호</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="예약 조회시 사용할 비밀번호를 입력하세요"
+              required
+            />
+            <p className="text-sm text-muted-foreground">비회원 예약 조회시 필요한 비밀번호입니다.</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowConfirmation(false)} className="flex-1">
+              수정하기
+            </Button>
+            <Button onClick={handleSubmit} className="flex-1" disabled={isSubmitting || !password}>
+              {isSubmitting ? "예약 접수 중..." : "예약하기"}
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4">
         <div className="space-y-3">
@@ -191,15 +252,25 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
       case 1:
         return (
           <div className="flex flex-col gap-4">
-            <Button onClick={() => setStep(2)} className="h-12 text-lg">
+            <Button
+              onClick={() => {
+                setStep(2);
+                setIsDirectInput(true);
+              }}
+              className="h-12 text-lg"
+            >
               직접 입력하기
             </Button>
-            <Button onClick={handleNaverLogin} className="h-12 text-lg bg-[#03C75A] hover:bg-[#03C75A]/90 text-white">
-              네이버로 시작하기
-            </Button>
-            <Button onClick={handleKakaoLogin} className="h-12 text-lg bg-[#FEE500] hover:bg-[#FEE500]/90 text-black">
-              카카오로 시작하기
-            </Button>
+            <button onClick={handleNaverLogin} className="w-full">
+              <div className="w-full h-[45px] bg-[#03C75A] rounded-lg transition-colors flex items-center justify-center">
+                <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
+              </div>
+            </button>
+            <button onClick={handleKakaoLogin} className="w-full">
+              <div className="w-full h-[45px] bg-[#FEE500] rounded-lg transition-colors flex items-center justify-center">
+                <Image src="/kakao_login_medium_narrow.png" alt="카카오 로그인" width={300} height={45} className="h-[45px] object-contain" />
+              </div>
+            </button>
           </div>
         );
 
