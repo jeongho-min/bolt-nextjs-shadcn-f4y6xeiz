@@ -72,9 +72,25 @@
   * {
     @apply border-border;
   }
+
+  html {
+    overflow-y: scroll;
+    width: 100vw;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  #root {
+    overflow-x: hidden;
   }
 }
 

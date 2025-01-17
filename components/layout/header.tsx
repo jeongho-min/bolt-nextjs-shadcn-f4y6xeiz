@@ -1,31 +1,18 @@
 "use client";
 
+import { useAuth } from "@/app/providers/auth-provider";
 import { useHeader } from "@/app/providers/header-provider";
-import { useKakao } from "@/app/providers/kakao-provider";
-import { useNaver } from "@/app/providers/naver-provider";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { kakaoLogin, kakaoLogout } from "@/utils/kakao";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
-import { Calendar, LogIn, LogOut, Menu, MoreVertical, Pencil, Trash2, X } from "lucide-react";
+import { Calendar, LogIn, LogOut, Menu, MoreVertical, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { naverLogin, naverLogout } from "@/utils/naver";
-
-declare global {
-  interface Window {
-    Kakao: any;
-    naver: any;
-  }
-}
-
-const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+import { LoginDialog } from "./dialogs/login-dialog";
+import { NonMemberDialog } from "./dialogs/non-member-dialog";
+import { ReservationDialog } from "./dialogs/reservation-dialog";
+import { UserMenuDialog } from "./dialogs/user-menu-dialog";
+import { signOut, useSession } from "next-auth/react";
 
 const navigation = [
   { name: "인사말", href: "/about" },
@@ -107,109 +94,21 @@ const sampleReservations = [
   },
 ];
 
-function ReservationActions({ reservation, onEdit, onCancel }: { reservation: (typeof sampleReservations)[0]; onEdit: () => void; onCancel: () => void }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onEdit} className="text-blue-600">
-          <Pencil className="mr-2 h-4 w-4" />
-          수정하기
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onCancel} className="text-red-600">
-          <Trash2 className="mr-2 h-4 w-4" />
-          예약취소
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function NonMemberReservationDialog({
-  open,
-  onOpenChange,
-  onSuccess,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: (phone: string) => void;
-}) {
-  const [phone, setPhone] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-
-    if (value.length <= 11) {
-      let formattedNumber = "";
-      if (value.length <= 3) {
-        formattedNumber = value;
-      } else if (value.length <= 7) {
-        formattedNumber = `${value.slice(0, 3)}-${value.slice(3)}`;
-      } else {
-        formattedNumber = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
-      }
-      setPhone(formattedNumber);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // TODO: API 호출로 변경
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onOpenChange(false);
-      onSuccess(phone);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "조회 실패",
-        description: "예약 내역을 찾을 수 없습니다. 전화번호를 다시 확인해주세요.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>비회원 예약 조회</DialogTitle>
-          <DialogDescription>예약 시 입력하신 전화번호로 예약 내역을 조회할 수 있습니다.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="phone">전화번호</Label>
-            <Input id="phone" type="tel" value={phone} onChange={handlePhoneChange} placeholder="010-0000-0000" maxLength={13} required />
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "조회중..." : "예약 조회하기"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showReservations, setShowReservations] = useState(false);
   const [showNonMemberDialog, setShowNonMemberDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showUserMenuDialog, setShowUserMenuDialog] = useState(false);
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
   const { isHeaderVisible } = useHeader();
+  const { data: session, status } = useSession();
   const { toast } = useToast();
-  const { userInfo, setUserInfo, updateLoginStatus } = useKakao();
-  const { userInfo: naverUserInfo, setUserInfo: setNaverUserInfo, updateLoginStatus: updateNaverLoginStatus } = useNaver();
+
+  useEffect(() => {
+    console.log("[SESSION_STATUS]", { session, status });
+  }, [session, status]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -225,297 +124,35 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const initializeNaverLogin = () => {
-      try {
-        console.log("Initializing Naver Login...");
-        if (!window.naver) {
-          console.log("Naver SDK not loaded yet");
-          return;
-        }
-        const naverLogin = new window.naver.LoginWithNaverId({
-          clientId: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
-          callbackUrl: process.env.NEXT_PUBLIC_NAVER_CALLBACK_URL,
-          isPopup: false,
-          loginButton: { color: "green", type: 3, height: 45 },
-        });
-        console.log("Naver Login Config:", {
-          clientId: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
-          callbackUrl: process.env.NEXT_PUBLIC_NAVER_CALLBACK_URL,
-        });
-
-        naverLogin.init();
-        console.log("Naver Login initialized");
-
-        const naverLoginButton = document.getElementById("naverIdLogin");
-        console.log("Naver Login Button Element:", naverLoginButton);
-
-        if (naverLoginButton) {
-          const url = naverLogin.generateAuthorizeUrl();
-          console.log("Generated Authorize URL:", url);
-        }
-      } catch (error) {
-        console.error("Error initializing Naver Login:", error);
-      }
-    };
-
-    // SDK 로드 완료 확인을 위한 인터벌
-    const checkNaverSDK = setInterval(() => {
-      if (window.naver) {
-        console.log("Naver SDK loaded");
-        clearInterval(checkNaverSDK);
-        initializeNaverLogin();
-      }
-    }, 500);
-
-    // 컴포넌트 언마운트 시 인터벌 정리
-    return () => {
-      clearInterval(checkNaverSDK);
-    };
-  }, []);
-
-  const handleKakaoLogin = async () => {
-    try {
-      await kakaoLogin();
-      await updateLoginStatus();
-      setShowLoginDialog(false);
-      setShowReservations(false);
-    } catch (error) {
-      console.error("Login Failed:", error);
-      toast({
-        variant: "destructive",
-        title: "로그인 실패",
-        description: "카카오 로그인 중 오류가 발생했습니다.",
-      });
+    if (showLoginDialog || showNonMemberDialog || showReservations) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
     }
-  };
-
-  const handleNaverLogin = async () => {
-    try {
-      console.log("Starting Naver login process...");
-      const user = await naverLogin();
-      console.log("Raw Naver User Data:", user);
-
-      if (!user) {
-        throw new Error("Failed to get user info from Naver");
-      }
-
-      // 네이버 사용자 정보를 상태에 저장
-      const userInfoToStore = {
-        id: user.id,
-        email: user.email,
-        nickname: user.nickname || user.name || user.email.split("@")[0],
-        name: user.name || "",
-        profile_image: user.profile_image,
-      };
-
-      console.log("Processed Naver User Info to Store:", userInfoToStore);
-
-      // 먼저 상태를 업데이트
-      setNaverUserInfo(userInfoToStore);
-
-      // 상태 업데이트 후 로그인 상태 확인
-      await updateNaverLoginStatus();
-      console.log("Naver login status updated, current userInfo:", userInfoToStore);
-
-      // 모달 닫기
-      setShowLoginDialog(false);
-      setShowReservations(false);
-      setMobileMenuOpen(false);
-
-      toast({
-        title: "로그인 성공",
-        description: `${userInfoToStore.nickname}님 환영합니다.`,
-      });
-    } catch (error) {
-      console.error("Naver Login Failed:", error);
-      setNaverUserInfo(null);
-      toast({
-        variant: "destructive",
-        title: "로그인 실패",
-        description: "네이버 로그인 중 오류가 발생했습니다.",
-      });
-    }
-  };
-
-  const handleNaverLogout = async () => {
-    try {
-      await naverLogout();
-      setNaverUserInfo(null);
-      toast({
-        title: "로그아웃",
-        description: "네이버 계정에서 로그아웃되었습니다.",
-      });
-    } catch (error) {
-      console.error("Naver Logout Failed:", error);
-      toast({
-        variant: "destructive",
-        title: "로그아웃 실패",
-        description: "네이버 로그아웃 중 오류가 발생했습니다.",
-      });
-    }
-  };
-
-  const handleKakaoLogout = async () => {
-    try {
-      await kakaoLogout();
-      setUserInfo(null);
-      toast({
-        title: "로그아웃",
-        description: "카카오 계정에서 로그아웃되었습니다.",
-      });
-    } catch (error) {
-      console.error("Kakao Logout Failed:", error);
-      toast({
-        variant: "destructive",
-        title: "로그아웃 실패",
-        description: "카카오 로그아웃 중 오류가 발생했습니다.",
-      });
-    }
-  };
+  }, [showLoginDialog, showNonMemberDialog, showReservations]);
 
   const handleLogout = async () => {
-    try {
-      if (userInfo) {
-        await handleKakaoLogout();
-      } else if (naverUserInfo) {
-        await handleNaverLogout();
-      }
-      // 모든 모달 닫기
-      setShowLoginDialog(false);
-      setShowReservations(false);
-      setMobileMenuOpen(false);
-    } catch (error) {
-      console.error("Logout Failed:", error);
-    }
+    await signOut({ callbackUrl: "/" });
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "예약확정":
-        return "text-blue-600";
-      case "대기중":
-        return "text-yellow-600";
-      case "진료완료":
-        return "text-gray-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const handleReservationEdit = (reservation: (typeof sampleReservations)[0]) => {
-    // TODO: 예약 수정 로직 구현
-    toast({
-      title: "준비 중인 기능입니다",
-      description: "곧 예약 수정 기능이 제공될 예정입니다.",
-    });
-  };
-
-  const handleReservationCancel = (reservation: (typeof sampleReservations)[0]) => {
-    // TODO: 예약 취소 로직 구현
-    toast({
-      title: "예약이 취소되었습니다",
-      description: `${format(reservation.date, "M월 d일 HH:mm")} 예약이 취소되었습니다.`,
-    });
-  };
-
-  // 로그인 상태 디버깅을 위한 useEffect 추가
-  useEffect(() => {
-    console.log("Login Status:", {
-      kakao: userInfo,
-      naver: naverUserInfo,
-    });
-  }, [userInfo, naverUserInfo]);
 
   if (!isHeaderVisible) return null;
 
   return (
     <>
       <div id="naverIdLogin" className="hidden" />
-      <Dialog open={showReservations} onOpenChange={setShowReservations}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-center">예약 내역</DialogTitle>
-            {nonMemberPhone && !userInfo?.nickname && !naverUserInfo?.nickname && (
-              <DialogDescription className="text-center">{nonMemberPhone} 님의 예약 내역입니다.</DialogDescription>
-            )}
-            {userInfo?.nickname && <DialogDescription className="text-center">{userInfo.nickname} 님의 예약 내역입니다.</DialogDescription>}
-            {naverUserInfo?.nickname && <DialogDescription className="text-center">{naverUserInfo.nickname} 님의 예약 내역입니다.</DialogDescription>}
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            {userInfo?.nickname || naverUserInfo?.nickname || nonMemberPhone ? (
-              <>
-                {sampleReservations.length > 0 ? (
-                  <>
-                    {sampleReservations
-                      .filter((r) => {
-                        if (userInfo?.nickname) {
-                          // 카카오 로그인 사용자의 경우 닉네임으로 필터링 (실제로는 사용자 ID나 다른 식별자를 사용해야 함)
-                          return r.patientName === userInfo.nickname;
-                        } else if (nonMemberPhone) {
-                          // 비회원의 경우 전화번호로 필터링
-                          return r.phone === nonMemberPhone;
-                        }
-                        return false;
-                      })
-                      .map((reservation) => (
-                        <div key={reservation.id} className="flex justify-between items-start p-4 bg-gray-100 rounded-lg">
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">{format(reservation.date, "M월 d일 (EEE) HH:mm", { locale: ko })}</p>
-                            <p className="text-sm text-gray-600 mt-0.5">{reservation.department}</p>
-                            <p className="text-sm text-gray-600 mt-0.5">증상: {reservation.symptoms}</p>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className={`text-sm font-medium ${getStatusColor(reservation.status)}`}>{reservation.status}</span>
-                            <ReservationActions
-                              reservation={reservation}
-                              onEdit={() => handleReservationEdit(reservation)}
-                              onCancel={() => handleReservationCancel(reservation)}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                  </>
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="text-gray-500">예약 내역이 없습니다.</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-8 text-center space-y-4">
-                <p className="text-gray-500">로그인하고 예약 내역을 확인하세요.</p>
-                <div className="flex flex-col gap-2">
-                  <button onClick={handleNaverLogin} className="w-full">
-                    <div className="w-full h-[45px] bg-[#03C75A] rounded-lg  transition-colors flex items-center justify-center">
-                      <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
-                    </div>
-                  </button>
-                  <button onClick={handleKakaoLogin} className="w-full">
-                    <Image
-                      src="/kakao_login_medium_wide.png"
-                      alt="카카오 로그인"
-                      width={300}
-                      height={45}
-                      className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
-                    />
-                  </button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowReservations(false);
-                      setShowNonMemberDialog(true);
-                    }}
-                  >
-                    비회원 예약 조회
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      <NonMemberReservationDialog
+      <ReservationDialog
+        open={showReservations}
+        onOpenChange={setShowReservations}
+        showNonMemberDialog={() => {
+          setShowNonMemberDialog(true);
+          setShowReservations(false);
+        }}
+        nonMemberPhone={nonMemberPhone}
+        sampleReservations={sampleReservations}
+      />
+
+      <NonMemberDialog
         open={showNonMemberDialog}
         onOpenChange={setShowNonMemberDialog}
         onSuccess={(phone) => {
@@ -524,30 +161,9 @@ export function Header() {
         }}
       />
 
-      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-center">로그인</DialogTitle>
-            <DialogDescription className="text-center">소셜 계정으로 간편하게 로그인하세요</DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            <button onClick={handleNaverLogin} className="w-full">
-              <div className="w-full h-[45px] bg-[#03C75A] rounded-lg transition-colors flex items-center justify-center">
-                <Image src="/btnG_완성형.png" alt="네이버 로그인" width={300} height={45} className="h-[45px] object-contain" />
-              </div>
-            </button>
-            <button onClick={handleKakaoLogin} className="w-full">
-              <Image
-                src="/kakao_login_medium_wide.png"
-                alt="카카오 로그인"
-                width={300}
-                height={45}
-                className="w-full h-[45px] object-contain bg-[#FEE500] rounded-lg hover:bg-[#FEE500]/90 transition-colors"
-              />
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+
+      <UserMenuDialog open={showUserMenuDialog} onOpenChange={setShowUserMenuDialog} />
 
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -569,7 +185,7 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              {userInfo?.nickname || naverUserInfo?.nickname ? (
+              {status === "authenticated" ? (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowReservations(true)}
@@ -586,6 +202,10 @@ export function Header() {
                     <LogOut className="h-4 w-4" />
                     로그아웃
                   </button>
+                  <div className="h-4 w-px bg-gray-300" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowUserMenuDialog(true)}>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -631,40 +251,48 @@ export function Header() {
                   </Link>
                 ))}
 
-                {userInfo?.nickname || naverUserInfo?.nickname ? (
-                  <div className="mt-4 px-3">
+                {status === "authenticated" ? (
+                  <>
                     <button
-                      onClick={() => setShowReservations(true)}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                      onClick={() => {
+                        setShowReservations(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <Calendar className="h-4 w-4" />
-                      예약내역 보기
+                      예약내역
                     </button>
                     <button
-                      onClick={handleLogout}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mt-3 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <LogOut className="h-4 w-4" />
                       로그아웃
                     </button>
-                  </div>
+                  </>
                 ) : (
-                  <div className="mt-4 px-3 space-y-3">
+                  <>
                     <button
-                      onClick={() => setShowNonMemberDialog(true)}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                      onClick={() => {
+                        setShowNonMemberDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <Calendar className="h-4 w-4" />
                       예약조회
                     </button>
                     <button
-                      onClick={() => setShowLoginDialog(true)}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white border border-gray-200 rounded-lg transition-all"
+                      onClick={() => {
+                        setShowLoginDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <LogIn className="h-4 w-4" />
                       로그인
                     </button>
-                  </div>
+                  </>
                 )}
               </div>
             </div>

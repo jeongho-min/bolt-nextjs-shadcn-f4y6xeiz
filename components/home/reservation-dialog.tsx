@@ -1,6 +1,6 @@
 "use client";
 
-import { useKakao } from "@/app/providers/kakao-provider";
+import { useAuth } from "@/app/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { kakaoLogin } from "@/utils/kakao";
 import { ko } from "date-fns/locale";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 interface ReservationDialogProps {
@@ -19,15 +19,15 @@ interface ReservationDialogProps {
 
 export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps) {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(user?.name || "");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [symptoms, setSymptoms] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { userInfo, updateLoginStatus } = useKakao();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -44,14 +44,40 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
     }
   };
 
+  const handleNaverLogin = async () => {
+    try {
+      const result = await signIn("naver", { redirect: false });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      if (user) {
+        setName(user.name || "");
+        setPhone(user.phone || "");
+        setStep(2);
+      }
+    } catch (error) {
+      console.error("Naver Login Failed:", error);
+      toast({
+        variant: "destructive",
+        title: "로그인 실패",
+        description: "네이버 로그인 중 오류가 발생했습니다.",
+      });
+    }
+  };
+
   const handleKakaoLogin = async () => {
     try {
-      const user = await kakaoLogin();
-      await updateLoginStatus();
-      setName(user.nickname);
-      setStep(2);
+      const result = await signIn("kakao", { redirect: false });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      if (user) {
+        setName(user.name || "");
+        setPhone(user.phone || "");
+        setStep(2);
+      }
     } catch (error) {
-      console.error("Login Failed:", error);
+      console.error("Kakao Login Failed:", error);
       toast({
         variant: "destructive",
         title: "로그인 실패",
@@ -168,6 +194,9 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
             <Button onClick={() => setStep(2)} className="h-12 text-lg">
               직접 입력하기
             </Button>
+            <Button onClick={handleNaverLogin} className="h-12 text-lg bg-[#03C75A] hover:bg-[#03C75A]/90 text-white">
+              네이버로 시작하기
+            </Button>
             <Button onClick={handleKakaoLogin} className="h-12 text-lg bg-[#FEE500] hover:bg-[#FEE500]/90 text-black">
               카카오로 시작하기
             </Button>
@@ -185,7 +214,7 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
           >
             <div className="space-y-2">
               <Label htmlFor="name">이름</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required disabled={isAuthenticated} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">연락처</Label>
@@ -301,14 +330,14 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{showConfirmation ? "예약 확인" : "진료료 예약"}</DialogTitle>
+          <DialogTitle>{showConfirmation ? "예약 확인" : "진료 예약"}</DialogTitle>
           <DialogDescription>
             {showConfirmation
               ? "예약 내용을 확인해주세요."
               : step === 1
               ? "예약 방식을 선택해주세요."
               : step === 2
-              ? userInfo
+              ? isAuthenticated
                 ? "예약을 위해 연락처를 입력해주세요."
                 : "예약자 정보를 입력해주세요."
               : step === 3

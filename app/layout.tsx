@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Script from "next/script";
-import { ClientLayout } from "./client-layout";
+import { AuthProvider } from "./providers/auth-provider";
+import ClientLayout from "./client-layout";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -27,18 +27,13 @@ export const metadata: Metadata = {
   },
 };
 
-function NaverScript() {
-  return <Script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" strategy="afterInteractive" />;
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className="!scroll-smooth">
-      <head>
-        <NaverScript />
-      </head>
       <body className="min-h-screen">
-        <ClientLayout>{children}</ClientLayout>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );

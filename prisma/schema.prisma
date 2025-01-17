@@ -1,0 +1,171 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ProviderType {
+  kakao
+  naver
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?    @map("email_verified")
+  phone         String?
+  image         String?
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  
+  accounts      Account[]
+  sessions      Session[]
+  reservations  Reservation[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  doctors     Doctor[]
+  diseases    Disease[]
+
+  @@map("Department")
+}
+
+model Disease {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  symptoms    String?
+  causes      String?
+  treatments  String?
+  imageUrl    String?    @map("image_url")
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamptz
+  department  Department @relation(fields: [departmentId], references: [id])
+  departmentId String    @map("department_id")
+
+  @@map("Disease")
+}
+
+model Doctor {
+  id           String     @id @default(uuid())
+  departmentId String     @map("department_id")
+  name         String
+  position     String?
+  specialties  String?
+  imageUrl     String?    @map("image_url")
+  biography    String?
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime   @default(now()) @map("updated_at") @db.Timestamptz
+  department   Department @relation(fields: [departmentId], references: [id])
+  schedules    Schedule[]
+
+  @@map("Doctor")
+}
+
+model Schedule {
+  id          String   @id @default(uuid())
+  doctorId    String   @map("doctor_id")
+  date        DateTime @db.Date
+  startTime   DateTime @map("start_time") @db.Time
+  endTime     DateTime @map("end_time") @db.Time
+  maxPatients Int      @map("max_patients")
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+
+  @@map("Schedule")
+}
+
+model Reservation {
+  id              String           @id @default(uuid())
+  userId          String?
+  patientName     String
+  phone           String
+  symptoms        String
+  reservationDate DateTime
+  status          ReservationStatus
+  memo            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User?            @relation(fields: [userId], references: [id])
+}
+
+model NonMemberReservation {
+  id                 String            @id @default(uuid())
+  patientName        String           @map("patient_name")
+  phone              String
+  symptoms           String?
+  reservationDate    DateTime         @map("reservation_date") @db.Timestamptz
+  status             ReservationStatus @default(pending)
+  reservationPassword String           @map("reservation_password")
+  memo               String?
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime         @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("NonMemberReservation")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+} 
