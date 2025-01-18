@@ -68,7 +68,7 @@ export function BusinessHours() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-6 left-6 md:left-auto md:right-6 z-50"
+      className="fixed bottom-6 left-6 z-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -95,7 +95,7 @@ export function BusinessHours() {
             scale: isHovered ? 1 : 0.95,
           }}
           className={`
-            absolute bottom-full right-0 mb-2
+            absolute bottom-full left-0 mb-2
             bg-white shadow-lg border border-gray-200
             p-4 rounded-lg min-w-[200px]
             ${isHovered ? "pointer-events-auto" : "pointer-events-none"}

@@ -1,77 +1,57 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { ReservationStatus } from "@prisma/client";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    const { patientName, phone, doctorId, reservationDate, timeSlot, symptoms, userId, password } = body;
+    const session = await getServerSession(authOptions);
 
-    // 필수 필드 검증
-    if (!patientName || !phone || !doctorId || !reservationDate || !timeSlot) {
-      return new NextResponse("필수 정보가 누락되었습니다 (이름, 전화번호, 의사, 예약일, 예약시간)", { status: 400 });
+    if (!session?.user) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
     }
 
-    // 의사 존재 여부 확인
+    const body = await request.json();
+    const { doctorId, departmentId, reservationDate, timeSlot, symptoms } = body;
+
+    // 필수 필드 검증
+    if (!doctorId || !departmentId || !reservationDate || !timeSlot || !symptoms) {
+      return NextResponse.json({ error: "모든 필수 정보를 입력해주세요." }, { status: 400 });
+    }
+
+    // 의사와 진료과 존재 여부 확인
     const doctor = await prisma.doctor.findUnique({
-      where: {
-        id: doctorId,
-        isActive: true,
-      },
-      include: {
-        department: true,
-      },
+      where: { id: doctorId, isActive: true },
+      include: { department: true },
     });
 
     if (!doctor) {
-      return new NextResponse("해당 의사를 찾을 수 없습니다", { status: 404 });
+      return NextResponse.json({ error: "선택하신 의사를 찾을 수 없습니다." }, { status: 404 });
     }
 
-    // 예약 시간대 중복 체크
-    const existingReservation = await prisma.reservation.findFirst({
-      where: {
-        doctorId,
-        reservationDate: new Date(reservationDate),
-        timeSlot,
-        status: {
-          in: ["pending", "confirmed"] as ReservationStatus[],
-        },
-      },
-    });
-
-    if (existingReservation) {
-      return new NextResponse("해당 시간대에 이미 예약이 존재합니다", { status: 409 });
+    if (doctor.departmentId !== departmentId) {
+      console.log("진료과 불일치:", {
+        요청된_진료과: departmentId,
+        의사의_진료과: doctor.departmentId,
+      });
+      return NextResponse.json({ error: "선택하신 진료과와 의사가 일치하지 않습니다." }, { status: 400 });
     }
 
     // 예약 생성
     const reservation = await prisma.reservation.create({
       data: {
-        patientName,
-        phone,
+        userId: session.user.id,
+        doctorId,
+        departmentId,
+        patientName: session.user.name || "",
+        phone: session.user.phone || "",
+        symptoms,
         reservationDate: new Date(reservationDate),
         timeSlot,
-        symptoms: symptoms || "",
-        status: "pending" as ReservationStatus,
-        doctor: {
-          connect: {
-            id: doctorId,
-          },
-        },
-        department: {
-          connect: {
-            id: doctor.departmentId,
-          },
-        },
-        user: userId
-          ? {
-              connect: {
-                id: userId,
-              },
-            }
-          : undefined,
+        status: ReservationStatus.pending,
       },
       include: {
-        user: true,
         doctor: {
           include: {
             department: true,
@@ -82,7 +62,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(reservation);
   } catch (error) {
-    console.error("[RESERVATION_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error("Reservation creation error:", error);
+    return NextResponse.json({ error: "예약 생성 중 오류가 발생했습니다." }, { status: 500 });
   }
 }

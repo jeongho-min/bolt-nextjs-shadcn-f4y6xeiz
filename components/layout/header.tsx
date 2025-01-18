@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/app/providers/auth-provider";
 import { useHeader } from "@/app/providers/header-provider";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +12,8 @@ import { NonMemberDialog } from "./dialogs/non-member-dialog";
 import { ReservationDialog } from "./dialogs/reservation-dialog";
 import { UserMenuDialog } from "./dialogs/user-menu-dialog";
 import { signOut, useSession } from "next-auth/react";
+import { ReservationHistoryDialog } from "./dialogs/reservation-history-dialog";
+import { NonMemberHistoryDialog } from "./dialogs/non-member-history-dialog";
 
 const navigation = [
   { name: "인사말", href: "/about" },
@@ -36,69 +37,13 @@ const navigation = [
   { name: "예약문의", href: "/contact" },
 ];
 
-// 예시 예약 데이터
-const sampleReservations = [
-  {
-    id: 1,
-    date: new Date(2024, 1, 15, 14, 30),
-    department: "이명클리닉",
-    status: "예약확정",
-    patientName: "홍길동",
-    phone: "010-1234-5678",
-    symptoms: "이명 증상이 있습니다. 특히 밤에 심해집니다.",
-  },
-  {
-    id: 2,
-    date: new Date(2024, 1, 20, 11, 0),
-    department: "어지럼증클리닉",
-    status: "대기중",
-    patientName: "김철수",
-    phone: "010-1234-5678",
-    symptoms: "어지러움이 심하고 구토 증상도 있습니다.",
-  },
-  {
-    id: 3,
-    date: new Date(2024, 1, 10, 15, 30),
-    department: "난청클리닉",
-    status: "진료완료",
-    patientName: "이영희",
-    phone: "010-9876-5432",
-    symptoms: "갑자기 한쪽 귀의 청력이 떨어졌습니다.",
-  },
-  {
-    id: 4,
-    date: new Date(2024, 1, 25, 10, 0),
-    department: "이석증클리닉",
-    status: "예약확정",
-    patientName: "박지민",
-    phone: "010-9876-5432",
-    symptoms: "누울 때마다 어지럽고 속이 좋지 않습니다.",
-  },
-  {
-    id: 5,
-    date: new Date(2024, 1, 18, 16, 30),
-    department: "메니에르클리닉",
-    status: "대기중",
-    patientName: "최수진",
-    phone: "010-5555-4444",
-    symptoms: "어지럽고 귀가 먹먹하며 이명도 있습니다.",
-  },
-  {
-    id: 6,
-    date: new Date(2024, 1, 5, 9, 30),
-    department: "두통클리닉",
-    status: "진료완료",
-    patientName: "강민수",
-    phone: "010-5555-4444",
-    symptoms: "만성 두통이 있으며 목도 아픕니다.",
-  },
-];
-
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showReservations, setShowReservations] = useState(false);
+  const [showReservationHistory, setShowReservationHistory] = useState(false);
   const [showNonMemberDialog, setShowNonMemberDialog] = useState(false);
+  const [showNonMemberHistoryDialog, setShowNonMemberHistoryDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showUserMenuDialog, setShowUserMenuDialog] = useState(false);
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
@@ -141,16 +86,11 @@ export function Header() {
     <>
       <div id="naverIdLogin" className="hidden" />
 
-      <ReservationDialog
-        open={showReservations}
-        onOpenChange={setShowReservations}
-        showNonMemberDialog={() => {
-          setShowNonMemberDialog(true);
-          setShowReservations(false);
-        }}
-        nonMemberPhone={nonMemberPhone}
-        sampleReservations={sampleReservations}
-      />
+      <ReservationDialog open={showReservations} onOpenChange={setShowReservations} />
+
+      <ReservationHistoryDialog open={showReservationHistory} onOpenChange={setShowReservationHistory} />
+
+      <NonMemberHistoryDialog open={showNonMemberHistoryDialog} onOpenChange={setShowNonMemberHistoryDialog} />
 
       <NonMemberDialog
         open={showNonMemberDialog}
@@ -188,7 +128,7 @@ export function Header() {
               {status === "authenticated" ? (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowReservations(true)}
+                    onClick={() => setShowReservationHistory(true)}
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
                   >
                     <Calendar className="h-4 w-4" />
@@ -210,7 +150,7 @@ export function Header() {
               ) : (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowNonMemberDialog(true)}
+                    onClick={() => setShowNonMemberHistoryDialog(true)}
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
                   >
                     <Calendar className="h-4 w-4" />
@@ -255,7 +195,7 @@ export function Header() {
                   <>
                     <button
                       onClick={() => {
-                        setShowReservations(true);
+                        setShowReservationHistory(true);
                         setMobileMenuOpen(false);
                       }}
                       className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
@@ -276,7 +216,7 @@ export function Header() {
                   <>
                     <button
                       onClick={() => {
-                        setShowNonMemberDialog(true);
+                        setShowNonMemberHistoryDialog(true);
                         setMobileMenuOpen(false);
                       }}
                       className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"

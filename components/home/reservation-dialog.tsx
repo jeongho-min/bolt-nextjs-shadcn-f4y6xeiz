@@ -41,7 +41,6 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   const [doctors, setDoctors] = useState<DoctorWithDepartment[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -71,7 +70,6 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
   };
 
   const fetchDoctors = async (departmentId: string) => {
-    setIsLoading(true);
     try {
       const response = await fetch(`/api/departments/${departmentId}/doctors`);
       if (!response.ok) throw new Error("의사 정보를 불러오는데 실패했습니다.");
@@ -83,8 +81,6 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
         title: "오류",
         description: "의사 정보를 불러오는데 실패했습니다.",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -168,6 +164,7 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
           patientName: name,
           phone,
           doctorId: selectedDoctorId,
+          departmentId: selectedDepartmentId,
           reservationDate: selectedDate?.toISOString(),
           timeSlot: selectedTime,
           symptoms,
@@ -180,8 +177,6 @@ export function ReservationDialog({ open, onOpenChange }: ReservationDialogProps
         const error = await response.text();
         throw new Error(error);
       }
-
-      const reservation = await response.json();
 
       toast({
         title: "예약이 완료되었습니다",
