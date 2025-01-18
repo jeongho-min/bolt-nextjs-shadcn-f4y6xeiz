@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 import { createContext, useContext } from "react";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
@@ -18,11 +18,13 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
+  signOut: async () => {},
 });
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
@@ -31,6 +33,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const value = {
     user: session?.user ?? null,
     isAuthenticated: !!session?.user,
+    signOut: () => nextAuthSignOut({ callbackUrl: "/" }),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

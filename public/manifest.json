@@ -1,7 +1,7 @@
 {
-  "name": "병원 홈페이지",
-  "short_name": "병원",
-  "description": "병원 홈페이지 PWA",
+  "name": "소리청이곡에스한방병원",
+  "short_name": "소리청이곡에스한방병원",
+  "description": "소리청이곡에스한방병원 홈페이지 PWA",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

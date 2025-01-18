@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, ArrowLeft } from "lucide-react";
 import { Doctor, Department } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { DoctorTable } from "./components/doctor-table";
+import { DoctorCards } from "./components/doctor-cards";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { PageLayout } from "../components/page-layout";
 
 type DoctorWithDepartment = Doctor & {
   department: Department;
@@ -16,12 +15,18 @@ type DoctorWithDepartment = Doctor & {
 
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<DoctorWithDepartment[]>([]);
+  const [viewType, setViewType] = useState<"table" | "grid">("table");
   const router = useRouter();
   const { toast } = useToast();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
     fetchDoctors();
   }, []);
+
+  useEffect(() => {
+    setViewType(isDesktop ? "table" : "grid");
+  }, [isDesktop]);
 
   const fetchDoctors = async () => {
     try {
@@ -63,76 +68,48 @@ export default function DoctorsPage() {
     }
   };
 
-  const tableHeaders = [
-    { label: "이름", width: "w-[150px]" },
-    { label: "소속과", width: "w-[150px]" },
-    { label: "직책", width: "w-[120px]" },
-    { label: "전문분야", width: "w-[200px]" },
-    { label: "상태", width: "w-[100px]" },
-    { label: "관리", width: "w-[100px]", align: "text-right" },
-  ];
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/doctors/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.status === 204) {
+        fetchDoctors();
+        toast({
+          title: "의사 삭제 성공",
+          description: "의사가 성공적으로 삭제되었습니다.",
+        });
+      } else {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      toast({
+        title: "의사 삭제 실패",
+        description: error instanceof Error ? error.message : "의사 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.push("/admin")} className="h-10 w-10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">의사 관리</h1>
-        </div>
-        <Button size="lg" onClick={() => router.push("/admin/doctors/new")}>
-          <Plus className="mr-2 h-5 w-5" />새 의사 추가
-        </Button>
-      </div>
-
-      <div className="rounded-lg border shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              {tableHeaders.map((header, index) => (
-                <TableHead key={index} className={cn(header.width, "py-5 px-6", header.align, "font-semibold")}>
-                  {header.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {doctors.map((doctor) => (
-              <TableRow key={doctor.id} className="hover:bg-muted/50">
-                <TableCell className="py-5 px-6">
-                  <div className="flex items-center gap-3">
-                    {doctor.imageUrl && (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                        <Image src={doctor.imageUrl} alt={doctor.name} fill className="object-cover" />
-                      </div>
-                    )}
-                    <span className="font-medium">{doctor.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="py-5 px-6 text-muted-foreground">{doctor.department.name}</TableCell>
-                <TableCell className="py-5 px-6 text-muted-foreground">{doctor.position || "-"}</TableCell>
-                <TableCell className="py-5 px-6 text-muted-foreground">{doctor.specialties || "-"}</TableCell>
-                <TableCell className="py-5 px-6">
-                  <Button
-                    size="sm"
-                    variant={doctor.isActive ? "default" : "secondary"}
-                    onClick={() => handleStatusToggle(doctor.id, doctor.isActive)}
-                    className="w-20"
-                  >
-                    {doctor.isActive ? "활성" : "비활성"}
-                  </Button>
-                </TableCell>
-                <TableCell className="py-5 px-6 text-right">
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/admin/doctors/${doctor.id}`)}>
-                    수정
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    <PageLayout
+      title="의사 관리"
+      onBack={() => router.push("/admin")}
+      onCreate={() => router.push("/admin/doctors/new")}
+      createButtonLabel="새 의사 추가"
+      viewOptions={{
+        isDesktop,
+        viewType,
+        onViewChange: setViewType,
+      }}
+    >
+      {viewType === "table" && isDesktop ? (
+        <DoctorTable doctors={doctors} onStatusToggle={handleStatusToggle} onEdit={(id) => router.push(`/admin/doctors/${id}`)} onDelete={handleDelete} />
+      ) : (
+        <DoctorCards doctors={doctors} onStatusToggle={handleStatusToggle} onEdit={(id) => router.push(`/admin/doctors/${id}`)} onDelete={handleDelete} />
+      )}
+    </PageLayout>
   );
 }

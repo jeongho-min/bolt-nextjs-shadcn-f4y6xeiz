@@ -13,7 +13,6 @@ import { ReservationDialog } from "./dialogs/reservation-dialog";
 import { UserMenuDialog } from "./dialogs/user-menu-dialog";
 import { signOut, useSession } from "next-auth/react";
 import { ReservationHistoryDialog } from "./dialogs/reservation-history-dialog";
-import { NonMemberHistoryDialog } from "./dialogs/non-member-history-dialog";
 
 const navigation = [
   { name: "인사말", href: "/about" },
@@ -43,7 +42,6 @@ export function Header() {
   const [showReservations, setShowReservations] = useState(false);
   const [showReservationHistory, setShowReservationHistory] = useState(false);
   const [showNonMemberDialog, setShowNonMemberDialog] = useState(false);
-  const [showNonMemberHistoryDialog, setShowNonMemberHistoryDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showUserMenuDialog, setShowUserMenuDialog] = useState(false);
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
@@ -89,8 +87,6 @@ export function Header() {
       <ReservationDialog open={showReservations} onOpenChange={setShowReservations} />
 
       <ReservationHistoryDialog open={showReservationHistory} onOpenChange={setShowReservationHistory} />
-
-      <NonMemberHistoryDialog open={showNonMemberHistoryDialog} onOpenChange={setShowNonMemberHistoryDialog} />
 
       <NonMemberDialog
         open={showNonMemberDialog}
@@ -150,7 +146,7 @@ export function Header() {
               ) : (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowNonMemberHistoryDialog(true)}
+                    onClick={() => setShowNonMemberDialog(true)}
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-500 transition-colors"
                   >
                     <Calendar className="h-4 w-4" />
@@ -216,7 +212,7 @@ export function Header() {
                   <>
                     <button
                       onClick={() => {
-                        setShowNonMemberHistoryDialog(true);
+                        setShowNonMemberDialog(true);
                         setMobileMenuOpen(false);
                       }}
                       className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"

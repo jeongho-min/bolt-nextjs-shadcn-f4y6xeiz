@@ -5,6 +5,18 @@ import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, User2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EditProfileDialog } from "./edit-profile-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/providers/auth-provider";
 
 interface UserMenuDialogProps {
   open: boolean;
@@ -13,7 +25,10 @@ interface UserMenuDialogProps {
 
 export function UserMenuDialog({ open, onOpenChange }: UserMenuDialogProps) {
   const { toast } = useToast();
+  const router = useRouter();
+  const { signOut } = useAuth();
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -33,18 +48,54 @@ export function UserMenuDialog({ open, onOpenChange }: UserMenuDialogProps) {
     setShowEditProfile(true);
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: 회원탈퇴 기능 구현
-    toast({
-      title: "준비 중",
-      description: "회원탈퇴 기능은 현재 개발 중입니다.",
-    });
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("회원탈퇴 처리 중 오류가 발생했습니다.");
+      }
+
+      toast({
+        title: "회원탈퇴 완료",
+        description: "회원탈퇴가 성공적으로 처리되었습니다.",
+      });
+
+      await signOut();
+      router.push("/");
+    } catch (error) {
+      toast({
+        title: "회원탈퇴 실패",
+        description: error instanceof Error ? error.message : "회원탈퇴 처리 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+    setShowDeleteConfirm(false);
     onOpenChange(false);
   };
 
   return (
     <>
       <EditProfileDialog open={showEditProfile} onOpenChange={setShowEditProfile} />
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>회원탈퇴</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말로 회원탈퇴를 진행하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 영구적으로 삭제됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              회원탈퇴
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px] p-0 gap-0">
@@ -70,7 +121,10 @@ export function UserMenuDialog({ open, onOpenChange }: UserMenuDialogProps) {
                 </div>
               </button>
               <button
-                onClick={handleDeleteAccount}
+                onClick={() => {
+                  onOpenChange(false);
+                  setShowDeleteConfirm(true);
+                }}
                 className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all group"
               >
                 <div className="p-2 rounded-full bg-red-100 group-hover:bg-red-200 transition-colors">

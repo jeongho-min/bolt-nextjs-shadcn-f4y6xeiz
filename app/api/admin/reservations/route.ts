@@ -16,21 +16,54 @@ export async function GET() {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const reservations = await prisma.reservation.findMany({
-      include: {
-        user: true,
-        doctor: {
-          include: {
-            department: true,
+    // 회원과 비회원 예약을 모두 조회
+    const [memberReservations, nonMemberReservations] = await Promise.all([
+      // 회원 예약
+      prisma.reservation.findMany({
+        where: {
+          userId: { not: null },
+        },
+        include: {
+          user: true,
+          doctor: {
+            include: {
+              department: true,
+            },
           },
         },
-      },
-      orderBy: {
-        reservationDate: "desc",
-      },
-    });
+        orderBy: {
+          reservationDate: "desc",
+        },
+      }),
+      // 비회원 예약
+      prisma.nonMemberReservation.findMany({
+        include: {
+          doctor: {
+            include: {
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          reservationDate: "desc",
+        },
+      }),
+    ]);
 
-    return NextResponse.json(reservations);
+    // 비회원 예약 데이터를 회원 예약 형식에 맞게 변환
+    const formattedNonMemberReservations = nonMemberReservations.map((reservation) => ({
+      ...reservation,
+      user: null,
+      userId: null,
+      isNonMember: true,
+    }));
+
+    // 모든 예약을 날짜순으로 정렬
+    const allReservations = [...memberReservations, ...formattedNonMemberReservations].sort(
+      (a, b) => new Date(b.reservationDate).getTime() - new Date(a.reservationDate).getTime()
+    );
+
+    return NextResponse.json(allReservations);
   } catch (error) {
     console.error("[RESERVATIONS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });

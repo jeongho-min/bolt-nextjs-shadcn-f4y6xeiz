@@ -1,6 +1,13 @@
-import { MapPin, Phone, Clock, Building2 } from "lucide-react";
+"use client";
+
+import { Building2, MapPin, Phone } from "lucide-react";
+import { useFooter } from "@/app/providers/footer-provider";
 
 export function Footer() {
+  const { isFooterVisible } = useFooter();
+
+  if (!isFooterVisible) return null;
+
   return (
     <footer className="bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

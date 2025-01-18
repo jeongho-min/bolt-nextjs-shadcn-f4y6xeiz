@@ -1,22 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, ArrowLeft } from "lucide-react";
 import { Department } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { DepartmentTable } from "./components/department-table";
+import { DepartmentCards } from "./components/department-cards";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { PageLayout } from "../components/page-layout";
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [viewType, setViewType] = useState<"table" | "grid">("table");
   const router = useRouter();
   const { toast } = useToast();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    setViewType(isDesktop ? "table" : "grid");
+  }, [isDesktop]);
 
   const fetchDepartments = async () => {
     try {
@@ -58,65 +64,58 @@ export default function DepartmentsPage() {
     }
   };
 
-  const tableHeaders = [
-    { label: "부서명", width: "w-[200px]" },
-    { label: "설명", width: "w-[300px]" },
-    { label: "상태", width: "w-[120px]" },
-    { label: "생성일", width: "w-[150px]" },
-    { label: "관리", width: "w-[100px]", align: "text-right" },
-  ];
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/departments/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.status === 204) {
+        fetchDepartments();
+        toast({
+          title: "부서 삭제 성공",
+          description: "부서가 성공적으로 삭제되었습니다.",
+        });
+      } else {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      toast({
+        title: "부서 삭제 실패",
+        description: error instanceof Error ? error.message : "부서 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.push("/admin")} className="h-10 w-10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">부서 관리</h1>
-        </div>
-        <Button size="lg" onClick={() => router.push("/admin/departments/new")}>
-          <Plus className="mr-2 h-5 w-5" />새 부서 추가
-        </Button>
-      </div>
-
-      <div className="rounded-lg border shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              {tableHeaders.map((header, index) => (
-                <TableHead key={index} className={cn(header.width, "py-5 px-6", header.align, "font-semibold")}>
-                  {header.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {departments.map((department) => (
-              <TableRow key={department.id} className="hover:bg-muted/50">
-                <TableCell className="py-5 px-6 font-medium">{department.name}</TableCell>
-                <TableCell className="py-5 px-6 text-muted-foreground">{department.description || "-"}</TableCell>
-                <TableCell className="py-5 px-6">
-                  <Button
-                    size="sm"
-                    variant={department.isActive ? "default" : "secondary"}
-                    onClick={() => handleStatusToggle(department.id, department.isActive)}
-                    className="w-20"
-                  >
-                    {department.isActive ? "활성" : "비활성"}
-                  </Button>
-                </TableCell>
-                <TableCell className="py-5 px-6 text-muted-foreground">{new Date(department.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell className="py-5 px-6 text-right">
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/admin/departments/${department.id}`)}>
-                    수정
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    <PageLayout
+      title="부서 관리"
+      onBack={() => router.push("/admin")}
+      onCreate={() => router.push("/admin/departments/new")}
+      createButtonLabel="새 부서 추가"
+      viewOptions={{
+        isDesktop,
+        viewType,
+        onViewChange: setViewType,
+      }}
+    >
+      {viewType === "table" && isDesktop ? (
+        <DepartmentTable
+          departments={departments}
+          onStatusToggle={handleStatusToggle}
+          onEdit={(id) => router.push(`/admin/departments/${id}`)}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <DepartmentCards
+          departments={departments}
+          onStatusToggle={handleStatusToggle}
+          onEdit={(id) => router.push(`/admin/departments/${id}`)}
+          onDelete={handleDelete}
+        />
+      )}
+    </PageLayout>
   );
 }

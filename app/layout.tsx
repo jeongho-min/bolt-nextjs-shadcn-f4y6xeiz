@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="!scroll-smooth">
+    <html lang="ko" className="!scroll-smooth overflow-x-hidden">
       <body className="min-h-screen">
         <AuthProvider>
           <ClientLayout>{children}</ClientLayout>

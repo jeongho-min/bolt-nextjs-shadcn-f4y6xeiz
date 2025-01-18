@@ -37,20 +37,23 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
 
     const body = await request.json();
-    const { role } = body;
+    const { role, name, phone } = body;
 
     // 자기 자신의 권한은 변경할 수 없음
-    if (session.user.id === params.id) {
+    if (role && session.user.id === params.id) {
       return new NextResponse("자신의 권한은 변경할 수 없습니다.", { status: 400 });
     }
+
+    const updateData: any = {};
+    if (role) updateData.role = role;
+    if (name) updateData.name = name;
+    if (phone) updateData.phone = phone;
 
     const user = await prisma.user.update({
       where: {
         id: params.id,
       },
-      data: {
-        role,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(user);
