@@ -142,13 +142,6 @@ export function DoctorsSection() {
             </motion.div>
           ))}
         </div>
-
-        <div className="text-center mt-10">
-          <Link href="/about" className="group inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors text-sm">
-            자세히 보기
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
       </div>
     </section>
   );

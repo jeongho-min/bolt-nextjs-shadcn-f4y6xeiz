@@ -13,23 +13,18 @@ export function SuddenHearingLossPanel({ disease, onClose }: SuddenHearingLossPa
   return (
     <PanelLayout title={disease.title} titleEn="SUDDEN DEAFNESS" onClose={onClose}>
       {/* 기본 정보 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-3xl font-bold mb-6">돌발성난청이란?</h3>
-            <p className="text-xl font-medium text-primary mb-4">뚜렷한 원인 없이 귀가 잘 들리지 않게 되는 감각신경성 난청</p>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              돌발성 난청은 뚜렷한 원인 없이 귀가 잘 들리지 않게 되는 감각신경성 난청입니다. 대부분 한쪽 귀에 발생하고 30~50대에 가장 많이 발생하며, 해마다
-              10만명 이상 발병하는 것으로 보고되고 있습니다.
-            </p>
-            <p className="text-gray-600 text-lg leading-relaxed mt-4">
-              돌발성 난청은 안타깝게도 치료 시기를 놓치면 영원히 회복되지 않는 난청이 될 수도 있기 때문에 여러 가지 귀 질환 중 응급질환 중 하나입니다.
-            </p>
-          </div>
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-3xl font-bold mb-6">돌발성난청이란?</h3>
+          <p className="text-xl font-medium text-primary mb-4">뚜렷한 원인 없이 귀가 잘 들리지 않게 되는 감각신경성 난청</p>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            돌발성 난청은 뚜렷한 원인 없이 귀가 잘 들리지 않게 되는 감각신경성 난청입니다. 대부분 한쪽 귀에 발생하고 30~50대에 가장 많이 발생하며, 해마다 10만명
+            이상 발병하는 것으로 보고되고 있습니다.
+          </p>
+          <p className="text-gray-600 text-lg leading-relaxed mt-4">
+            돌발성 난청은 안타깝게도 치료 시기를 놓치면 영원히 회복되지 않는 난청이 될 수도 있기 때문에 여러 가지 귀 질환 중 응급질환 중 하나입니다.
+          </p>
         </div>
-        {/* <div className="relative h-[400px] rounded-xl overflow-hidden bg-gray-50">
-          <Image src="/diseases/돌발성난청/main.png" alt="돌발성난청의 특징" fill className="object-contain" priority />
-        </div> */}
       </div>
 
       {/* 주요 증상 */}
