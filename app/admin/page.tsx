@@ -20,12 +20,12 @@ export default function AdminPage() {
       icon: Stethoscope,
       href: "/admin/doctors",
     },
-    {
-      title: "질병 관리",
-      description: "질병 정보를 등록하고 관리합니다.",
-      icon: ClipboardList,
-      href: "/admin/diseases",
-    },
+    // {
+    //   title: "질병 관리",
+    //   description: "질병 정보를 등록하고 관리합니다.",
+    //   icon: ClipboardList,
+    //   href: "/admin/diseases",
+    // },
     {
       title: "예약 관리",
       description: "환자 예약 현황을 확인하고 관리합니다.",
