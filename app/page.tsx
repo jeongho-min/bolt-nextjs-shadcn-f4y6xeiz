@@ -19,7 +19,6 @@ export default function HomePage() {
       const errorMessages: { [key: string]: string } = {
         Signin: "로그인에 실패했습니다.",
         OAuthSignin: "소셜 로그인 연동에 실패했습니다.",
-        OAuthCallback: "소셜 로그인 인증에 실패했습니다.",
         OAuthCreateAccount: "계정 생성에 실패했습니다.",
         EmailCreateAccount: "이메일 계정 생성에 실패했습니다.",
         Callback: "인증 콜백 처리에 실패했습니다.",
@@ -35,7 +34,7 @@ export default function HomePage() {
   }, [searchParams, toast]);
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen ">
       <HeroSection />
       <CertificationSection />
       <HistorySection />
