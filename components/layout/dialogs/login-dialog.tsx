@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react";
+import { useHandleOAuthError } from "@/lib/utils/handle-oauth-error";
 
 interface LoginDialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface LoginDialogProps {
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { toast } = useToast();
+  useHandleOAuthError();
 
   const handleKakaoLogin = async () => {
     try {

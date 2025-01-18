@@ -10,6 +10,7 @@ import { ko } from "date-fns/locale";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { useHandleOAuthError } from "@/lib/utils/handle-oauth-error";
 
 interface ReservationDialogProps {
   open: boolean;
@@ -44,6 +45,7 @@ function ReservationActions({ onEdit, onCancel }: { onEdit: () => void; onCancel
 export function ReservationDialog({ open, onOpenChange, showNonMemberDialog, nonMemberPhone, sampleReservations }: ReservationDialogProps) {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
+  useHandleOAuthError();
 
   const handleKakaoLogin = async () => {
     try {
@@ -58,7 +60,10 @@ export function ReservationDialog({ open, onOpenChange, showNonMemberDialog, non
     }
   };
 
-  const handleNaverLogin = async () => {
+  const handleNaverLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenChange(false);
     try {
       await signIn("naver", { callbackUrl: "/" });
     } catch (error) {
