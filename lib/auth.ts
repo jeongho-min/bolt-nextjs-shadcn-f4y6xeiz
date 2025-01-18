@@ -88,14 +88,16 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/",
     error: "/",
+    signOut: "/",
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      try {
-        if (!user.email || !account) {
-          return false;
-        }
+      if (!user.email || !account) {
+        console.error("SignIn Error: Missing email or account");
+        return "/";
+      }
 
+      try {
         let dbUser = await prisma.user.findUnique({
           where: { email: user.email },
           include: { accounts: true },
@@ -149,7 +151,7 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("SignIn Error:", error);
-        return false;
+        return "/";
       }
     },
     async jwt({ token, user, account }) {
@@ -193,6 +195,11 @@ export const authOptions: NextAuthOptions = {
         path: "/",
         secure: process.env.NODE_ENV === "production",
       },
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      console.log("User signed in:", user);
     },
   },
 };
