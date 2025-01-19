@@ -1,10 +1,16 @@
-import { BackButton, CreateButton, ViewToggleButtons } from "./buttons";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, LayoutGrid, Table } from "lucide-react";
+
+interface ActionButton {
+  label: string;
+  onClick: () => void;
+  variant?: "default" | "outline";
+}
 
 interface PageHeaderProps {
   title: string;
   onBack: () => void;
-  onCreate?: () => void;
-  createButtonLabel?: string;
+  actions?: ActionButton[];
   viewOptions?: {
     isDesktop: boolean;
     viewType: "table" | "grid";
@@ -12,20 +18,43 @@ interface PageHeaderProps {
   };
 }
 
-export function PageHeader({ title, onBack, onCreate, createButtonLabel, viewOptions }: PageHeaderProps) {
+export function PageHeader({ title, onBack, actions, viewOptions }: PageHeaderProps) {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <BackButton onClick={onBack} />
-        <h1 className="text-2xl font-bold">{title}</h1>
+        <Button variant="ghost" size="icon" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <h1 className="text-2xl font-semibold">{title}</h1>
       </div>
       <div className="flex items-center gap-2">
         {viewOptions?.isDesktop && (
-          <div className="mr-2">
-            <ViewToggleButtons viewType={viewOptions.viewType} onViewChange={viewOptions.onViewChange} />
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewOptions.viewType === "table" ? "secondary" : "ghost"}
+              size="icon"
+              className="rounded-none"
+              onClick={() => viewOptions.onViewChange("table")}
+              title="테이블 보기"
+            >
+              <Table className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewOptions.viewType === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              className="rounded-none"
+              onClick={() => viewOptions.onViewChange("grid")}
+              title="카드 보기"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
           </div>
         )}
-        {onCreate && createButtonLabel && <CreateButton onClick={onCreate} label={createButtonLabel} />}
+        {actions?.map((action, index) => (
+          <Button key={index} onClick={action.onClick} variant={action.variant}>
+            {action.label}
+          </Button>
+        ))}
       </div>
     </div>
   );

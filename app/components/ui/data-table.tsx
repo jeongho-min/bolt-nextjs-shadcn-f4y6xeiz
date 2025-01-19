@@ -13,7 +13,7 @@ export interface Column<T> {
   className?: string;
 }
 
-interface DataTableProps<T> {
+export interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   onRowClick?: (item: T) => void;

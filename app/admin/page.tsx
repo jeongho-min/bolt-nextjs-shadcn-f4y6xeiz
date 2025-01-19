@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Building2, Users, Stethoscope, Calendar, ClipboardList } from "lucide-react";
+import { Building2, Users, Stethoscope, Calendar, ClipboardList, Receipt } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -37,6 +37,12 @@ export default function AdminPage() {
       description: "회원 정보를 확인하고 관리합니다.",
       icon: Users,
       href: "/admin/users",
+    },
+    {
+      title: "가격표 관리",
+      description: "진료 및 처방 가격을 관리합니다",
+      icon: Receipt,
+      href: "/admin/prices",
     },
   ];
 

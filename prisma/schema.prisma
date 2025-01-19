@@ -28,6 +28,12 @@ enum UserRole {
   USER
 }
 
+enum SubjectType {
+  KOREAN    // 한방
+  WESTERN   // 양방
+}
+
+
 model User {
   id            String        @id @default(cuid())
   name          String?
@@ -207,11 +213,6 @@ model MedicalSubject {
   @@index([departmentId])
 }
 
-enum SubjectType {
-  KOREAN    // 한방
-  WESTERN   // 양방
-}
-
 model HospitalInfo {
   id              String   @id @default(cuid())
   name            String   // 병원명
@@ -252,4 +253,45 @@ model DoctorSubject {
 
   @@unique([doctorId, subjectId])
   @@map("doctor_subjects")
-} 
+}
+
+// 가격표 카테고리 테이블
+model PriceCategory {
+  id          String    @id @default(cuid())
+  name        String    // 카테고리명 (예: 한약/처방, 치료/처치, 제증명)
+  order       Int       // 정렬 순서
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // 계층 구조를 위한 필드 추가
+  parentId    String?   // 상위 카테고리 ID
+  parent      PriceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    PriceCategory[] @relation("CategoryHierarchy")
+  level       Int       @default(0)  // 계층 레벨 (0: 최상위, 1: 2단계, 2: 3단계)
+  
+  items       PriceItem[]
+
+  @@map("price_categories")
+}
+
+// 가격표 항목 테이블
+model PriceItem {
+  id            String    @id @default(cuid())
+  categoryId    String    // 카테고리 ID
+  name          String    // 항목명 (예: 일반 탕약, 공진단, 도수치료 등)
+  description   String?   // 설명
+  specification String?   // 규격/용량 (예: 15일분, 30환 등)
+  priceType     String    // 가격 유형 (FIXED: 고정가격, RANGE: 가격범위, TEXT: 텍스트)
+  priceMin      Int?      // 최소 가격 (원 단위)
+  priceMax      Int?      // 최대 가격 (원 단위)
+  priceText     String?   // 텍스트형 가격 (예: "본인부담 30%", "상담 후 결정" 등)
+  order         Int       // 정렬 순서
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  category      PriceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("price_items")
+}
+

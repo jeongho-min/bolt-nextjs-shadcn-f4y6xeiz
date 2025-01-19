@@ -101,8 +101,12 @@ export default function DoctorsPage() {
     <PageLayout
       title="의사 관리"
       onBack={() => router.push("/admin")}
-      onCreate={() => router.push("/admin/doctors/new")}
-      createButtonLabel="새 의사 추가"
+      actions={[
+        {
+          label: "새 의사 추가",
+          onClick: () => router.push("/admin/doctors/new"),
+        },
+      ]}
       viewOptions={{
         isDesktop,
         viewType,

@@ -193,79 +193,45 @@ export function Header() {
 
                 {status === "authenticated" ? (
                   <>
-                    <div className="my-2 border-t border-gray-200" />
-                    <div className="px-3 py-2">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">예약</div>
-                      <button
-                        onClick={() => {
-                          setShowReservationHistory(true);
-                          setMobileMenuOpen(false);
-                        }}
-                        className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                      >
-                        예약내역
-                      </button>
-                    </div>
-
-                    <div className="px-3 py-2">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">계정 관리</div>
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            setShowUserMenuDialog(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                        >
-                          정보수정
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowUserMenuDialog(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block w-full px-3 py-2 text-left text-base font-medium text-red-600 hover:bg-red-50 rounded-lg"
-                        >
-                          회원탈퇴
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                        >
-                          로그아웃
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setShowReservationHistory(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      예약내역
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      로그아웃
+                    </button>
                   </>
                 ) : (
                   <>
-                    <div className="my-2 border-t border-gray-200" />
-                    <div className="px-3 py-2">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">비회원</div>
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            setShowNonMemberHistoryDialog(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                        >
-                          예약조회
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowLoginDialog(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                        >
-                          로그인
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setShowNonMemberHistoryDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      예약조회
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowLoginDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      로그인
+                    </button>
                   </>
                 )}
               </div>

@@ -122,8 +122,12 @@ export default function DepartmentsPage() {
       <PageLayout
         title="부서 관리"
         onBack={() => router.push("/admin")}
-        onCreate={() => router.push("/admin/departments/new")}
-        createButtonLabel="부서 등록"
+        actions={[
+          {
+            label: "부서 등록",
+            onClick: () => router.push("/admin/departments/new"),
+          },
+        ]}
         viewOptions={{
           isDesktop,
           viewType,
