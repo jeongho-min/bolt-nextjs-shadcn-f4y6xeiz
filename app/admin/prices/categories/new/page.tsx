@@ -15,6 +15,8 @@ interface PriceCategory {
   name: string;
   level: number;
   children: PriceCategory[];
+  parentId: string | null;
+  order: number;
 }
 
 export default function NewPriceCategoryPage() {
@@ -32,12 +34,54 @@ export default function NewPriceCategoryPage() {
     fetchCategories();
   }, []);
 
+  const buildHierarchy = (categories: PriceCategory[]) => {
+    const categoryMap = new Map();
+    const rootCategories: PriceCategory[] = [];
+
+    // 먼저 모든 카테고리를 맵에 저장
+    categories.forEach((category) => {
+      categoryMap.set(category.id, {
+        ...category,
+        children: [],
+        level: 0,
+      });
+    });
+
+    // 부모-자식 관계 설정
+    categories.forEach((category) => {
+      const node = categoryMap.get(category.id);
+      if (category.parentId) {
+        const parent = categoryMap.get(category.parentId);
+        if (parent) {
+          node.level = parent.level + 1;
+          parent.children.push(node);
+        }
+      } else {
+        rootCategories.push(node);
+      }
+    });
+
+    // 정렬
+    const sortCategories = (cats: PriceCategory[]) => {
+      cats.sort((a, b) => a.order - b.order);
+      cats.forEach((cat) => {
+        if (cat.children.length > 0) {
+          sortCategories(cat.children);
+        }
+      });
+      return cats;
+    };
+
+    return sortCategories(rootCategories);
+  };
+
   const fetchCategories = async () => {
     try {
       const response = await fetch("/api/admin/prices/categories");
       if (!response.ok) throw new Error("카테고리 목록을 불러오는데 실패했습니다.");
       const data = await response.json();
-      setCategories(data);
+      const hierarchicalCategories = buildHierarchy(data);
+      setCategories(hierarchicalCategories);
     } catch (error) {
       toast({
         title: "오류",
@@ -45,6 +89,17 @@ export default function NewPriceCategoryPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const renderCategoryOptions = (categories: PriceCategory[], level = 0): JSX.Element[] => {
+    return categories.flatMap((category) => [
+      <SelectItem key={category.id} value={category.id}>
+        {"\u00A0".repeat(level * 4)}
+        {level > 0 ? "└ " : ""}
+        {category.name}
+      </SelectItem>,
+      ...renderCategoryOptions(category.children || [], level + 1),
+    ]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +143,7 @@ export default function NewPriceCategoryPage() {
   };
 
   return (
-    <PageLayout title="새 카테고리 추가" onBack={() => router.push("/admin/prices")}>
+    <PageLayout title="새 카테고리 추가" backUrl="/admin/prices">
       <div className="max-w-3xl mx-auto">
         <Card className="border-0 shadow-none">
           <CardHeader className="px-0">
@@ -104,11 +159,7 @@ export default function NewPriceCategoryPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="root">없음 (최상위 카테고리)</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
+                    {renderCategoryOptions(categories)}
                   </SelectContent>
                 </Select>
               </div>

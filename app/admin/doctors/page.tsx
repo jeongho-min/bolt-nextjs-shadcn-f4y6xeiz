@@ -100,7 +100,7 @@ export default function DoctorsPage() {
   return (
     <PageLayout
       title="의사 관리"
-      onBack={() => router.push("/admin")}
+      backUrl="/admin"
       actions={[
         {
           label: "새 의사 추가",

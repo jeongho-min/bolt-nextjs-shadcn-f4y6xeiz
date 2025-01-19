@@ -230,7 +230,7 @@ export default function ReservationsPage() {
   return (
     <PageLayout
       title="예약 관리"
-      onBack={() => router.push("/admin")}
+      backUrl="/admin"
       headerContent={<HeaderContent />}
       viewOptions={{
         isDesktop,

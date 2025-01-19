@@ -100,3 +100,47 @@ export async function PATCH(request: Request, { params }: Props) {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    // 1. 먼저 하위 카테고리들을 재귀적으로 찾아서 삭제
+    const deleteSubCategories = async (categoryId: string) => {
+      const subCategories = await prisma.priceCategory.findMany({
+        where: { parentId: categoryId },
+      });
+
+      for (const subCategory of subCategories) {
+        // 재귀적으로 하위 카테고리의 하위 카테고리들을 삭제
+        await deleteSubCategories(subCategory.id);
+
+        // 해당 카테고리의 가격표 항목들을 삭제
+        await prisma.priceItem.deleteMany({
+          where: { categoryId: subCategory.id },
+        });
+
+        // 카테고리 자체를 삭제
+        await prisma.priceCategory.delete({
+          where: { id: subCategory.id },
+        });
+      }
+    };
+
+    // 2. 삭제하려는 카테고리의 하위 카테고리들을 먼저 삭제
+    await deleteSubCategories(params.id);
+
+    // 3. 삭제하려는 카테고리의 가격표 항목들을 삭제
+    await prisma.priceItem.deleteMany({
+      where: { categoryId: params.id },
+    });
+
+    // 4. 마지막으로 카테고리 자체를 삭제
+    await prisma.priceCategory.delete({
+      where: { id: params.id },
+    });
+
+    return new NextResponse(null, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return new NextResponse("카테고리 삭제 중 오류가 발생했습니다.", { status: 500 });
+  }
+}

@@ -9,7 +9,7 @@ export default function NewPricePage() {
   const router = useRouter();
 
   return (
-    <PageLayout title="새 가격표 항목 추가" onBack={() => router.push("/admin/prices")}>
+    <PageLayout title="새 가격표 항목 추가" backUrl="/admin/prices">
       <div className="max-w-3xl mx-auto">
         <Card className="border-0 shadow-none">
           <CardHeader className="px-0">

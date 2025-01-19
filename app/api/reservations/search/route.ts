@@ -33,10 +33,6 @@ export async function GET(request: Request) {
         ],
       });
 
-      if (reservations.length === 0) {
-        return NextResponse.json({ error: "예약 내역이 없습니다." }, { status: 404 });
-      }
-
       return NextResponse.json(reservations);
     }
 
@@ -63,10 +59,6 @@ export async function GET(request: Request) {
         reservationDate: "desc",
       },
     });
-
-    if (nonMemberReservations.length === 0) {
-      return NextResponse.json({ error: "예약 내역을 찾을 수 없습니다." }, { status: 404 });
-    }
 
     return NextResponse.json(nonMemberReservations);
   } catch (error) {

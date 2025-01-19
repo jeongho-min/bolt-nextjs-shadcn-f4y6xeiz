@@ -121,7 +121,7 @@ export default function DepartmentsPage() {
     <SubjectProvider>
       <PageLayout
         title="부서 관리"
-        onBack={() => router.push("/admin")}
+        backUrl="/admin"
         actions={[
           {
             label: "부서 등록",

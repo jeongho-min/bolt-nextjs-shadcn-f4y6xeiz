@@ -19,49 +19,57 @@ import {
 interface PriceItem {
   id: string;
   name: string;
-  description?: string | null;
-  specification?: string | null;
-  priceType: string;
-  priceMin?: number | null;
-  priceMax?: number | null;
-  priceText?: string | null;
+  description: string | null;
+  specification: string | null;
+  priceType: "FIXED" | "RANGE" | "TEXT";
+  priceMin: number | null;
+  priceMax: number | null;
+  priceText: string | null;
+  order: number;
+  categoryId: string;
   category: {
+    id: string;
     name: string;
   };
 }
 
 interface PriceTableProps {
-  items: PriceItem[];
+  data: PriceItem[];
   onDelete: (id: string) => Promise<void>;
 }
 
-export function PriceTable({ items, onDelete }: PriceTableProps) {
+export function PriceTable({ data = [], onDelete }: PriceTableProps) {
   const router = useRouter();
 
   const formatPrice = (item: PriceItem) => {
-    if (item.priceType === "TEXT") return item.priceText;
-    if (item.priceType === "RANGE" && item.priceMin && item.priceMax) {
-      return `${item.priceMin.toLocaleString()}원~${item.priceMax.toLocaleString()}원`;
+    if (!item.priceType) return "-";
+
+    switch (item.priceType) {
+      case "TEXT":
+        return item.priceText || "-";
+      case "RANGE":
+        if (item.priceMin && item.priceMax) {
+          return `${item.priceMin.toLocaleString()}원~${item.priceMax.toLocaleString()}원`;
+        }
+        return "-";
+      case "FIXED":
+        return item.priceMin ? `${item.priceMin.toLocaleString()}원` : "-";
+      default:
+        return "-";
     }
-    if (item.priceType === "FIXED" && item.priceMin) {
-      return `${item.priceMin.toLocaleString()}원`;
-    }
-    return "-";
   };
 
   const columns: Column<PriceItem>[] = [
     {
       header: "카테고리",
-      accessorKey: "category",
-      cell: (item: PriceItem) => item.category.name,
+      cell: (item: PriceItem) => item.category?.name || "-",
     },
     {
       header: "항목명",
-      accessorKey: "name",
+      cell: (item: PriceItem) => item.name,
     },
     {
       header: "규격",
-      accessorKey: "specification",
       cell: (item: PriceItem) => item.specification || "-",
     },
     {
@@ -98,5 +106,7 @@ export function PriceTable({ items, onDelete }: PriceTableProps) {
     },
   ];
 
-  return <DataTable data={items} columns={columns} pageSize={20} />;
+  if (!data) return null;
+
+  return <DataTable data={data} columns={columns} pageSize={20} />;
 }

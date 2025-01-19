@@ -9,7 +9,7 @@ interface ActionButton {
 
 interface PageHeaderProps {
   title: string;
-  onBack: () => void;
+  onBack?: () => void;
   actions?: ActionButton[];
   viewOptions?: {
     isDesktop: boolean;

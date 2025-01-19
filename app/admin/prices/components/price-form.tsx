@@ -34,9 +34,66 @@ interface PriceCategory {
   id: string;
   name: string;
   level: number;
+  children: PriceCategory[];
   parentId: string | null;
-  items: { id: string }[];
+  order: number;
+  items: {
+    id: string;
+    order: number;
+  }[];
 }
+
+const buildHierarchy = (categories: PriceCategory[]) => {
+  const categoryMap = new Map();
+  const rootCategories: PriceCategory[] = [];
+
+  // 먼저 모든 카테고리를 맵에 저장
+  categories.forEach((category) => {
+    categoryMap.set(category.id, {
+      ...category,
+      children: [],
+      level: 0,
+    });
+  });
+
+  // 부모-자식 관계 설정
+  categories.forEach((category) => {
+    const node = categoryMap.get(category.id);
+    if (category.parentId) {
+      const parent = categoryMap.get(category.parentId);
+      if (parent) {
+        node.level = parent.level + 1;
+        parent.children.push(node);
+      }
+    } else {
+      rootCategories.push(node);
+    }
+  });
+
+  // 정렬
+  const sortCategories = (cats: PriceCategory[]) => {
+    cats.sort((a, b) => a.order - b.order);
+    cats.forEach((cat) => {
+      if (cat.children.length > 0) {
+        sortCategories(cat.children);
+      }
+    });
+    return cats;
+  };
+
+  return sortCategories(rootCategories);
+};
+
+const renderCategoryOptions = (categories: PriceCategory[], level = 0): JSX.Element[] => {
+  return categories.flatMap((category) => [
+    <SelectItem key={category.id} value={category.id}>
+      {"\u00A0".repeat(level * 4)}
+      {level > 0 ? "└ " : ""}
+      {category.name}
+    </SelectItem>,
+    ...renderCategoryOptions(category.children || [], level + 1),
+  ]);
+};
 
 export function PriceForm({ initialData }: PriceFormProps) {
   const router = useRouter();
@@ -45,16 +102,71 @@ export function PriceForm({ initialData }: PriceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<PriceCategory[]>([]);
 
+  const form = useForm<PriceFormValues>({
+    resolver: zodResolver(priceFormSchema),
+    defaultValues: initialData || {
+      name: "",
+      description: "",
+      specification: "",
+      priceType: "FIXED",
+      priceMin: 0,
+      priceMax: 0,
+      priceText: "",
+      categoryId: searchParams.get("categoryId") || "",
+      order: 0,
+    },
+  });
+
+  const priceType = form.watch("priceType");
+  const selectedCategoryId = form.watch("categoryId");
+
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategoryId && !initialData) {
+      const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
+      if (selectedCategory) {
+        // 디버깅을 위한 로그 추가
+        console.log("Selected category items:", selectedCategory.items);
+
+        // 현재 카테고리의 모든 항목을 가져와서 가장 큰 order 값을 찾음
+        const getAllItems = (category: PriceCategory): number => {
+          const itemOrders = category.items.map((item) => item.order);
+          const maxItemOrder = Math.max(...itemOrders, -1);
+
+          // 재귀적으로 하위 카테고리의 항목들도 확인
+          const childrenMaxOrders = category.children.map((child) => getAllItems(child));
+          const maxChildOrder = Math.max(...childrenMaxOrders, -1);
+
+          return Math.max(maxItemOrder, maxChildOrder);
+        };
+
+        const maxOrder = getAllItems(selectedCategory);
+        console.log("Max order found:", maxOrder);
+
+        // order 값을 설정하고 form을 강제로 업데이트
+        const nextOrder = maxOrder + 1;
+        form.setValue("order", nextOrder, { shouldValidate: true });
+
+        // 디버깅을 위한 현재 폼 값 로그
+        console.log("Current form values:", form.getValues());
+      }
+    }
+  }, [selectedCategoryId, categories, form, initialData]);
 
   const fetchCategories = async () => {
     try {
       const response = await fetch("/api/admin/prices/categories");
       if (!response.ok) throw new Error("카테고리 목록을 불러오는데 실패했습니다.");
       const data = await response.json();
-      setCategories(data);
+
+      // 디버깅을 위한 API 응답 로그
+      console.log("API Response:", data);
+
+      const hierarchicalCategories = buildHierarchy(data);
+      setCategories(hierarchicalCategories);
     } catch (error) {
       toast({
         title: "오류",
@@ -63,32 +175,6 @@ export function PriceForm({ initialData }: PriceFormProps) {
       });
     }
   };
-
-  const form = useForm<PriceFormValues>({
-    resolver: zodResolver(priceFormSchema),
-    defaultValues: initialData || {
-      name: "",
-      description: "",
-      specification: "",
-      priceType: "FIXED",
-      order: 0,
-      categoryId: searchParams.get("categoryId") || "",
-    },
-  });
-
-  const priceType = form.watch("priceType");
-  const selectedCategoryId = form.watch("categoryId");
-
-  // 선택된 카테고리가 변경될 때마다 순서 자동 설정
-  useEffect(() => {
-    if (!selectedCategoryId || initialData) return;
-
-    const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
-    if (selectedCategory) {
-      const nextOrder = selectedCategory.items.length;
-      form.setValue("order", nextOrder);
-    }
-  }, [selectedCategoryId, categories, form, initialData]);
 
   async function onSubmit(data: PriceFormValues) {
     try {
@@ -135,15 +221,7 @@ export function PriceForm({ initialData }: PriceFormProps) {
                     <SelectValue placeholder="카테고리를 선택하세요" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.level > 0 && "\u00A0".repeat(category.level * 2)}
-                      {category.level > 0 && "└ "}
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectContent>{renderCategoryOptions(categories)}</SelectContent>
               </Select>
               <FormMessage />
             </FormItem>

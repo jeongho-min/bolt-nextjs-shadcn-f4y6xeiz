@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 import { PageHeader } from "./page-header";
 
@@ -9,7 +12,7 @@ interface ActionButton {
 
 interface PageLayoutProps {
   title: string;
-  onBack: () => void;
+  backUrl?: string;
   actions?: ActionButton[];
   viewOptions?: {
     isDesktop: boolean;
@@ -20,11 +23,13 @@ interface PageLayoutProps {
   children: ReactNode;
 }
 
-export function PageLayout({ title, onBack, actions, viewOptions, headerContent, children }: PageLayoutProps) {
+export function PageLayout({ title, backUrl, actions, viewOptions, headerContent, children }: PageLayoutProps) {
+  const router = useRouter();
+
   return (
     <div className="container mx-auto py-10 space-y-6">
       <div className="space-y-4">
-        <PageHeader title={title} onBack={onBack} actions={actions} viewOptions={viewOptions} />
+        <PageHeader title={title} onBack={backUrl ? () => router.push(backUrl) : undefined} actions={actions} viewOptions={viewOptions} />
         {headerContent}
       </div>
       {children}

@@ -12,20 +12,19 @@ export async function GET() {
   }
 
   try {
-    const categories = await prisma.priceCategory.findMany({
+    const items = await prisma.priceItem.findMany({
+      where: {
+        isActive: true,
+      },
       include: {
-        items: {
-          orderBy: {
-            order: "asc",
-          },
-        },
+        category: true,
       },
       orderBy: {
         order: "asc",
       },
     });
 
-    return NextResponse.json(categories);
+    return NextResponse.json(items);
   } catch (error) {
     console.error("[PRICES_GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });

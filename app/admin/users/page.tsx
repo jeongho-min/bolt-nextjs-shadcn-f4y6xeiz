@@ -143,7 +143,7 @@ export default function UsersPage() {
   return (
     <PageLayout
       title="회원 관리"
-      onBack={() => router.push("/admin")}
+      backUrl="/admin"
       headerContent={<HeaderContent />}
       viewOptions={{
         isDesktop,
