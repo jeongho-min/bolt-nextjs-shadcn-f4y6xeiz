@@ -12,11 +12,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     const doctor = await prisma.doctor.findUnique({
-      where: {
-        id: params.id,
-      },
+      where: { id: params.id },
       include: {
         department: true,
+        subjects: {
+          include: {
+            subject: true,
+          },
+        },
       },
     });
 
@@ -40,34 +43,86 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
 
     const body = await request.json();
-    const { name, departmentId, position, specialties, biography, imageUrl, isActive } = body;
 
-    if (departmentId) {
-      // 부서가 존재하는지 확인
-      const department = await prisma.department.findUnique({
-        where: { id: departmentId },
+    // isActive만 업데이트하는 경우
+    if (body.hasOwnProperty("isActive")) {
+      const doctor = await prisma.doctor.update({
+        where: { id: params.id },
+        data: { isActive: body.isActive },
+        include: {
+          department: true,
+          subjects: {
+            include: {
+              subject: true,
+            },
+          },
+        },
       });
 
-      if (!department) {
-        return new NextResponse("존재하지 않는 부서입니다.", { status: 400 });
-      }
+      return NextResponse.json(doctor);
     }
 
-    const doctor = await prisma.doctor.update({
-      where: {
-        id: params.id,
+    // 전체 정보 업데이트하는 경우
+    const { name, departmentId, position, specialties, biography, imageUrl, subjectIds = [] } = body;
+
+    if (!name || !departmentId) {
+      return new NextResponse("이름과 소속과는 필수입니다.", { status: 400 });
+    }
+
+    // 전문분야 배열을 쉼표로 구분된 문자열로 변환
+    const specialtiesString = Array.isArray(specialties) ? specialties.join(", ") : specialties;
+
+    // 부서가 존재하는지 확인
+    const department = await prisma.department.findUnique({
+      where: { id: departmentId },
+      include: {
+        subjects: true,
       },
+    });
+
+    if (!department) {
+      return new NextResponse("존재하지 않는 부서입니다.", { status: 400 });
+    }
+
+    // 선택된 진료과목이 해당 부서의 진료과목인지 확인
+    const invalidSubjects = subjectIds.filter((subjectId: string) => !department.subjects.some((subject) => subject.id === subjectId));
+
+    if (invalidSubjects.length > 0) {
+      return new NextResponse("선택한 진료과목 중 해당 부서에 속하지 않는 과목이 있습니다.", { status: 400 });
+    }
+
+    // 기존 진료과목 관계 삭제
+    await prisma.doctorSubject.deleteMany({
+      where: { doctorId: params.id },
+    });
+
+    // 의사 정보 업데이트
+    const doctor = await prisma.doctor.update({
+      where: { id: params.id },
       data: {
-        ...(name && { name }),
-        ...(departmentId && { departmentId }),
-        ...(position !== undefined && { position }),
-        ...(specialties !== undefined && { specialties }),
-        ...(biography !== undefined && { biography }),
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(isActive !== undefined && { isActive }),
+        name,
+        departmentId,
+        position,
+        specialties: specialtiesString,
+        biography,
+        imageUrl,
+        subjects: {
+          create: subjectIds.map((subjectId: string) => ({
+            subject: {
+              connect: {
+                id: subjectId,
+              },
+            },
+          })),
+        },
       },
       include: {
         department: true,
+        subjects: {
+          include: {
+            subject: true,
+          },
+        },
       },
     });
 
@@ -86,21 +141,14 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // 예약이 있는지 확인
-    const hasReservations = await prisma.reservation.findFirst({
-      where: {
-        doctorId: params.id,
-      },
+    // 진료과목 관계 삭제
+    await prisma.doctorSubject.deleteMany({
+      where: { doctorId: params.id },
     });
 
-    if (hasReservations) {
-      return new NextResponse("이 의사와 연관된 예약이 있어 삭제할 수 없습니다.", { status: 400 });
-    }
-
+    // 의사 삭제
     await prisma.doctor.delete({
-      where: {
-        id: params.id,
-      },
+      where: { id: params.id },
     });
 
     return new NextResponse(null, { status: 204 });

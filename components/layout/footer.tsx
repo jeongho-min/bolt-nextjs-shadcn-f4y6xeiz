@@ -17,7 +17,7 @@ export function Footer() {
             <div className="space-y-2 text-sm text-gray-600">
               <p>평일: 09:00 - 17:30</p>
               <p>토요일: 09:00 - 13:00</p>
-              <p>점심시간: 12:30 - 14:30</p>
+              <p>점심시간: 12:30 - 14:00</p>
               <p className="text-primary text-red-600">일요일/공휴일 휴진</p>
             </div>
           </div>
@@ -50,8 +50,8 @@ export function Footer() {
                   <span className="font-medium text-primary">한방</span>
                   <span className="mx-2 text-gray-300">|</span>
                   <span className="space-x-2">
-                    <span>이비인후과</span>·<span>내과</span>·<span>침구과</span>·<span>재활의학과</span>·<span>사상체질과</span>·<span>정신신경과</span>·
-                    <span>부인과</span>·<span>소아과</span>
+                    <span>이비인후과</span>&nbsp; ·<span>내과</span>&nbsp; ·<span>침구과</span>&nbsp; ·<span>재활의학과</span>&nbsp; ·<span>사상체질과</span>
+                    &nbsp; ·<span>정신신경과</span>&nbsp; ·<span>부인과</span>&nbsp; ·<span>소아과</span>
                   </span>
                 </div>
               </div>
@@ -60,7 +60,7 @@ export function Footer() {
                   <span className="font-medium text-primary">양방</span>
                   <span className="mx-2 text-gray-300">|</span>
                   <span className="space-x-2">
-                    <span>가정의학과</span>·<span>내과</span>·<span>영상의학과</span>·<span>재활의학과</span>
+                    <span>가정의학과</span>&nbsp; ·<span>내과</span>&nbsp; ·<span>영상의학과</span>&nbsp; ·<span>재활의학과</span>
                   </span>
                 </div>
               </div>

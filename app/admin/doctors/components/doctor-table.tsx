@@ -1,13 +1,23 @@
 "use client";
 
-import { Doctor, Department } from "@prisma/client";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DataTable, Column } from "@/app/components/ui/data-table";
-import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Department, Doctor } from "@prisma/client";
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type DoctorWithDepartment = Doctor & {
   department: Department;
@@ -15,59 +25,72 @@ type DoctorWithDepartment = Doctor & {
 
 interface DoctorTableProps {
   doctors: DoctorWithDepartment[];
-  onStatusToggle: (id: string, currentStatus: boolean) => void;
-  onEdit: (id: string) => void;
+  onStatusToggle: (id: string) => Promise<void>;
   onDelete: (id: string) => void;
 }
 
-export function DoctorTable({ doctors, onStatusToggle, onEdit, onDelete }: DoctorTableProps) {
-  const columns: Column<DoctorWithDepartment>[] = [
-    {
-      header: "이름",
-      cell: (doctor) => (
-        <div>
-          <div className="font-medium">{doctor.name}</div>
-          <div className="text-sm text-muted-foreground">{doctor.position}</div>
-        </div>
-      ),
-    },
-    {
-      header: "진료과",
-      cell: (doctor) => <Badge variant="outline">{doctor.department.name}</Badge>,
-    },
-    {
-      header: "전문분야",
-      cell: (doctor) => doctor.specialties || "-",
-    },
-    {
-      header: "상태",
-      cell: (doctor) => <Badge variant={doctor.isActive ? "default" : "secondary"}>{doctor.isActive ? "진료중" : "휴진중"}</Badge>,
-    },
-    {
-      header: "등록일",
-      cell: (doctor) => format(new Date(doctor.createdAt), "PPP", { locale: ko }),
-    },
-    {
-      header: "",
-      className: "w-[80px]",
-      cell: (doctor) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">메뉴 열기</span>
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(doctor.id)}>수정</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(doctor.id)} className="text-destructive">
-              삭제
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
+export function DoctorTable({ doctors, onStatusToggle, onDelete }: DoctorTableProps) {
+  const router = useRouter();
 
-  return <DataTable data={doctors} columns={columns} pageSize={10} />;
+  const handleRowClick = (e: React.MouseEvent<HTMLTableRowElement>, doctorId: string) => {
+    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest('[role="switch"]')) {
+      return;
+    }
+    router.push(`/admin/doctors/${doctorId}`);
+  };
+
+  return (
+    <Table className="w-full border">
+      <TableHeader>
+        <TableRow>
+          <TableHead>이름</TableHead>
+          <TableHead>소속과</TableHead>
+          <TableHead>직책</TableHead>
+          <TableHead>전문분야</TableHead>
+          <TableHead>상태</TableHead>
+          <TableHead className="text-right">관리</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {doctors.map((doctor) => (
+          <TableRow key={doctor.id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => handleRowClick(e, doctor.id)}>
+            <TableCell>{doctor.name}</TableCell>
+            <TableCell>{doctor.department.name}</TableCell>
+            <TableCell>{doctor.position || "-"}</TableCell>
+            <TableCell>
+              <div className="flex flex-wrap gap-1">
+                {doctor.specialties?.split(", ").map((specialty, index) => (
+                  <Badge key={index} variant="outline">
+                    {specialty}
+                  </Badge>
+                ))}
+              </div>
+            </TableCell>
+            <TableCell>
+              <Switch checked={doctor.isActive} onCheckedChange={() => onStatusToggle(doctor.id)} />
+            </TableCell>
+            <TableCell className="text-right">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>의사 삭제</AlertDialogTitle>
+                    <AlertDialogDescription>정말로 이 의사를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>취소</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete(doctor.id)}>삭제</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 }

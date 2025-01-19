@@ -31,6 +31,19 @@ const equipment = [
 
 const specialEquipment = [
   {
+    title: "Raphael 707-K",
+    description: "드롭·플렉션·오토플렉션·견인·감압·승하강 기능을 통합한 척추 치료기",
+    features: [
+      "컴프레셔 없는 모터 센서 드롭 시스템",
+      "Auto/Semi Auto 드롭 전환 기능",
+      "트랙션과 플렉션 동시 적용 가능",
+      "펠빅 레버로 레터럴 플렉션 조절",
+      "메모리 기능으로 세팅값 저장",
+    ],
+    effects: ["임상 기반 척추 교정", "디스크 감압 치료", "칵스테크닉 기반 플렉션", "간헐적 견인 치료", "통합적 척추 관리"],
+    image: "/facility/01M707.png",
+  },
+  {
     title: "Cryo-Master",
     description: "국내 최초의 CO₂ 방식 극저온 치료 장비",
     features: ["CO₂ 방식의 첨단 극저온 치료", "포인트 케어 가능", "4초 이내 -78℃ 도달", "블루라이트 가이드", "실시간 피부온도 측정"],
@@ -52,11 +65,24 @@ const specialEquipment = [
     image: "/facility/eswt-1000.png",
   },
   {
-    title: "ARTUS-701ES",
-    description: "어깨 관절 전용 지속적 수동 운동(CPM) 치료기",
-    features: ["어깨 관절 맞춤형 설계", "정밀한 각도 조절", "점진적 운동 범위 확장", "안전한 수동 운동 제공", "인체공학적 구조"],
-    effects: ["관절 운동 범위 회복", "염증 완화", "근육 이완 및 재건", "수술 후 회복 가속화", "통증 감소"],
-    image: "/facility/01M707.png",
+    title: "Raphael SASO-PR (01M7-P)",
+    description: "케이블의 내구성과 편심회전운동 기술을 적용한 진동 마사지기",
+    features: [
+      "사용이 간편하고 실용적이며 뛰어난 안정성",
+      "조절 다이얼을 이용한 진동 강도 조절",
+      "다양한 마사지 용도에 알맞은 어플리케이터 선택 가능",
+      "저소음의 안정적인 테이블",
+      "프리미엄 디자인과 내구성",
+    ],
+    effects: ["근육 이완", "통증 완화", "혈액 순환 개선", "피로 회복", "전신 마사지"],
+    image: "/facility/01M7-P.png",
+  },
+  {
+    title: "OMS-1",
+    description: "한방 치료의 과학화와 세계화를 목표로 개발된 전동 테이블",
+    features: ["간결한 디자인", "뛰어난 안정성", "우수한 내구성"],
+    effects: ["한방 치료의 효율성 증대", "치료사의 편의성 향상", "환자의 편안함 증대"],
+    image: "/facility/OMS-1.png",
   },
 ];
 

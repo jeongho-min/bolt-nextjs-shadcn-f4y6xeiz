@@ -33,7 +33,7 @@ export function InfoSection() {
           <div className="space-y-2 text-gray-600">
             <p>평일: 09:00 - 17:30</p>
             <p>토요일: 09:00 - 13:00</p>
-            <p>점심시간: 12:30 - 14:30</p>
+            <p>점심시간: 12:30 - 14:00</p>
             <p className="text-primary font-medium text-red-600">일요일/공휴일 휴진</p>
           </div>
         </Card>

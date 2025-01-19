@@ -47,13 +47,14 @@ model User {
 }
 
 model Department {
-  id          String    @id @default(uuid())
+  id          String    @id @default(cuid())
   name        String
   description String?
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   doctors     Doctor[]
+  subjects    MedicalSubject[]
   diseases    Disease[]
   reservations Reservation[]
   nonMemberReservations NonMemberReservation[]
@@ -93,6 +94,7 @@ model Doctor {
   schedules    Schedule[]
   reservations Reservation[]
   nonMemberReservations NonMemberReservation[]
+  subjects     DoctorSubject[]
 
   @@map("doctors")
 }
@@ -188,4 +190,66 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model MedicalSubject {
+  id           String     @id @default(cuid())
+  name         String     // 진료과목명
+  type         SubjectType? // 한방/양방 구분 (선택)
+  description  String?    // 진료과목 설명
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId String
+  doctors      DoctorSubject[]
+  
+  @@index([departmentId])
+}
+
+enum SubjectType {
+  KOREAN    // 한방
+  WESTERN   // 양방
+}
+
+model HospitalInfo {
+  id              String   @id @default(cuid())
+  name            String   // 병원명
+  representative  String   // 대표자명
+  businessNumber  String   // 사업자등록번호
+  address         String   // 주소
+  addressDetail   String?  // 상세주소
+  parkingInfo     String?  // 주차 정보
+  
+  // 연락처 정보
+  mainPhone       String   // 대표 전화번호
+  specialtyPhone  String?  // 특수 진료 전화번호 (예: 이명치료)
+  
+  // 진료 시간
+  weekdayOpen     String   // 평일 시작 시간
+  weekdayClose    String   // 평일 종료 시간
+  saturdayOpen    String?  // 토요일 시작 시간
+  saturdayClose   String?  // 토요일 종료 시간
+  lunchStart      String   // 점심시간 시작
+  lunchEnd        String   // 점심시간 종료
+  closedDays      String   // 휴진일 (예: 일요일/공휴일)
+  
+  // 메타 정보
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("hospital_info")
+}
+
+// 의사-진료과목 다대다 관계를 위한 중간 테이블
+model DoctorSubject {
+  id              String        @id @default(cuid())
+  doctor          Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  doctorId        String
+  subject         MedicalSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId       String
+  createdAt       DateTime      @default(now())
+
+  @@unique([doctorId, subjectId])
+  @@map("doctor_subjects")
 } 

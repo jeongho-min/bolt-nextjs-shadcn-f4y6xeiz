@@ -8,34 +8,78 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Department, MedicalSubject } from "@prisma/client";
+import { Department, MedicalSubject, Doctor } from "@prisma/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/app/components/ui/image-upload";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+interface DoctorWithRelations extends Doctor {
+  department: Department;
+  subjects: {
+    subject: MedicalSubject;
+  }[];
+}
 
 interface DepartmentWithSubjects extends Department {
   subjects: MedicalSubject[];
 }
 
-export default function NewDoctorPage() {
-  const [isLoading, setIsLoading] = useState(false);
+export default function EditDoctorPage({ params }: { params: { id: string } }) {
+  const [doctor, setDoctor] = useState<DoctorWithRelations | null>(null);
   const [departments, setDepartments] = useState<DepartmentWithSubjects[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [specialties, setSpecialties] = useState<string[]>([""]);
+  const [specialties, setSpecialties] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
+    fetchDoctor();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    if (doctor) {
+      setSelectedDepartment(doctor.departmentId);
+      setSelectedSubjects(doctor.subjects.map(({ subject }) => subject.id));
+      setSpecialties(doctor.specialties ? doctor.specialties.split(", ") : [""]);
+      setImageUrl(doctor.imageUrl || "");
+    }
+  }, [doctor]);
+
+  const fetchDoctor = async () => {
+    try {
+      const response = await fetch(`/api/admin/doctors/${params.id}`);
+      if (!response.ok) throw new Error("의사 정보를 불러오는데 실패했습니다.");
+      const data = await response.json();
+      setDoctor(data);
+    } catch (error) {
+      toast({
+        title: "오류",
+        description: "의사 정보를 불러오는데 실패했습니다.",
+        variant: "destructive",
+      });
+      router.push("/admin/doctors");
+    }
+  };
 
   const fetchDepartments = async () => {
     try {
       const response = await fetch("/api/admin/departments?include=subjects");
       const data = await response.json();
-      console.log("Fetched departments:", data);
       setDepartments(data);
     } catch (error) {
       toast({
@@ -49,8 +93,6 @@ export default function NewDoctorPage() {
   const handleDepartmentChange = (departmentId: string) => {
     setSelectedDepartment(departmentId);
     setSelectedSubjects([]); // 부서가 변경되면 선택된 진료과목 초기화
-    console.log("Selected department:", departmentId);
-    console.log("Available subjects:", departments.find((dept) => dept.id === departmentId)?.subjects);
   };
 
   const handleSubjectToggle = (subjectId: string) => {
@@ -94,18 +136,9 @@ export default function NewDoctorPage() {
       return;
     }
 
-    if (!selectedDepartment) {
-      toast({
-        variant: "destructive",
-        description: "소속과를 선택해주세요.",
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch("/api/admin/doctors", {
-        method: "POST",
+      const response = await fetch(`/api/admin/doctors/${params.id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -121,20 +154,19 @@ export default function NewDoctorPage() {
       });
 
       if (!response.ok) {
-        throw new Error("의사 생성에 실패했습니다.");
+        throw new Error("의사 정보 수정에 실패했습니다.");
       }
 
       toast({
         title: "성공",
-        description: "새로운 의사가 등록되었습니다.",
+        description: "의사 정보가 수정되었습니다.",
       });
 
-      router.push("/admin/doctors");
-      router.refresh();
+      router.push(`/admin/doctors/${params.id}`);
     } catch (error) {
       toast({
         title: "오류",
-        description: "의사 등록 중 문제가 발생했습니다.",
+        description: "의사 정보 수정 중 문제가 발생했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -142,17 +174,62 @@ export default function NewDoctorPage() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/admin/doctors/${params.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast({
+        title: "성공",
+        description: "의사가 삭제되었습니다.",
+      });
+
+      router.push("/admin/doctors");
+    } catch (error) {
+      toast({
+        title: "오류",
+        description: error instanceof Error ? error.message : "의사 삭제 중 문제가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const currentDepartment = departments.find((dept) => dept.id === selectedDepartment);
   const departmentSubjects = currentDepartment?.subjects ?? [];
 
-  return (
+  return doctor ? (
     <div className="container mx-auto py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" size="icon" onClick={() => router.push("/admin/doctors")} className="h-10 w-10">
+          <Button variant="outline" size="icon" onClick={() => router.push(`/admin/doctors/${params.id}`)} className="h-10 w-10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">새 의사 등록</h1>
+          <div className="flex-1 flex justify-between items-center">
+            <h1 className="text-2xl font-bold">의사 정보 수정</h1>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">삭제</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>의사 삭제</AlertDialogTitle>
+                  <AlertDialogDescription>정말로 이 의사를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                    삭제
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -161,7 +238,7 @@ export default function NewDoctorPage() {
               <label htmlFor="name" className="text-sm font-medium">
                 이름
               </label>
-              <Input id="name" name="name" required placeholder="의사 이름을 입력하세요" />
+              <Input id="name" name="name" required defaultValue={doctor.name} placeholder="의사 이름을 입력하세요" />
             </div>
 
             <div className="space-y-2">
@@ -186,7 +263,7 @@ export default function NewDoctorPage() {
               <label htmlFor="position" className="text-sm font-medium">
                 직책
               </label>
-              <Input id="position" name="position" placeholder="직책을 입력하세요" />
+              <Input id="position" name="position" defaultValue={doctor.position || ""} placeholder="직책을 입력하세요" />
             </div>
 
             <div className="space-y-2">
@@ -238,7 +315,7 @@ export default function NewDoctorPage() {
             <label htmlFor="biography" className="text-sm font-medium">
               약력
             </label>
-            <Textarea id="biography" name="biography" placeholder="의사의 약력을 입력하세요" rows={4} />
+            <Textarea id="biography" name="biography" defaultValue={doctor.biography || ""} placeholder="의사의 약력을 입력하세요" rows={4} />
           </div>
 
           <div className="flex gap-4">
@@ -246,11 +323,11 @@ export default function NewDoctorPage() {
               취소
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "처리중..." : "의사 등록"}
+              {isLoading ? "처리중..." : "수정 완료"}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  ) : null;
 }

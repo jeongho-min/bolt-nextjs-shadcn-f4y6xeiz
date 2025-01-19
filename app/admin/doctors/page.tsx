@@ -31,34 +31,38 @@ export default function DoctorsPage() {
   const fetchDoctors = async () => {
     try {
       const response = await fetch("/api/admin/doctors");
+      if (!response.ok) throw new Error("의사 목록을 불러오는데 실패했습니다.");
       const data = await response.json();
       setDoctors(data);
     } catch (error) {
       toast({
-        title: "의사 정보 로딩 실패",
-        description: "의사 정보를 불러오는데 실패했습니다.",
+        title: "오류",
+        description: "의사 목록을 불러오는데 실패했습니다.",
         variant: "destructive",
       });
     }
   };
 
-  const handleStatusToggle = async (id: string, currentStatus: boolean) => {
+  const handleStatusToggle = async (id: string) => {
     try {
+      const doctor = doctors.find((d) => d.id === id);
+      if (!doctor) return;
+
       const response = await fetch(`/api/admin/doctors/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ isActive: !currentStatus }),
+        body: JSON.stringify({ isActive: !doctor.isActive }),
       });
 
-      if (response.ok) {
-        fetchDoctors();
-        toast({
-          title: "상태 변경 성공",
-          description: "의사 상태가 성공적으로 변경되었습니다.",
-        });
-      }
+      if (!response.ok) throw new Error("상태 변경에 실패했습니다.");
+
+      await fetchDoctors();
+      toast({
+        title: "상태 변경 성공",
+        description: "의사 상태가 성공적으로 변경되었습니다.",
+      });
     } catch (error) {
       toast({
         title: "상태 변경 실패",
@@ -75,7 +79,7 @@ export default function DoctorsPage() {
       });
 
       if (response.status === 204) {
-        fetchDoctors();
+        await fetchDoctors();
         toast({
           title: "의사 삭제 성공",
           description: "의사가 성공적으로 삭제되었습니다.",
@@ -106,9 +110,9 @@ export default function DoctorsPage() {
       }}
     >
       {viewType === "table" && isDesktop ? (
-        <DoctorTable doctors={doctors} onStatusToggle={handleStatusToggle} onEdit={(id) => router.push(`/admin/doctors/${id}`)} onDelete={handleDelete} />
+        <DoctorTable doctors={doctors} onStatusToggle={handleStatusToggle} onDelete={handleDelete} />
       ) : (
-        <DoctorCards doctors={doctors} onStatusToggle={handleStatusToggle} onEdit={(id) => router.push(`/admin/doctors/${id}`)} onDelete={handleDelete} />
+        <DoctorCards doctors={doctors} onStatusToggle={handleStatusToggle} onDelete={handleDelete} />
       )}
     </PageLayout>
   );

@@ -7,9 +7,9 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface Column<T> {
-  header: string;
+  header: string | JSX.Element | (() => JSX.Element);
   accessorKey?: keyof T;
-  cell?: (item: T) => ReactNode;
+  cell?: (item: T) => React.ReactNode;
   className?: string;
 }
 
@@ -58,7 +58,7 @@ export function DataTable<T>({
             <TableRow>
               {columns.map((column, index) => (
                 <TableHead key={index} className={column.className}>
-                  {column.header}
+                  {typeof column.header === "function" ? column.header() : column.header}
                 </TableHead>
               ))}
             </TableRow>

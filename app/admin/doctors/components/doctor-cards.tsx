@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
@@ -16,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import { StatusButton } from "../../components/buttons";
+import { useRouter } from "next/navigation";
 
 type DoctorWithDepartment = Doctor & {
   department: Department;
@@ -23,19 +26,26 @@ type DoctorWithDepartment = Doctor & {
 
 interface DoctorCardsProps {
   doctors: DoctorWithDepartment[];
-  onStatusToggle: (id: string, currentStatus: boolean) => void;
-  onEdit: (id: string) => void;
+  onStatusToggle: (id: string) => Promise<void>;
   onDelete: (id: string) => void;
 }
 
-export function DoctorCards({ doctors, onStatusToggle, onEdit, onDelete }: DoctorCardsProps) {
+export function DoctorCards({ doctors, onStatusToggle, onDelete }: DoctorCardsProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>, doctorId: string) => {
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    router.push(`/admin/doctors/${doctorId}`);
+  };
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4">
         {doctors.map((doctor) => (
-          <Card key={doctor.id}>
+          <Card key={doctor.id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => handleCardClick(e, doctor.id)}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -56,7 +66,6 @@ export function DoctorCards({ doctors, onStatusToggle, onEdit, onDelete }: Docto
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(doctor.id)}>수정</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setDeleteId(doctor.id)} className="text-red-600">
                       삭제
                     </DropdownMenuItem>
@@ -74,7 +83,7 @@ export function DoctorCards({ doctors, onStatusToggle, onEdit, onDelete }: Docto
                 </div>
                 <div className="flex justify-between items-center text-sm pt-2">
                   <span className="text-muted-foreground">상태</span>
-                  <StatusButton isActive={doctor.isActive} onClick={() => onStatusToggle(doctor.id, doctor.isActive)} />
+                  <StatusButton isActive={doctor.isActive} onClick={() => onStatusToggle(doctor.id)} />
                 </div>
               </div>
             </CardContent>

@@ -1,7 +1,9 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
-import { Department } from "@prisma/client";
+import { MoreVertical, MoreHorizontal } from "lucide-react";
+import { Department, MedicalSubject } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -13,55 +15,83 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+
+interface DepartmentWithSubjects extends Department {
+  subjects: MedicalSubject[];
+}
 
 interface DepartmentCardsProps {
-  departments: Department[];
+  departments: DepartmentWithSubjects[];
   onStatusToggle: (id: string, currentStatus: boolean) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onAddSubjects: (id: string) => void;
 }
 
-export function DepartmentCards({ departments, onStatusToggle, onEdit, onDelete }: DepartmentCardsProps) {
+export function DepartmentCards({ departments, onStatusToggle, onEdit, onDelete, onAddSubjects }: DepartmentCardsProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   return (
     <>
-      <div className="grid gap-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {departments.map((department) => (
-          <div key={department.id} className="bg-white rounded-lg border p-3 hover:shadow-sm transition-shadow">
-            <div className="flex items-center gap-3">
+          <Card key={department.id} className="bg-white rounded-lg border p-3 hover:shadow-sm transition-shadow">
+            <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium truncate">{department.name}</h3>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(department.createdAt).toLocaleDateString()}</span>
                 </div>
-                {department.description && <p className="text-sm text-muted-foreground truncate">{department.description}</p>}
+                {department.description && <p className="text-sm text-muted-foreground break-words line-clamp-2">{department.description}</p>}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <Badge
+                    variant={department.isActive ? "default" : "secondary"}
+                    className="cursor-pointer hover:opacity-80"
+                    onClick={() => onStatusToggle(department.id, department.isActive)}
+                  >
+                    {department.isActive ? "표시" : "숨김"}
+                  </Badge>
+                </div>
+                <div className="mt-2">
+                  <div className="text-sm font-medium mb-1">진료과목</div>
+                  <div className="flex flex-wrap gap-1">
+                    {department.subjects?.length > 0 ? (
+                      department.subjects.map((subject) => (
+                        <Badge key={subject.id} variant="outline" className="text-xs">
+                          {subject.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">등록된 진료과목이 없습니다</span>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <Button
-                  size="sm"
-                  variant={department.isActive ? "default" : "secondary"}
-                  onClick={() => onStatusToggle(department.id, department.isActive)}
-                  className="h-7 text-xs px-2.5"
-                >
-                  {department.isActive ? "활성" : "비활성"}
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                      <MoreVertical className="h-4 w-4" />
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onEdit(department.id)}>수정</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setDeleteId(department.id)} className="text-red-600">
+                    <DropdownMenuItem onClick={() => onAddSubjects(department.id)}>진료과목 추가</DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setDeleteId(department.id);
+                      }}
+                      className="text-red-600"
+                    >
                       삭제
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 

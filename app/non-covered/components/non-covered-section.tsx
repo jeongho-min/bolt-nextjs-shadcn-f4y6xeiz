@@ -40,7 +40,7 @@ export function NonCoveredSection() {
                   </TableRow>
                   {/* 환약 */}
                   <TableRow>
-                    <TableCell rowSpan={5} className="align-top font-medium bg-gray-50">
+                    <TableCell rowSpan={6} className="align-top font-medium bg-gray-50">
                       환약
                     </TableCell>
                     <TableCell>공진단</TableCell>
@@ -60,7 +60,12 @@ export function NonCoveredSection() {
                   <TableRow>
                     <TableCell>슬림환</TableCell>
                     <TableCell>30일분</TableCell>
-                    <TableCell className="text-right">300,000원</TableCell>
+                    <TableCell className="text-right">250,000원</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>슬림환</TableCell>
+                    <TableCell>90일분 (+ 30일분)</TableCell>
+                    <TableCell className="text-right">750,000원</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>경옥고</TableCell>

@@ -26,7 +26,7 @@ export function BusinessHours() {
       // 일요일은 휴진
       if (day === 0) return "closed";
 
-      // 점심시간 (12:30 - 14:30)
+      // 점심시간 (12:30 - 14:00)
       const lunchStart = 12 * 60 + 30;
       const lunchEnd = 14 * 60 + 30;
 
@@ -114,7 +114,7 @@ export function BusinessHours() {
               </p>
               <p className="flex justify-between">
                 <span className="text-gray-600">점심시간</span>
-                <span className="font-medium">12:30 - 14:30</span>
+                <span className="font-medium">12:30 - 14:00</span>
               </p>
               <p className="flex justify-between text-red-500 font-medium mt-2">
                 <span>일요일/공휴일</span>

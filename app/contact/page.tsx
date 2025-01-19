@@ -1,13 +1,12 @@
 "use client";
 
-import { ContactHero } from "./components/contact-hero";
-import { InfoSection } from "./components/info-section";
-import { Card } from "@/components/ui/card";
+import { ReservationDialog } from "@/components/home/reservation-dialog";
 import { KakaoMap } from "@/components/map/kakao-map";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { CalendarDays, Clock, Phone } from "lucide-react";
 import { useState } from "react";
-import { ReservationDialog } from "@/components/home/reservation-dialog";
+import { ContactHero } from "./components/contact-hero";
 
 export default function ContactPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +54,7 @@ export default function ContactPage() {
                   <h3 className="text-xl font-bold">진료 안내</h3>
                 </div>
                 <div className="space-y-2 text-gray-600">
-                  <p>점심시간: 12:30 - 14:30</p>
+                  <p>점심시간: 12:30 - 14:00</p>
                   <p className="text-red-600">일요일/공휴일 휴진</p>
                 </div>
               </div>

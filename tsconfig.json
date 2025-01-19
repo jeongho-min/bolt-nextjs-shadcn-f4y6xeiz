@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/contexts/*": ["./app/contexts/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"]
   },

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -11,7 +11,13 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const includeSubjects = searchParams.get("include") === "subjects";
+
     const departments = await prisma.department.findMany({
+      include: {
+        subjects: includeSubjects,
+      },
       orderBy: {
         createdAt: "desc",
       },

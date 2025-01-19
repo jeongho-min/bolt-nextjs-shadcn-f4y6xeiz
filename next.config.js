@@ -11,13 +11,22 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    unoptimized: false,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/**',
       },
     ],
+    domains: ['yvssieikcxdbtioggcbf.supabase.co', 'ilgoc-hospital.supabase.co'],
+  },
+  webpack: (config) => {
+    config.ignoreWarnings = [
+      { module: /node_modules\/ws\/lib\// }
+    ];
+    return config;
   },
 };
 
