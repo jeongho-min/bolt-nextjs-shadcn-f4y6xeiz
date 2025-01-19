@@ -19,26 +19,26 @@ import {
 interface PriceItem {
   id: string;
   name: string;
-  description: string | null;
-  specification: string | null;
-  priceType: "FIXED" | "RANGE" | "TEXT";
-  priceMin: number | null;
-  priceMax: number | null;
-  priceText: string | null;
+  description?: string | null;
+  specification?: string | null;
+  priceType: string;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  priceText?: string | null;
   order: number;
   categoryId: string;
   category: {
-    id: string;
+    id?: string;
     name: string;
   };
 }
 
-interface PriceTableProps {
-  data: PriceItem[];
+export interface PriceTableProps {
+  items: PriceItem[];
   onDelete: (id: string) => Promise<void>;
 }
 
-export function PriceTable({ data = [], onDelete }: PriceTableProps) {
+export function PriceTable({ items, onDelete }: PriceTableProps) {
   const router = useRouter();
 
   const formatPrice = (item: PriceItem) => {
@@ -106,7 +106,7 @@ export function PriceTable({ data = [], onDelete }: PriceTableProps) {
     },
   ];
 
-  if (!data) return null;
+  if (!items) return null;
 
-  return <DataTable data={data} columns={columns} pageSize={20} />;
+  return <DataTable data={items} columns={columns} pageSize={20} />;
 }

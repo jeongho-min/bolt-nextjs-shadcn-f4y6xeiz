@@ -76,7 +76,7 @@ export function PriceTab() {
         <h2 className="text-lg font-semibold">가격표 항목</h2>
         <Button onClick={() => router.push("/admin/prices/new")}>새 항목</Button>
       </div>
-      <PriceTable data={items} onDelete={handleDelete} />
+      <PriceTable items={items} onDelete={handleDelete} />
     </div>
   );
 }

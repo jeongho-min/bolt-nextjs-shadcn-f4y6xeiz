@@ -71,7 +71,7 @@ export function PricesPageClient({ categories: rawCategories }: PricesPageClient
   return (
     <PageLayout
       title="가격표 관리"
-      onBack={() => router.back()}
+      backUrl="/admin/prices"
       actions={[
         {
           label: "새 항목 추가",
