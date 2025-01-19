@@ -67,7 +67,7 @@ export default function EditPricePage({ params }: Props) {
   if (!priceItem) return null;
 
   return (
-    <PageLayout title="가격표 항목 수정" onBack={() => router.push("/admin/prices")}>
+    <PageLayout title="가격표 항목 수정" backUrl="/admin/prices">
       <div className="max-w-3xl mx-auto">
         <PriceForm initialData={priceItem} />
       </div>
