@@ -29,6 +29,7 @@ interface PriceItem {
   priceMax: number | null;
   priceText: string | null;
   order: number;
+  categoryId: string;
 }
 
 interface PriceCategory {
@@ -53,7 +54,7 @@ export function CategoryTab() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/prices/${id}`, {
+      const response = await fetch(`/api/admin/prices/items/${id}`, {
         method: "DELETE",
       });
 
@@ -90,6 +91,130 @@ export function CategoryTab() {
       toast({
         title: "오류",
         description: "카테고리 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveItemUp = async (itemId: string, items: PriceItem[]) => {
+    const sortedItems = [...items].sort((a, b) => a.order - b.order);
+    const currentIndex = sortedItems.findIndex((item) => item.id === itemId);
+
+    if (currentIndex === 0) return;
+
+    const currentItem = sortedItems[currentIndex];
+    const targetItem = sortedItems[currentIndex - 1];
+
+    try {
+      // 현재 항목을 이전 항목의 순서로 변경
+      const response1 = await fetch(`/api/admin/prices/items/${currentItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...currentItem,
+          order: targetItem.order,
+        }),
+      });
+
+      if (!response1.ok) throw new Error("순서 변경에 실패했습니다.");
+
+      // 이전 항목을 현재 항목의 순서로 변경
+      const response2 = await fetch(`/api/admin/prices/items/${targetItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...targetItem,
+          order: currentItem.order,
+        }),
+      });
+
+      if (!response2.ok) throw new Error("순서 변경에 실패했습니다.");
+
+      await fetchCategories();
+      toast({
+        title: "성공",
+        description: "순서가 변경되었습니다.",
+      });
+    } catch (error) {
+      console.error("Error moving item up:", error);
+      toast({
+        title: "오류",
+        description: "순서 변경에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveItemDown = async (itemId: string, items: PriceItem[]) => {
+    const sortedItems = [...items].sort((a, b) => a.order - b.order);
+    const currentIndex = sortedItems.findIndex((item) => item.id === itemId);
+
+    if (currentIndex === sortedItems.length - 1) return;
+
+    const currentItem = sortedItems[currentIndex];
+    const targetItem = sortedItems[currentIndex + 1];
+
+    try {
+      // 현재 항목을 임시 순서로 변경 (다음 항목의 순서보다 조금 더 큰 값)
+      const tempOrder = targetItem.order + 1;
+      const response1 = await fetch(`/api/admin/prices/items/${currentItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...currentItem,
+          order: tempOrder,
+        }),
+      });
+
+      if (!response1.ok) throw new Error("순서 변경에 실패했습니다.");
+
+      // 다음 항목을 현재 항목의 원래 순서로 변경
+      const response2 = await fetch(`/api/admin/prices/items/${targetItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...targetItem,
+          order: currentItem.order,
+        }),
+      });
+
+      if (!response2.ok) throw new Error("순서 변경에 실패했습니다.");
+
+      // 현재 항목을 다음 항목의 원래 순서로 변경
+      const response3 = await fetch(`/api/admin/prices/items/${currentItem.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...currentItem,
+          order: targetItem.order,
+        }),
+      });
+
+      if (!response3.ok) throw new Error("순서 변경에 실패했습니다.");
+
+      // 약간의 지연 후 목록 새로고침
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await fetchCategories();
+
+      toast({
+        title: "성공",
+        description: "순서가 변경되었습니다.",
+      });
+    } catch (error) {
+      console.error("Error moving item down:", error);
+      toast({
+        title: "오류",
+        description: "순서 변경에 실패했습니다.",
         variant: "destructive",
       });
     }
@@ -183,6 +308,8 @@ export function CategoryTab() {
     const hasChildren = category.children.length > 0;
     const isExpanded = expandedCategories.has(category.id);
 
+    const sortedItems = [...category.items].sort((a, b) => a.order - b.order);
+
     return (
       <div key={category.id} className="space-y-4">
         <Card className="border shadow-sm">
@@ -231,37 +358,37 @@ export function CategoryTab() {
                   </TooltipContent>
                 </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <AlertDialog>
+                <AlertDialog>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>카테고리 삭제</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            이 카테고리를 삭제하시겠습니까?
-                            {hasChildren && " 하위 카테고리와 "}
-                            {category.items.length > 0 && " 포함된 가격표 항목도 "}
-                            모두 삭제됩니다.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>취소</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteCategory(category.id)} className="bg-red-500 hover:bg-red-600">
-                            삭제
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>카테고리 삭제</p>
-                  </TooltipContent>
-                </Tooltip>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>카테고리 삭제</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>카테고리 삭제</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        이 카테고리를 삭제하시겠습니까?
+                        {hasChildren && " 하위 카테고리와 "}
+                        {category.items.length > 0 && " 포함된 가격표 항목도 "}
+                        모두 삭제됩니다.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>취소</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteCategory(category.id)} className="bg-red-500 hover:bg-red-600">
+                        삭제
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TooltipProvider>
             </div>
           </CardHeader>
@@ -275,7 +402,7 @@ export function CategoryTab() {
           <div className="pl-4 space-y-4">
             {category.items.length > 0 && (
               <div className="space-y-2">
-                {category.items.map((item) => (
+                {sortedItems.map((item, index) => (
                   <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                     <div>
                       <h4 className="font-medium text-sm">{item.name}</h4>
@@ -283,6 +410,26 @@ export function CategoryTab() {
                       <p className="text-sm font-medium text-primary">{formatPrice(item)}</p>
                     </div>
                     <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleMoveItemUp(item.id, category.items)}
+                          disabled={index === 0}
+                        >
+                          ↑
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleMoveItemDown(item.id, category.items)}
+                          disabled={index === sortedItems.length - 1}
+                        >
+                          ↓
+                        </Button>
+                      </div>
                       <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/prices/${item.id}`)}>
                         <Edit className="h-4 w-4" />
                       </Button>

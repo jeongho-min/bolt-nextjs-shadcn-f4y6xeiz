@@ -50,7 +50,7 @@ export function PriceTab() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/prices/${id}`, {
+      const response = await fetch(`/api/admin/prices/items/${id}`, {
         method: "DELETE",
       });
 
