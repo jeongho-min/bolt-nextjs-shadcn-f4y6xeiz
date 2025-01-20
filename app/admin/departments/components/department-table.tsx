@@ -4,7 +4,7 @@ import { Department, MedicalSubject } from "@prisma/client";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { DataTable, Column } from "@/app/components/ui/data-table";
+import { DataTable, Column } from "@/components/ui/data-table";
 import { MoreHorizontal, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

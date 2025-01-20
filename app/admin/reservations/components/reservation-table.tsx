@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DataTable, Column } from "@/app/components/ui/data-table";
+import { DataTable, Column } from "@/components/ui/data-table";
 import { ReservationWithDetails } from "../types";
 import { SetStateAction } from "react";
 

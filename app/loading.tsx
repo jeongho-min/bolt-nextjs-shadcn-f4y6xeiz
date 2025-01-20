@@ -1,4 +1,4 @@
-import { BrandLoader } from "@/app/components/ui/brand-loader";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 export default function Loading() {
   return (

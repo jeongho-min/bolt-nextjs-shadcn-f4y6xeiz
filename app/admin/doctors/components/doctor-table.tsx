@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { DataTable, type Column } from "@/app/components/ui/data-table";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { Department, Doctor } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";

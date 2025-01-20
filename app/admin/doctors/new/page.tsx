@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Department, MedicalSubject } from "@prisma/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ImageUpload } from "@/app/components/ui/image-upload";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface DepartmentWithSubjects extends Department {
   subjects: MedicalSubject[];

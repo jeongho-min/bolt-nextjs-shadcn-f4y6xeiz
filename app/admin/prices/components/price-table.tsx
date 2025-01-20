@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DataTable, Column } from "@/app/components/ui/data-table";
+import { DataTable, Column } from "@/components/ui/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
