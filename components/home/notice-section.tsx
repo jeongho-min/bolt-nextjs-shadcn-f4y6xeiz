@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ArrowRight, CalendarDays, ChevronRight, Megaphone, Bell, Gift } from "lucide-react";
+import { ArrowRight, Bell, CalendarDays, Gift, Megaphone } from "lucide-react";
 import Link from "next/link";
 
 type Notice = {
@@ -86,7 +86,7 @@ export function NoticeSection() {
           transition={{ duration: 0.4 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4">공지사항</h2>
+          <h2 className="text-4xl font-bold mb-4">공지사항 (임시)</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">일곡에스한방병원의 새로운 소식을 알려드립니다</p>
         </motion.div>
 
@@ -123,22 +123,6 @@ export function NoticeSection() {
               </motion.div>
             );
           })}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-8"
-        >
-          <Link
-            href="/notices"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary/5 hover:bg-primary/10 text-primary font-medium transition-colors"
-          >
-            전체 공지사항 보기
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </motion.div>
       </div>
     </section>
