@@ -33,6 +33,12 @@ enum SubjectType {
   WESTERN   // 양방
 }
 
+// 공지사항 카테고리 enum 추가
+enum NoticeCategory {
+  NOTICE    // 공지
+  INFO      // 안내
+  EVENT     // 이벤트
+}
 
 model User {
   id            String        @id @default(cuid())
@@ -48,6 +54,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   reservations  Reservation[]
+  notices       Notice[]      // 작성한 공지사항
+  popupNotices  PopupNotice[] // 작성한 팝업 공지사항
 
   @@map("users")
 }
@@ -293,5 +301,61 @@ model PriceItem {
   category      PriceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("price_items")
+}
+
+// 공지사항 테이블
+model Notice {
+  id          String        @id @default(cuid())
+  title       String        // 제목
+  content     String        // 내용
+  category    NoticeCategory // 카테고리
+  isImportant Boolean       @default(false) // 중요 공지 여부
+  isActive    Boolean       @default(true)  // 활성화 여부
+  viewCount   Int          @default(0)     // 조회수
+  startDate   DateTime?     // 게시 시작일
+  endDate     DateTime?     // 게시 종료일
+  attachments NoticeAttachment[] // 첨부파일
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  createdBy   User?        @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@map("notices")
+}
+
+// 공지사항 첨부파일 테이블
+model NoticeAttachment {
+  id        String   @id @default(cuid())
+  noticeId  String   // 공지사항 ID
+  fileName  String   // 파일명
+  fileUrl   String   // 파일 URL
+  fileSize  Int      // 파일 크기 (bytes)
+  mimeType  String   // 파일 타입
+  createdAt DateTime @default(now()) @map("created_at")
+  notice    Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@map("notice_attachments")
+}
+
+// 팝업 공지사항 테이블
+model PopupNotice {
+  id          String        @id @default(cuid())
+  title       String        // 제목
+  content     String        // 내용
+  category    NoticeCategory // 카테고리
+  imageUrl    String?       // 팝업 이미지 URL
+  startDate   DateTime      // 팝업 시작일
+  endDate     DateTime      // 팝업 종료일
+  isActive    Boolean       @default(true)  // 활성화 여부
+  priority    Int          @default(0)      // 우선순위 (높을수록 먼저 표시)
+  width       Int          @default(320)    // 팝업 너비
+  height      Int?                          // 팝업 높이 (선택적)
+  position    Json?        // 팝업 위치 설정 (예: { "top": "10%", "left": "5%" })
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  createdBy   User?        @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@map("popup_notices")
 }
 

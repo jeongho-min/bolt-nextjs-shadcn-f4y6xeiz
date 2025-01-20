@@ -1,13 +1,10 @@
 "use client";
 
 import { PageLayout } from "@/app/admin/components/page-layout";
-import { PriceForm } from "../components/price-form";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PriceForm } from "../components/price-form";
 
 export default function NewPricePage() {
-  const router = useRouter();
-
   return (
     <PageLayout title="새 가격표 항목 추가" backUrl="/admin/prices">
       <div className="max-w-3xl mx-auto">

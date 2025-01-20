@@ -2,18 +2,17 @@
 
 import { useHeader } from "@/app/providers/header-provider";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { Calendar, LogIn, LogOut, Menu, MoreVertical, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LoginDialog } from "./dialogs/login-dialog";
 import { NonMemberDialog } from "./dialogs/non-member-dialog";
-import { ReservationDialog } from "./dialogs/reservation-dialog";
-import { UserMenuDialog } from "./dialogs/user-menu-dialog";
-import { signOut, useSession } from "next-auth/react";
-import { ReservationHistoryDialog } from "./dialogs/reservation-history-dialog";
 import { NonMemberHistoryDialog } from "./dialogs/non-member-history-dialog";
+import { ReservationDialog } from "./dialogs/reservation-dialog";
+import { ReservationHistoryDialog } from "./dialogs/reservation-history-dialog";
+import { UserMenuDialog } from "./dialogs/user-menu-dialog";
 
 const navigation = [
   { name: "인사말", href: "/about" },
@@ -49,11 +48,6 @@ export function Header() {
   const [nonMemberPhone, setNonMemberPhone] = useState<string | null>(null);
   const { isHeaderVisible } = useHeader();
   const { data: session, status } = useSession();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    console.log("[SESSION_STATUS]", { session, status });
-  }, [session, status]);
 
   useEffect(() => {
     const handleScroll = () => {
