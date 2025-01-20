@@ -10,52 +10,52 @@ const facilities = [
   {
     title: "병원 전경",
     description: "소리청 일곡에스한방병원 전경",
-    images: ["/facility/병원전경.jpg"],
+    images: ["/facility/병원전경.webp"],
   },
   {
     title: "접수실",
     description: "친절한 상담과 접수를 도와드립니다",
-    images: ["/facility/접수실.jpg"],
+    images: ["/facility/접수실.webp"],
   },
   {
     title: "간호사실",
     description: "전문적인 간호 서비스를 제공합니다",
-    images: ["/facility/간호사실.jpg"],
+    images: ["/facility/간호사실.webp"],
   },
   {
     title: "X-ray실",
     description: "정확한 진단을 위한 영상 검사실",
-    images: ["/facility/x-ray_1.jpg", "/facility/x-ray_2.jpg"],
+    images: ["/facility/x-ray_1.webp", "/facility/x-ray_2.webp"],
   },
   {
     title: "도수치료실",
     description: "전문적인 도수치료와 재활치료를 제공합니다",
-    images: ["/facility/도수치료실.jpg"],
+    images: ["/facility/도수치료실.webp"],
   },
   {
     title: "한방요법실",
     description: "다양한 한방치료를 제공합니다",
-    images: ["/facility/한방요법실_1.jpg", "/facility/한방요법실_2.jpg"],
+    images: ["/facility/한방요법실_1.webp", "/facility/한방요법실_2.webp"],
   },
   {
     title: "황토방",
     description: "건강한 치료를 위한 황토 찜질 시설",
-    images: ["/facility/황토방_1.jpg", "/facility/황토방_2.jpg"],
+    images: ["/facility/황토방_1.webp", "/facility/황토방_2.webp"],
   },
   {
     title: "건식 반식욕기",
     description: "효과적인 치료를 위한 반신욕 시설",
-    images: ["/facility/건식_반식욕기.jpg"],
+    images: ["/facility/건식_반식욕기.webp"],
   },
   {
     title: "청각검사실",
     description: "청각검사를 위한 시설",
-    images: ["/facility/청각검사실_1.jpg", "/facility/청각검사실_2.jpg", "/facility/청각검사실_3.jpg"],
+    images: ["/facility/청각검사실_1.webp", "/facility/청각검사실_2.webp", "/facility/청각검사실_3.webp"],
   },
   // {
   //   title: "경옥고",
   //   description: "전통 한방 보약 제조실",
-  //   images: ["/facility/경옥고.jpg"],
+  //   images: ["/facility/경옥고.webp"],
   // },
 ];
 
@@ -89,7 +89,15 @@ function ImageModal({ isOpen, onClose, images, currentIndex }: { isOpen: boolean
 
       <div className="relative w-full h-full max-w-5xl max-h-[90vh] m-4">
         <div className="relative w-full h-full">
-          <Image src={images[imageIndex]} alt="Facility image" fill className="object-contain" />
+          <Image
+            src={images[imageIndex]}
+            alt="Facility image"
+            fill
+            sizes="(max-width: 1280px) 100vw, 1280px"
+            quality={85}
+            priority
+            className="object-contain"
+          />
 
           {images.length > 1 && (
             <>
@@ -132,6 +140,14 @@ function FacilityCard({ facility }: { facility: (typeof facilities)[0] }) {
     return () => clearInterval(timer);
   }, [facility.images.length]);
 
+  useEffect(() => {
+    if (facility.images.length > 1) {
+      const nextIndex = (currentImageIndex + 1) % facility.images.length;
+      const img = document.createElement("img");
+      img.src = facility.images[nextIndex];
+    }
+  }, [currentImageIndex, facility.images]);
+
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsTransitioning(true);
@@ -158,6 +174,10 @@ function FacilityCard({ facility }: { facility: (typeof facilities)[0] }) {
             src={facility.images[currentImageIndex]}
             alt={facility.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={currentImageIndex === 0}
+            quality={75}
+            loading={currentImageIndex === 0 ? undefined : "lazy"}
             className={`object-cover transition-all duration-300 group-hover:scale-105 ${isTransitioning ? "opacity-0" : "opacity-100"}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
