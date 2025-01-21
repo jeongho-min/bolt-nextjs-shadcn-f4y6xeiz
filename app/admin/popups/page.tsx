@@ -1,49 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PopupNotice, NoticeCategory } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-import { PageLayout } from "../components/page-layout";
-import { PopupTable } from "./components/popup-table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { PopupTable } from "./components/popup-table";
+import { useEffect, useState } from "react";
+import { PopupNotice } from "@prisma/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function PopupsPage() {
-  const [popups, setPopups] = useState<PopupNotice[]>([]);
-  const [filteredPopups, setFilteredPopups] = useState<PopupNotice[]>([]);
-  const [categoryFilter, setCategoryFilter] = useState<NoticeCategory | "ALL">("ALL");
   const router = useRouter();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchPopups();
-  }, []);
-
-  useEffect(() => {
-    if (categoryFilter === "ALL") {
-      setFilteredPopups(popups);
-    } else {
-      setFilteredPopups(popups.filter((popup) => popup.category === categoryFilter));
-    }
-  }, [categoryFilter, popups]);
+  const [popups, setPopups] = useState<PopupNotice[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchPopups = async () => {
     try {
       const response = await fetch("/api/admin/popups");
+      if (!response.ok) throw new Error("팝업 목록을 불러오는데 실패했습니다.");
       const data = await response.json();
       setPopups(data);
-      setFilteredPopups(data);
     } catch (error) {
-      toast({
-        title: "팝업 정보 로딩 실패",
-        description: "팝업 정보를 불러오는데 실패했습니다.",
-        variant: "destructive",
-      });
+      toast.error("팝업 목록을 불러오는데 실패했습니다.");
     }
   };
+
+  useEffect(() => {
+    fetchPopups();
+  }, []);
 
   const handleDelete = async (id: string) => {
     try {
@@ -51,75 +45,48 @@ export default function PopupsPage() {
         method: "DELETE",
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
+      if (!response.ok) throw new Error("팝업 삭제에 실패했습니다.");
 
-      fetchPopups();
-      toast({
-        title: "성공",
-        description: "팝업이 삭제되었습니다.",
-      });
+      await fetchPopups();
+      toast.success("팝업이 삭제되었습니다.");
     } catch (error) {
-      toast({
-        title: "오류",
-        description: error instanceof Error ? error.message : "팝업 삭제 중 문제가 발생했습니다.",
-        variant: "destructive",
-      });
+      toast.error("팝업 삭제에 실패했습니다.");
     }
   };
 
-  const handleEdit = (id: string) => {
-    router.push(`/admin/popups/${id}`);
-  };
-
-  const categoryOptions = [
-    { label: "전체", value: "ALL" },
-    { label: "공지", value: "NOTICE" },
-    { label: "안내", value: "INFO" },
-    { label: "이벤트", value: "EVENT" },
-  ];
-
-  const HeaderContent = () => (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">카테고리 필터:</span>
-        <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as NoticeCategory | "ALL")}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {categoryOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex gap-2">
-        <Badge variant="outline">전체: {popups.length}</Badge>
-        <Badge variant="default">공지: {popups.filter((popup) => popup.category === "NOTICE").length}</Badge>
-        <Badge variant="secondary">안내: {popups.filter((popup) => popup.category === "INFO").length}</Badge>
-        <Badge variant="destructive">이벤트: {popups.filter((popup) => popup.category === "EVENT").length}</Badge>
-      </div>
-    </div>
-  );
-
   return (
-    <PageLayout
-      title="팝업 관리"
-      backUrl="/admin"
-      headerContent={<HeaderContent />}
-      actions={[
-        {
-          label: "새 팝업",
-          onClick: () => router.push("/admin/popups/new"),
-        },
-      ]}
-    >
-      <PopupTable popups={filteredPopups} onEdit={handleEdit} onDelete={handleDelete} />
-    </PageLayout>
+    <div className="space-y-4 p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">팝업 관리</h1>
+        <Button onClick={() => router.push("/admin/popups/new")}>
+          <Plus className="mr-2 h-4 w-4" />새 팝업
+        </Button>
+      </div>
+
+      <AlertDialog>
+        <PopupTable popups={popups} onDelete={(id) => setSelectedId(id)} />
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>팝업 삭제</AlertDialogTitle>
+            <AlertDialogDescription>정말로 이 팝업을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedId(null)}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedId) {
+                  handleDelete(selectedId);
+                  setSelectedId(null);
+                }
+              }}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

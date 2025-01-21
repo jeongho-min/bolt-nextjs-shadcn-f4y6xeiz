@@ -90,3 +90,24 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "ADMIN") {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { isActive } = await req.json();
+
+    const popup = await prisma.popupNotice.update({
+      where: { id: params.id },
+      data: { isActive },
+    });
+
+    return NextResponse.json(popup);
+  } catch (error) {
+    console.error("[POPUP_PATCH]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}

@@ -46,7 +46,9 @@ export default function NonCoveredPage() {
 
   const fetchPriceItems = async () => {
     try {
-      const response = await fetch("/api/prices");
+      const response = await fetch("/api/prices", {
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("가격표를 불러오는데 실패했습니다.");
       const data = await response.json();
       setCategories(data);
