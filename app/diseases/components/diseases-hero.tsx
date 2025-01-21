@@ -27,7 +27,7 @@ export function DiseasesHero() {
         className="absolute inset-0"
       >
         <motion.div style={{ filter: `brightness(${brightness})` }} className="relative w-full h-full">
-          <Image src="/sub/sub_vis_bg2.jpg" alt="질병정보 이미지" fill className="object-cover object-center" priority />
+          <Image src="/sub/질병정보_히어로.png" alt="질병정보 이미지" fill className="object-cover object-center" priority />
         </motion.div>
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40"

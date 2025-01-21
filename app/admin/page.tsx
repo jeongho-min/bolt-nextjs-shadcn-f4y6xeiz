@@ -62,6 +62,12 @@ export default function AdminPage() {
       icon: Building2,
       href: "/admin/hospital",
     },
+    {
+      title: "휴일 관리",
+      description: "정기 휴일과 특별 휴일, 임시 휴진을 관리합니다.",
+      icon: Calendar,
+      href: "/admin/holidays",
+    },
   ];
 
   return (

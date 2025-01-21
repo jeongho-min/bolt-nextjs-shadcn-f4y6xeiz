@@ -40,6 +40,18 @@ enum NoticeCategory {
   EVENT     // 이벤트
 }
 
+enum HolidayType {
+  REGULAR    // 정기 휴일 (예: 매주 일요일)
+  SPECIAL    // 특별 휴일 (예: 명절, 공휴일)
+  TEMPORARY  // 임시 휴진
+}
+
+enum RegularHolidayType {
+  WEEKLY     // 매주 반복
+  MONTHLY    // 매월 반복
+  YEARLY     // 매년 반복
+}
+
 model User {
   id            String        @id @default(cuid())
   name          String?
@@ -56,6 +68,7 @@ model User {
   reservations  Reservation[]
   notices       Notice[]      // 작성한 공지사항
   popupNotices  PopupNotice[] // 작성한 팝업 공지사항
+  holidays      Holiday[]     // 작성한 휴일 정보
 
   @@map("users")
 }
@@ -378,5 +391,32 @@ model Hospital {
   closedDays      String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+// 휴일 관리 테이블
+model Holiday {
+  id              String    @id @default(cuid())
+  title           String    // 휴일 제목 (예: 설날, 추석, 임시휴진 등)
+  description     String?   // 휴일 설명
+  type            HolidayType // 휴일 유형
+  
+  // 정기 휴일인 경우
+  regularType     RegularHolidayType? // 정기 휴일 유형
+  dayOfWeek       Int?     // 요일 (0: 일요일, 1: 월요일, ..., 6: 토요일)
+  weekOfMonth     Int?     // 몇 번째 주 (1-5)
+  dayOfMonth      Int?     // 매월 몇 일
+  monthOfYear     Int?     // 매년 몇 월
+  
+  // 특별 휴일/임시 휴진인 경우
+  startDate       DateTime? // 시작일
+  endDate         DateTime? // 종료일
+  
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       User?     @relation(fields: [userId], references: [id])
+  userId          String?
+
+  @@map("holidays")
 }
 

@@ -105,6 +105,52 @@ export function NoticeSection({ notices, isLoading }: NoticeSectionProps) {
     );
   }
 
+  if (!notices || notices.length === 0) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "100px" }}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold mb-4">공지사항</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">일곡에스한방병원의 새로운 소식을 알려드립니다</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="relative bg-white rounded-2xl shadow-sm border p-8 flex flex-col items-center">
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Megaphone className="w-6 h-6 text-primary" />
+                </div>
+              </div>
+
+              <div className="mt-8 text-center space-y-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">아직 등록된 공지사항이 없어요</h3>
+                  <p className="text-gray-500">새로운 소식이 등록되면 이곳에서 확인하실 수 있습니다</p>
+                </div>
+
+                <div className="pt-6 border-t border-dashed w-full max-w-xs mx-auto">
+                  <p className="text-sm text-gray-400">매주 새로운 소식과 이벤트로 찾아뵙겠습니다</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       <div className="container mx-auto px-4">
