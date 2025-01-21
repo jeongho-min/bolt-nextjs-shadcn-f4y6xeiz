@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Loader2 } from "lucide-react";
-import { Editor } from "@/components/editor";
+import { TipTapEditor } from "@/components/editor/tiptap-editor";
 import { uploadImage } from "@/lib/supabase";
 
 type FormAttachment = {
@@ -172,7 +172,15 @@ export function NoticeForm({ initialData, onSubmit }: NoticeFormProps) {
                   <FormItem>
                     <FormLabel>내용</FormLabel>
                     <FormControl>
-                      <Editor value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" />
+                      <TipTapEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        placeholder="내용을 입력하세요"
+                        onImageUpload={async (file) => {
+                          const url = await uploadImage(file);
+                          return url;
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -208,22 +216,6 @@ export function NoticeForm({ initialData, onSubmit }: NoticeFormProps) {
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="isImportant"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">중요 공지</FormLabel>
-                      <div className="text-sm text-muted-foreground">이 공지사항을 중요 공지로 표시합니다.</div>
-                    </div>
-                    <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
 
               <div className="space-y-2">
                 <FormLabel>첨부파일</FormLabel>

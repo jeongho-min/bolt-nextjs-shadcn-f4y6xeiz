@@ -1,25 +1,19 @@
 "use client";
 
-import { NoticeCategory } from "@prisma/client";
+import { NoticeCategory, PopupNotice } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-type PopupNotice = {
-  id: string;
-  title: string;
-  content: string;
-  category: NoticeCategory;
-  startDate: Date | null;
-  endDate: Date | null;
-  createdAt: Date;
-  imageUrl?: string;
-};
+import { TipTapViewer } from "@/components/editor/tiptap-viewer";
 
 const POPUP_HIDE_KEY = "notice-popup-hide-all";
 
-export function NoticePopup({ notices }: { notices: PopupNotice[] }) {
+interface NoticePopupProps {
+  notices: PopupNotice[];
+}
+
+export function NoticePopup({ notices }: NoticePopupProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,6 +68,10 @@ export function NoticePopup({ notices }: { notices: PopupNotice[] }) {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === notices.length - 1 ? 0 : prev + 1));
+  };
+
+  const formatContent = (content: string) => {
+    return content.replace(/\n/g, "<br />");
   };
 
   if (!mounted || notices.length === 0) return null;
@@ -184,10 +182,7 @@ export function NoticePopup({ notices }: { notices: PopupNotice[] }) {
               {currentNotice.content && (
                 <div className={`px-4 py-3 ${currentNotice.imageUrl ? "max-h-[25vh]" : "max-h-[32vh]"} overflow-y-auto border-t border-gray-200 bg-white`}>
                   <div className="prose prose-sm max-w-none">
-                    <div
-                      dangerouslySetInnerHTML={{ __html: currentNotice.content }}
-                      className="text-[14px] leading-relaxed text-gray-700 [&_p]:mb-2.5 [&_p:last-child]:mb-0"
-                    />
+                    <TipTapViewer content={currentNotice.content} />
                   </div>
                 </div>
               )}

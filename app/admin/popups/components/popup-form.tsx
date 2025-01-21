@@ -10,11 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Loader2 } from "lucide-react";
+import { TipTapEditor } from "@/components/editor/tiptap-editor";
 
 const formSchema = z.object({
   title: z.string().min(1, "제목을 입력해주세요."),
@@ -133,7 +133,15 @@ export function PopupForm({ initialData, onSubmit }: PopupFormProps) {
                   <FormItem>
                     <FormLabel>내용</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="내용을 입력하세요" className="min-h-[200px]" {...field} />
+                      <TipTapEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        placeholder="내용을 입력하세요"
+                        onImageUpload={async (file) => {
+                          // 이미지 업로드 기능이 필요한 경우 구현
+                          return "";
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

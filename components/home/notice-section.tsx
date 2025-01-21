@@ -2,59 +2,52 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Notice, NoticeCategory } from "@prisma/client";
 import { motion } from "framer-motion";
-import { ArrowRight, Bell, CalendarDays, Gift, Megaphone } from "lucide-react";
+import { ArrowRight, Bell, CalendarDays, Gift, Megaphone, X, FileIcon, Download } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import Image from "next/image";
+import { TipTapViewer } from "@/components/editor/tiptap-viewer";
 
-type Notice = {
+interface Attachment {
   id: string;
-  title: string;
-  content: string;
-  category: "공지" | "안내" | "이벤트";
-  createdAt: string;
-};
+  noticeId: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  mimeType: string | null;
+  createdAt: Date;
+}
 
-const recentNotices: Notice[] = [
-  {
-    id: "1",
-    title: "2024년 설 연휴 진료 안내",
-    content: "설 연휴 기간 동안의 진료 일정을 안내드립니다.",
-    category: "공지",
-    createdAt: "2024-02-01",
-  },
-  {
-    id: "2",
-    title: "일곡에스한방병원 상담 예약 서비스 오픈",
-    content: "온라인으로 편리하게 상담 예약이 가능합니다.",
-    category: "안내",
-    createdAt: "2024-01-25",
-  },
-  {
-    id: "3",
-    title: "2024년 건강보험 한방 급여 항목 변경 안내",
-    content: "2024년부터 변경되는 한방 급여 항목을 안내드립니다.",
-    category: "안내",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "4",
-    title: "겨울철 건강관리 한방치료 프로모션",
-    content: "겨울철 면역력 강화를 위한 특별 프로모션을 진행합니다.",
-    category: "이벤트",
-    createdAt: "2024-01-10",
-  },
-];
+interface NoticeWithAttachments extends Notice {
+  attachments: Attachment[];
+}
+
+interface NoticeSectionProps {
+  notices: NoticeWithAttachments[];
+  isLoading: boolean;
+}
 
 const categoryIcons = {
-  공지: Bell,
-  안내: Megaphone,
-  이벤트: Gift,
+  NOTICE: Bell,
+  INFO: Megaphone,
+  EVENT: Gift,
+};
+
+const categoryLabels = {
+  NOTICE: "공지",
+  INFO: "안내",
+  EVENT: "이벤트",
 };
 
 const categoryColors = {
-  공지: "bg-primary/10 hover:bg-primary/20 text-primary border-primary/20",
-  안내: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 border-blue-500/20",
-  이벤트: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 border-orange-500/20",
+  NOTICE: "bg-primary/10 hover:bg-primary/20 text-primary border-primary/20",
+  INFO: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 border-blue-500/20",
+  EVENT: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 border-orange-500/20",
 };
 
 const cardAnimation = {
@@ -75,7 +68,43 @@ const cardAnimation = {
   },
 };
 
-export function NoticeSection() {
+export function NoticeSection({ notices, isLoading }: NoticeSectionProps) {
+  const [selectedNotice, setSelectedNotice] = useState<NoticeWithAttachments | null>(null);
+
+  const stripHtmlTags = (html: string) => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
+
+  const formatHtmlContent = (html: string) => {
+    // 빈 p 태그 제거
+    let formatted = html.replace(/<p><\/p>/g, "");
+    // p 태그 사이의 불필요한 공백 제거
+    formatted = formatted.replace(/<\/p>\s*<p>/g, "</p><p>");
+    // 연속된 br 태그를 하나로 통일
+    formatted = formatted.replace(/(<br\s*\/?>\s*)+/g, "<br>");
+    // 줄바꿈 유지를 위한 스타일 추가
+    formatted = formatted.replace(/<p>/g, '<p style="margin-bottom: 1rem;">');
+    return formatted;
+  };
+
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-gray-100 h-32 rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       <div className="container mx-auto px-4">
@@ -86,45 +115,119 @@ export function NoticeSection() {
           transition={{ duration: 0.4 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4">공지사항 (임시)</h2>
+          <h2 className="text-4xl font-bold mb-4">공지사항</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">일곡에스한방병원의 새로운 소식을 알려드립니다</p>
         </motion.div>
 
         <motion.div initial="initial" whileInView="animate" viewport={{ once: true, margin: "50px" }} className="grid gap-6 max-w-4xl mx-auto">
-          {recentNotices.map((notice, index) => {
+          {notices.map((notice) => {
             const Icon = categoryIcons[notice.category];
             return (
               <motion.div key={notice.id} variants={cardAnimation} whileHover="hover" className="will-change-transform">
-                <Link href={`/notices/${notice.id}`}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white group">
-                    <div className="p-6 flex items-center gap-6">
-                      <div className={`shrink-0 w-12 h-12 rounded-full ${categoryColors[notice.category]} flex items-center justify-center`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Badge className={`${categoryColors[notice.category]} border`} variant="outline">
-                            {notice.category}
-                          </Badge>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <CalendarDays className="w-4 h-4 mr-1" />
-                            {notice.createdAt}
-                          </div>
-                        </div>
-                        <h3 className="font-semibold text-lg mb-1 truncate group-hover:text-primary transition-colors">{notice.title}</h3>
-                        <p className="text-gray-600 text-sm line-clamp-1">{notice.content}</p>
-                      </div>
-                      <div className="shrink-0 flex items-center text-gray-400 group-hover:text-primary transition-colors">
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
+                <Card
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white group cursor-pointer"
+                  onClick={() => setSelectedNotice(notice)}
+                >
+                  <div className="p-6 flex items-center gap-6">
+                    <div className={`shrink-0 w-12 h-12 rounded-full ${categoryColors[notice.category]} flex items-center justify-center`}>
+                      <Icon className="w-6 h-6" />
                     </div>
-                  </Card>
-                </Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge className={`${categoryColors[notice.category]} border`} variant="outline">
+                          {categoryLabels[notice.category]}
+                        </Badge>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <CalendarDays className="w-4 h-4 mr-1" />
+                          {format(new Date(notice.createdAt), "yyyy.MM.dd", { locale: ko })}
+                        </div>
+                      </div>
+                      <h3 className="font-semibold text-lg mb-1 truncate group-hover:text-primary transition-colors">{notice.title}</h3>
+                      <p className="text-gray-600 text-sm line-clamp-1">{stripHtmlTags(notice.content)}</p>
+                    </div>
+                    <div className="shrink-0 flex items-center text-gray-400 group-hover:text-primary transition-colors">
+                      <ArrowRight className="w-5 h-5" />
+                    </div>
+                  </div>
+                </Card>
               </motion.div>
             );
           })}
         </motion.div>
       </div>
+
+      <Dialog open={!!selectedNotice} onOpenChange={() => setSelectedNotice(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              {selectedNotice && (
+                <Badge className={`${categoryColors[selectedNotice.category]} border`} variant="outline">
+                  {categoryLabels[selectedNotice.category]}
+                </Badge>
+              )}
+              <div className="flex items-center text-sm text-gray-500">
+                <CalendarDays className="w-4 h-4 mr-1" />
+                {selectedNotice && format(new Date(selectedNotice.createdAt), "yyyy.MM.dd", { locale: ko })}
+              </div>
+            </div>
+            <DialogTitle className="text-xl font-bold">{selectedNotice?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedNotice && (
+              <>
+                <div className="prose prose-sm max-w-none text-gray-700">
+                  <TipTapViewer content={selectedNotice.content} />
+                </div>
+                {selectedNotice.attachments && selectedNotice.attachments.length > 0 && (
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">첨부파일</h3>
+                    <div className="grid gap-3">
+                      {selectedNotice.attachments.map((attachment) => {
+                        const isImage = attachment.mimeType?.startsWith("image/") || attachment.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+                        return isImage ? (
+                          <div key={attachment.id} className="relative">
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+                              <Image
+                                src={attachment.fileUrl}
+                                alt={attachment.fileName}
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 768px) 100vw, 800px"
+                              />
+                            </div>
+                            <a
+                              href={attachment.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/50 hover:bg-black/70 text-white text-xs font-medium backdrop-blur-sm transition-colors"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              원본 보기
+                            </a>
+                          </div>
+                        ) : (
+                          <a
+                            key={attachment.id}
+                            href={attachment.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 p-3 rounded-lg border hover:border-gray-300 hover:bg-gray-50 transition-colors group"
+                          >
+                            <FileIcon className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                            <span className="text-sm text-gray-600 group-hover:text-gray-900">{attachment.fileName}</span>
+                            <Download className="w-4 h-4 ml-auto text-gray-400 group-hover:text-gray-600" />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

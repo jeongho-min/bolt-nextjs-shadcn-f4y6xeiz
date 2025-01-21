@@ -66,7 +66,6 @@ export async function GET() {
 
     // 루트 카테고리부터 시작하여 계층 구조 생성
     const hierarchicalCategories = buildHierarchy();
-
     return NextResponse.json(hierarchicalCategories);
   } catch (error) {
     console.error("가격표를 가져오는 중 오류가 발생했습니다:", error);
