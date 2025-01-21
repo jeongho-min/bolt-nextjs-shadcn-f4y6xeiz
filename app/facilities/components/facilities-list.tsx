@@ -123,63 +123,57 @@ function ImageModal({ isOpen, onClose, images, currentIndex }: { isOpen: boolean
 
 function FacilityCard({ facility }: { facility: (typeof facilities)[0] }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (facility.images.length <= 1) return;
 
+    // 이미지 프리로딩
+    const preloadImages = facility.images.map((src) => {
+      const img = new window.Image();
+      img.src = src;
+      return img;
+    });
+
     const timer = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
-        setIsTransitioning(false);
-      }, 300);
+      setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
     }, 5000);
 
-    return () => clearInterval(timer);
-  }, [facility.images.length]);
-
-  useEffect(() => {
-    if (facility.images.length > 1) {
-      const nextIndex = (currentImageIndex + 1) % facility.images.length;
-      const img = document.createElement("img");
-      img.src = facility.images[nextIndex];
-    }
-  }, [currentImageIndex, facility.images]);
+    return () => {
+      clearInterval(timer);
+      // 메모리 정리
+      preloadImages.forEach((img) => (img.src = ""));
+    };
+  }, [facility.images]);
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentImageIndex((prev) => (prev - 1 + facility.images.length) % facility.images.length);
-      setIsTransitioning(false);
-    }, 300);
+    setCurrentImageIndex((prev) => (prev - 1 + facility.images.length) % facility.images.length);
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
-      setIsTransitioning(false);
-    }, 300);
+    setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
   };
 
   return (
     <>
       <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setIsModalOpen(true)}>
         <div className="relative h-64">
-          <Image
-            src={facility.images[currentImageIndex]}
-            alt={facility.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={currentImageIndex === 0}
-            quality={75}
-            loading={currentImageIndex === 0 ? undefined : "lazy"}
-            className={`object-cover transition-all duration-300 group-hover:scale-105 ${isTransitioning ? "opacity-0" : "opacity-100"}`}
-          />
+          <div className="relative w-full h-full">
+            {facility.images.map((src, index) => (
+              <Image
+                key={src}
+                src={src}
+                alt={`${facility.title} ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={index === 0}
+                quality={75}
+                className={`object-cover absolute inset-0 transition-opacity duration-300 ${index === currentImageIndex ? "opacity-100" : "opacity-0"}`}
+              />
+            ))}
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
           {facility.images.length > 1 && (

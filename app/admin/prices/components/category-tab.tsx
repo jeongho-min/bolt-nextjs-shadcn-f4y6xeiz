@@ -48,6 +48,31 @@ export function CategoryTab() {
   const [categories, setCategories] = useState<PriceCategory[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
+  // 모든 카테고리 ID를 수집하는 함수
+  const getAllCategoryIds = (categories: PriceCategory[]): Set<string> => {
+    const ids = new Set<string>();
+    const addIds = (cats: PriceCategory[]) => {
+      cats.forEach((category) => {
+        ids.add(category.id);
+        if (category.children.length > 0) {
+          addIds(category.children);
+        }
+      });
+    };
+    addIds(categories);
+    return ids;
+  };
+
+  // 전체 펼치기
+  const expandAll = () => {
+    setExpandedCategories(getAllCategoryIds(categories));
+  };
+
+  // 전체 접기
+  const collapseAll = () => {
+    setExpandedCategories(new Set());
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -265,6 +290,10 @@ export function CategoryTab() {
       const data = await response.json();
       const hierarchicalCategories = buildHierarchy(data);
       setCategories(hierarchicalCategories);
+
+      // 모든 카테고리 ID를 expandedCategories에 추가
+      const allCategoryIds = getAllCategoryIds(hierarchicalCategories);
+      setExpandedCategories(allCategoryIds);
     } catch (error) {
       toast({
         title: "오류",
@@ -466,7 +495,15 @@ export function CategoryTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">카테고리 목록</h2>
-        <Button onClick={() => router.push("/admin/prices/categories/new")}>새 카테고리</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={expandAll}>
+            전체 펼치기
+          </Button>
+          <Button variant="outline" size="sm" onClick={collapseAll}>
+            전체 접기
+          </Button>
+          <Button onClick={() => router.push("/admin/prices/categories/new")}>새 카테고리</Button>
+        </div>
       </div>
       <div className="space-y-4">{categories.map(renderCategoryCard)}</div>
     </div>

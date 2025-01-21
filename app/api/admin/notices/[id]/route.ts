@@ -129,3 +129,24 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "ADMIN") {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { isActive } = await req.json();
+
+    const notice = await prisma.notice.update({
+      where: { id: params.id },
+      data: { isActive },
+    });
+
+    return NextResponse.json(notice);
+  } catch (error) {
+    console.error("[NOTICE_PATCH]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
