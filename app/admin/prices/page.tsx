@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageLayout } from "@/app/admin/components/page-layout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import { CategoryTab } from "./components/category-tab";
 import { PriceTab } from "./components/price-tab";
 
 export default function PricesPage() {
-  const [activeTab, setActiveTab] = useState("items");
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("categories");
 
   return (
     <PageLayout title="가격표 관리" backUrl="/admin">
