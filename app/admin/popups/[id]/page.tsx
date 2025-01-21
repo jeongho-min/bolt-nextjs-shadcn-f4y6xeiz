@@ -6,6 +6,7 @@ import { PopupNotice, NoticeCategory } from "@prisma/client";
 import { useToast } from "@/hooks/use-toast";
 import { PageLayout } from "../../components/page-layout";
 import { PopupForm } from "../components/popup-form";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 export default function EditPopupPage() {
   const params = useParams();
@@ -72,7 +73,11 @@ export default function EditPopupPage() {
   };
 
   if (isLoading) {
-    return <div>로딩 중...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <BrandLoader variant="default" />
+      </div>
+    );
   }
 
   return (

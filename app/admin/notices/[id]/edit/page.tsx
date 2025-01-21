@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Notice } from "@prisma/client";
-import { useToast } from "@/hooks/use-toast";
 import { PageLayout } from "@/app/admin/components/page-layout";
+import { BrandLoader } from "@/components/ui/brand-loader";
+import { useToast } from "@/hooks/use-toast";
+import { Notice } from "@prisma/client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { NoticeForm } from "../../components/notice-form";
 
 interface NoticeWithAttachments extends Omit<Notice, "attachments"> {
@@ -86,7 +87,7 @@ export default function EditNoticePage({ params }: PageProps) {
     return (
       <PageLayout title="공지사항 수정" backUrl="/admin/notices">
         <div className="flex items-center justify-center p-8">
-          <div className="text-muted-foreground">로딩 중...</div>
+          <BrandLoader variant="default" />
         </div>
       </PageLayout>
     );

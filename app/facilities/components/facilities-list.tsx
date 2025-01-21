@@ -50,7 +50,7 @@ const facilities = [
   {
     title: "청각검사실",
     description: "청각검사를 위한 시설",
-    images: ["/facility/청각검사실_1.webp", "/facility/청각검사실_2.webp", "/facility/청각검사실_3.webp"],
+    images: ["/facility/청각검사실_1.jpg", "/facility/청각검사실_2.jpg", "/facility/청각검사실_3.jpg"],
   },
   // {
   //   title: "경옥고",

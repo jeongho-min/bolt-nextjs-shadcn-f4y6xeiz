@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { HeaderProvider } from "./providers/header-provider";
 import { FooterProvider } from "./providers/footer-provider";
+import { HospitalProvider } from "./providers/hospital-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -19,16 +20,18 @@ interface ClientLayoutProps {
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    <HeaderProvider>
-      <FooterProvider>
-        <Header />
-        <main className="pt-16">
-          <AnimatePresence mode="wait">{children}</AnimatePresence>
-          <QuickLinks />
-        </main>
-        <Footer />
-        <Toaster />
-      </FooterProvider>
-    </HeaderProvider>
+    <HospitalProvider>
+      <HeaderProvider>
+        <FooterProvider>
+          <Header />
+          <main className="pt-16">
+            <AnimatePresence mode="wait">{children}</AnimatePresence>
+            <QuickLinks />
+          </main>
+          <Footer />
+          <Toaster />
+        </FooterProvider>
+      </HeaderProvider>
+    </HospitalProvider>
   );
 }

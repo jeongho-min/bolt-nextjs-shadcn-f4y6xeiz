@@ -359,3 +359,24 @@ model PopupNotice {
   @@map("popup_notices")
 }
 
+model Hospital {
+  id              String    @id @default(cuid())
+  name            String
+  representative  String
+  businessNumber  String
+  address         String
+  addressDetail   String?
+  parkingInfo     String?
+  mainPhone       String
+  specialtyPhone  String?
+  weekdayOpen     String
+  weekdayClose    String
+  saturdayOpen    String?
+  saturdayClose   String?
+  lunchStart      String
+  lunchEnd        String
+  closedDays      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+

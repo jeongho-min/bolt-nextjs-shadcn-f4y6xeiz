@@ -2,11 +2,14 @@
 
 import { Building2, MapPin, Phone } from "lucide-react";
 import { useFooter } from "@/app/providers/footer-provider";
+import { useHospital } from "@/app/providers/hospital-provider";
 
 export function Footer() {
   const { isFooterVisible } = useFooter();
+  const { hospitalInfo, isLoading } = useHospital();
+  const currentYear = new Date().getFullYear();
 
-  if (!isFooterVisible) return null;
+  if (!isFooterVisible || isLoading || !hospitalInfo) return null;
 
   return (
     <footer className="bg-gray-50">
@@ -15,30 +18,40 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">진료시간</h3>
             <div className="space-y-2 text-sm text-gray-600">
-              <p>평일: 09:00 - 17:30</p>
-              <p>토요일: 09:00 - 13:00</p>
-              <p>점심시간: 12:30 - 14:00</p>
-              <p className="text-primary text-red-600">일요일/공휴일 휴진</p>
+              <p>
+                평일: {hospitalInfo.weekdayOpen} - {hospitalInfo.weekdayClose}
+              </p>
+              {hospitalInfo.saturdayOpen && hospitalInfo.saturdayClose && (
+                <p>
+                  토요일: {hospitalInfo.saturdayOpen} - {hospitalInfo.saturdayClose}
+                </p>
+              )}
+              <p>
+                점심시간: {hospitalInfo.lunchStart} - {hospitalInfo.lunchEnd}
+              </p>
+              <p className="text-primary text-red-600">{hospitalInfo.closedDays} 휴진</p>
             </div>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-4">연락처</h3>
             <div className="space-y-2 text-sm text-gray-600">
+              {hospitalInfo.specialtyPhone && (
+                <p className="flex items-center">
+                  <Phone className="h-4 w-4 mr-2" />
+                  {hospitalInfo.specialtyPhone.split(" (")[0]}
+                  <span className="ml-2 text-primary">({hospitalInfo.specialtyPhone.split(" (")[1]?.replace(")", "")})</span>
+                </p>
+              )}
               <p className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
-                062-369-2075
-                <span className="ml-2 text-primary">(이명치료)</span>
-              </p>
-              <p className="flex items-center">
-                <Phone className="h-4 w-4 mr-2" />
-                062-571-2222
+                {hospitalInfo.mainPhone}
               </p>
               <p className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
-                광주광역시 북구 양일로 307
+                {hospitalInfo.address}
               </p>
-              <p className="ml-6">(일곡동 840-2)</p>
+              {hospitalInfo.addressDetail && <p className="ml-6">{hospitalInfo.addressDetail}</p>}
             </div>
           </div>
 
@@ -72,12 +85,17 @@ export function Footer() {
           <div className="text-center text-sm text-gray-500 space-y-2">
             <p className="flex items-center justify-center gap-2">
               <Building2 className="h-4 w-4" />
-              <span>대표: 민용태</span>
+              <span>대표: {hospitalInfo.representative}</span>
               <span className="mx-2">|</span>
-              <span>사업자등록번호: 503-94-25547</span>
+              <span>사업자등록번호: {hospitalInfo.businessNumber}</span>
             </p>
-            <p>주소: 광주광역시 북구 양일로 307(일곡동 840-2)</p>
-            <p>© 2024 소리청 일곡에스한방병원. All rights reserved.</p>
+            <p>
+              주소: {hospitalInfo.address}
+              {hospitalInfo.addressDetail ? ` ${hospitalInfo.addressDetail}` : ""}
+            </p>
+            <p>
+              © {currentYear} {hospitalInfo.name}. All rights reserved.
+            </p>
           </div>
         </div>
       </div>

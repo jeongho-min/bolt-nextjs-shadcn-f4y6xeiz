@@ -56,6 +56,12 @@ export default function AdminPage() {
       icon: MessageSquareMore,
       href: "/admin/popups",
     },
+    {
+      title: "병원 정보 관리",
+      description: "병원 정보를 등록하고 관리합니다.",
+      icon: Building2,
+      href: "/admin/hospital",
+    },
   ];
 
   return (

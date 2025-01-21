@@ -7,9 +7,20 @@ import { Card } from "@/components/ui/card";
 import { CalendarDays, Clock, Phone } from "lucide-react";
 import { useState } from "react";
 import { ContactHero } from "./components/contact-hero";
+import { useHospital } from "@/app/providers/hospital-provider";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 export default function ContactPage() {
   const [isOpen, setIsOpen] = useState(false);
+  const { hospitalInfo, isLoading } = useHospital();
+
+  if (isLoading || !hospitalInfo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <BrandLoader variant="default" />
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen">
@@ -28,8 +39,8 @@ export default function ContactPage() {
                   <h3 className="text-xl font-bold">전화 예약</h3>
                 </div>
                 <div className="space-y-2 text-gray-600">
-                  <p>Tel: 062-369-2075 (이명치료)</p>
-                  <p>Tel: 062-571-2222</p>
+                  {hospitalInfo.specialtyPhone && <p>Tel: {hospitalInfo.specialtyPhone}</p>}
+                  <p>Tel: {hospitalInfo.mainPhone}</p>
                 </div>
               </div>
 
@@ -41,8 +52,14 @@ export default function ContactPage() {
                   <h3 className="text-xl font-bold">진료 시간</h3>
                 </div>
                 <div className="space-y-2 text-gray-600">
-                  <p>평일: 09:00 - 17:30</p>
-                  <p>토요일: 09:00 - 13:00</p>
+                  <p>
+                    평일: {hospitalInfo.weekdayOpen} - {hospitalInfo.weekdayClose}
+                  </p>
+                  {hospitalInfo.saturdayOpen && hospitalInfo.saturdayClose && (
+                    <p>
+                      토요일: {hospitalInfo.saturdayOpen} - {hospitalInfo.saturdayClose}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -54,8 +71,10 @@ export default function ContactPage() {
                   <h3 className="text-xl font-bold">진료 안내</h3>
                 </div>
                 <div className="space-y-2 text-gray-600">
-                  <p>점심시간: 12:30 - 14:00</p>
-                  <p className="text-red-600">일요일/공휴일 휴진</p>
+                  <p>
+                    점심시간: {hospitalInfo.lunchStart} - {hospitalInfo.lunchEnd}
+                  </p>
+                  <p className="text-red-600">{hospitalInfo.closedDays} 휴진</p>
                 </div>
               </div>
             </div>
@@ -80,9 +99,9 @@ export default function ContactPage() {
             <div className="space-y-4">
               <KakaoMap />
               <div className="text-gray-600">
-                <p>주차: 병원 지하 1층과 병원 뒷쪽 공영주차장(진료시 주차비 지급)</p>
-                <p>전화: 062-369-2075 (이명치료)</p>
-                <p>전화: 062-571-2222</p>
+                {hospitalInfo.parkingInfo && <p>주차: {hospitalInfo.parkingInfo}</p>}
+                {hospitalInfo.specialtyPhone && <p>전화: {hospitalInfo.specialtyPhone}</p>}
+                <p>전화: {hospitalInfo.mainPhone}</p>
               </div>
             </div>
           </Card>

@@ -99,7 +99,6 @@ export function TinnitusPanel({ disease, onClose }: TinnitusPanelProps) {
         <div className="space-y-8">
           {/* 이미지 섹션 */}
           <div className="bg-white p-6 rounded-xl">
-            <h4 className="text-2xl font-bold text-primary mb-6">일곡에스한방병원 진료 방법</h4>
             <div className="relative h-[500px]">
               <Image src="/diseases/이명/이명_5.png" alt="일곡에스한방병원 진료 방법" fill className="object-contain" priority />
             </div>
@@ -137,8 +136,8 @@ export function TinnitusPanel({ disease, onClose }: TinnitusPanelProps) {
                 <h4 className="text-xl font-bold text-primary">약침 치료</h4>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                한약에서 추출해 정제한 약침 제제를 경혈에 주입해 침과 한약의 효과를 동시에 얻는 일곡에스한방병원의 이명 치료법입니다. 국소적인 통증 제어 뿐
-                아니라 면역력을 높여 탁월한 치료효과를 보입니다.
+                한약에서 추출해 정제한 약침 제제를 경혈에 주입해 침과 한약의 효과를 동시에 얻는 소리청 일곡에스한방병원의 이명 치료법입니다. 국소적인 통증 제어
+                뿐 아니라 면역력을 높여 탁월한 치료효과를 보입니다.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl">
