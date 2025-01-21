@@ -1,3 +1,5 @@
+"use client";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface PriceItem {
@@ -22,6 +24,7 @@ interface PriceCategory {
 
 interface NonCoveredSectionProps {
   items: PriceCategory[];
+  isLoading?: boolean;
 }
 
 function formatPrice(item: PriceItem) {
@@ -37,7 +40,7 @@ function formatPrice(item: PriceItem) {
   }
 }
 
-export function NonCoveredSection({ items }: NonCoveredSectionProps) {
+export function NonCoveredSection({ items, isLoading = false }: NonCoveredSectionProps) {
   const renderCategory = (category: PriceCategory) => {
     return (
       <div key={category.id} className="space-y-4">
@@ -74,11 +77,25 @@ export function NonCoveredSection({ items }: NonCoveredSectionProps) {
           </>
         ) : null}
 
-        {/* 하위 카테고리들 재귀적으로 렌더링 */}
         {category.level === 0 && category.children?.length > 0 && <div className="space-y-4">{category.children.map(renderCategory)}</div>}
       </div>
     );
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-96 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-white">

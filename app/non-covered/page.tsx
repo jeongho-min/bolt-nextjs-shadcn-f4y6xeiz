@@ -39,13 +39,23 @@ function formatPrice(item: PriceItem) {
 
 export default function NonCoveredPage() {
   const [categories, setCategories] = useState<PriceCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchPriceItems();
+
+    // 페이지가 포커스를 받을 때마다 데이터 새로고침
+    const handleFocus = () => {
+      fetchPriceItems();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   const fetchPriceItems = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/prices", {
         cache: "no-store",
       });
@@ -54,13 +64,15 @@ export default function NonCoveredPage() {
       setCategories(data);
     } catch (error) {
       console.error("가격표를 불러오는데 실패했습니다:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <main className="pt-16">
       <NonCoveredHero />
-      <NonCoveredSection items={categories} />
+      <NonCoveredSection items={categories} isLoading={isLoading} />
     </main>
   );
 }

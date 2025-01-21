@@ -18,6 +18,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { PageLayout } from "../components/page-layout";
+import { Badge } from "@/components/ui/badge";
 
 export default function PopupsPage() {
   const router = useRouter();
@@ -54,15 +56,29 @@ export default function PopupsPage() {
     }
   };
 
-  return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">팝업 관리</h1>
-        <Button onClick={() => router.push("/admin/popups/new")}>
-          <Plus className="mr-2 h-4 w-4" />새 팝업
-        </Button>
+  const HeaderContent = () => (
+    <div className="flex items-center gap-4">
+      <div className="flex gap-2">
+        <Badge variant="outline">전체: {popups.length}</Badge>
+        <Badge variant="default">공지: {popups.filter((popup) => popup.category === "NOTICE").length}</Badge>
+        <Badge variant="secondary">안내: {popups.filter((popup) => popup.category === "INFO").length}</Badge>
+        <Badge variant="destructive">이벤트: {popups.filter((popup) => popup.category === "EVENT").length}</Badge>
       </div>
+    </div>
+  );
 
+  return (
+    <PageLayout
+      title="팝업 관리"
+      backUrl="/admin"
+      headerContent={<HeaderContent />}
+      actions={[
+        {
+          label: "새 팝업",
+          onClick: () => router.push("/admin/popups/new"),
+        },
+      ]}
+    >
       <AlertDialog>
         <PopupTable popups={popups} onDelete={(id) => setSelectedId(id)} />
 
@@ -87,6 +103,6 @@ export default function PopupsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 }
