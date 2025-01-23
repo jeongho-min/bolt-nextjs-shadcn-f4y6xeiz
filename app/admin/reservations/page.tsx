@@ -79,7 +79,11 @@ export default function ReservationsPage() {
 
   const handleStatusChange = async (id: string, newStatus: ReservationStatus) => {
     try {
-      const response = await fetch(`/api/admin/reservations/${id}`, {
+      const reservation = reservations.find((r) => r.id === id);
+      const isNonMember = !reservation?.userId;
+      const endpoint = isNonMember ? `/api/reservations/non-member/${id}` : `/api/admin/reservations/${id}`;
+
+      const response = await fetch(endpoint, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +137,11 @@ export default function ReservationsPage() {
     if (!editingMemo) return;
 
     try {
-      const response = await fetch(`/api/admin/reservations/${editingMemo.id}`, {
+      const reservation = reservations.find((r) => r.id === editingMemo.id);
+      const isNonMember = !reservation?.userId;
+      const endpoint = isNonMember ? `/api/reservations/non-member/${editingMemo.id}` : `/api/admin/reservations/${editingMemo.id}`;
+
+      const response = await fetch(endpoint, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -165,7 +173,10 @@ export default function ReservationsPage() {
     if (!selectedReservation) return;
 
     try {
-      const response = await fetch(`/api/admin/reservations/${selectedReservation.id}`, {
+      const isNonMember = !selectedReservation.userId;
+      const endpoint = isNonMember ? `/api/reservations/non-member/${selectedReservation.id}` : `/api/admin/reservations/${selectedReservation.id}`;
+
+      const response = await fetch(endpoint, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
