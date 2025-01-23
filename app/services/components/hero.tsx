@@ -3,10 +3,23 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export function ServicesHero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -27,7 +40,7 @@ export function ServicesHero() {
         className="absolute inset-0"
       >
         <motion.div style={{ filter: `brightness(${brightness})` }} className="relative w-full h-full">
-          <Image src="/sub/sub_vis_bg3.jpg" alt="진료 안내" fill className="object-cover object-center" priority />
+          <Image src={isMobile ? "/sub/sub_vis_bg3_mobile.png" : "/sub/sub_vis_bg3.jpg"} alt="진료 안내" fill className="object-cover object-center" priority />
         </motion.div>
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/40"

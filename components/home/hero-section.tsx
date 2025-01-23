@@ -1,56 +1,25 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { HERO_SLIDES } from "./hero-slider/slide-data";
 import { SlideNavigation } from "./hero-slider/slide-navigation";
-import { QuickLinks } from "./quick-links";
-
-const slideVariants = {
-  enter: {
-    opacity: 0,
-    scale: 1.05,
-  },
-  center: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 1,
-      ease: "easeOut",
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 1.05,
-    transition: {
-      duration: 0.6,
-      ease: "easeIn",
-    },
-  },
-};
-
-const overlayVariants = {
-  enter: {
-    opacity: 0,
-  },
-  center: {
-    opacity: 1,
-    transition: {
-      duration: 0.8,
-      ease: "easeOut",
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.4,
-    },
-  },
-};
 
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,13 +30,13 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative h-[calc(100vh-50px)]">
+    <section className="relative h-[60vh] md:h-[80vh] lg:h-[calc(100vh-50px)] w-full">
       {/* Background Images */}
-      <div className="relative h-full overflow-hidden">
+      <div className="relative h-full w-full overflow-hidden">
         {HERO_SLIDES.map((slide, index) => (
           <motion.div
             key={slide.id}
-            className="absolute inset-0"
+            className="absolute inset-0 w-full h-full"
             initial={false}
             animate={{
               opacity: currentSlide === index ? 1 : 0,
@@ -77,8 +46,25 @@ export function HeroSection() {
               opacity: { duration: 1.5, ease: "easeInOut" },
             }}
           >
-            <Image src={slide.image} alt="배경 이미지" fill className="object-cover" priority={index === 0} />
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="relative w-full h-full">
+              <Image
+                src={isMobile && slide.mobileImage ? slide.mobileImage : slide.image}
+                alt="배경 이미지"
+                fill
+                sizes="100vw"
+                quality={100}
+                loading={index === 0 ? "eager" : "lazy"}
+                className="object-cover w-full h-full"
+                priority={index === 0}
+                style={{
+                  objectPosition: isMobile ? "center top" : "center",
+                  objectFit: "cover",
+                  transform: isMobile ? "scale(1)" : "scale(1.2)",
+                  transformOrigin: "center top",
+                }}
+              />
+              <div className="absolute inset-0 bg-black/30" />
+            </div>
           </motion.div>
         ))}
       </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState } from "react";
 
 const facilities = [
   {
@@ -25,7 +25,7 @@ const facilities = [
   {
     title: "X-ray실",
     description: "정확한 진단을 위한 영상 검사실",
-    images: ["/facility/x-ray_1.webp", "/facility/x-ray_2.webp"],
+    images: ["/facility/x-ray_2.webp"],
   },
   {
     title: "도수치료실",
@@ -35,12 +35,12 @@ const facilities = [
   {
     title: "한방요법실",
     description: "다양한 한방치료를 제공합니다",
-    images: ["/facility/한방요법실_1.webp", "/facility/한방요법실_2.webp"],
+    images: ["/facility/한방요법실_1.webp"],
   },
   {
     title: "황토방",
     description: "건강한 치료를 위한 황토 찜질 시설",
-    images: ["/facility/황토방_1.webp", "/facility/황토방_2.webp"],
+    images: ["/facility/황토방_1.webp"],
   },
   {
     title: "건식 반식욕기",
@@ -50,7 +50,7 @@ const facilities = [
   {
     title: "청각검사실",
     description: "청각검사를 위한 시설",
-    images: ["/facility/청각검사실_1.jpg", "/facility/청각검사실_2.jpg", "/facility/청각검사실_3.jpg"],
+    images: ["/facility/청각검사실_2.jpg"],
   },
   // {
   //   title: "경옥고",
@@ -59,153 +59,37 @@ const facilities = [
   // },
 ];
 
-function ImageModal({ isOpen, onClose, images, currentIndex }: { isOpen: boolean; onClose: () => void; images: string[]; currentIndex: number }) {
-  const [imageIndex, setImageIndex] = useState(currentIndex);
-
-  useEffect(() => {
-    setImageIndex(currentIndex);
-  }, [currentIndex]);
-
-  if (!isOpen) return null;
-
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setImageIndex((prev) => (prev + 1) % images.length);
-  };
-
+function ImageViewer({ images, currentIndex }: { images: string[]; currentIndex: number }) {
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={onClose}>
-      <button
-        onClick={onClose}
-        className="absolute right-6 top-6 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors z-10"
-      >
-        <X className="w-6 h-6" />
-      </button>
-
-      <div className="relative w-full h-full max-w-5xl max-h-[90vh] m-4">
-        <div className="relative w-full h-full">
-          <Image
-            src={images[imageIndex]}
-            alt="Facility image"
-            fill
-            sizes="(max-width: 1280px) 100vw, 1280px"
-            quality={85}
-            priority
-            className="object-contain"
-          />
-
-          {images.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+    <div className="relative w-full aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden">
+      <Image src={images[currentIndex]} alt="Facility image" fill sizes="(max-width: 1280px) 100vw, 1280px" quality={85} priority className="object-cover" />
     </div>
   );
 }
 
-function FacilityCard({ facility }: { facility: (typeof facilities)[0] }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (facility.images.length <= 1) return;
-
-    // 이미지 프리로딩
-    const preloadImages = facility.images.map((src) => {
-      const img = new window.Image();
-      img.src = src;
-      return img;
-    });
-
-    const timer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
-    }, 5000);
-
-    return () => {
-      clearInterval(timer);
-      // 메모리 정리
-      preloadImages.forEach((img) => (img.src = ""));
-    };
-  }, [facility.images]);
-
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev - 1 + facility.images.length) % facility.images.length);
-  };
-
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev + 1) % facility.images.length);
-  };
-
-  return (
-    <>
-      <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setIsModalOpen(true)}>
-        <div className="relative h-64">
-          <div className="relative w-full h-full">
-            {facility.images.map((src, index) => (
-              <Image
-                key={src}
-                src={src}
-                alt={`${facility.title} ${index + 1}`}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={index === 0}
-                quality={75}
-                className={`object-cover absolute inset-0 transition-opacity duration-300 ${index === currentImageIndex ? "opacity-100" : "opacity-0"}`}
-              />
-            ))}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-          {facility.images.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
-
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <h3 className="text-xl font-bold text-white mb-2">{facility.title}</h3>
-            <p className="text-white/90 text-sm">{facility.description}</p>
-          </div>
-        </div>
-      </Card>
-
-      <ImageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} images={facility.images} currentIndex={currentImageIndex} />
-    </>
-  );
-}
-
 export function FacilitiesList() {
+  const [currentFacilityIndex, setCurrentFacilityIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const currentFacility = facilities[currentFacilityIndex];
+
+  const handlePrevFacility = () => {
+    setCurrentFacilityIndex((prev) => (prev - 1 + facilities.length) % facilities.length);
+    setCurrentImageIndex(0);
+  };
+
+  const handleNextFacility = () => {
+    setCurrentFacilityIndex((prev) => (prev + 1) % facilities.length);
+    setCurrentImageIndex(0);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + currentFacility.images.length) % currentFacility.images.length);
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % currentFacility.images.length);
+  };
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -220,18 +104,94 @@ export function FacilitiesList() {
           <p className="text-gray-600">환자 중심의 편안하고 쾌적한 의료 환경을 제공합니다</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {facilities.map((facility, index) => (
-            <motion.div
-              key={facility.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+        <div className="max-w-4xl mx-auto">
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentFacilityIndex}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+                className="relative"
+              >
+                <ImageViewer images={currentFacility.images} currentIndex={currentImageIndex} />
+
+                {/* 시설 정보 오버레이 */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="text-2xl font-bold text-white mb-2">{currentFacility.title}</h3>
+                  <p className="text-white/90">{currentFacility.description}</p>
+                </div>
+
+                {/* 이미지 네비게이션 */}
+                {currentFacility.images.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                      onClick={handlePrevImage}
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                      onClick={handleNextImage}
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* 시설 네비게이션 */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white z-10"
+              onClick={handlePrevFacility}
             >
-              <FacilityCard facility={facility} />
-            </motion.div>
-          ))}
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white z-10"
+              onClick={handleNextFacility}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
+          </div>
+
+          {/* 이미지 인디케이터 */}
+          {currentFacility.images.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {currentFacility.images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${index === currentImageIndex ? "bg-primary" : "bg-gray-300"}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* 시설 인디케이터 */}
+          <div className="flex justify-center gap-2 mt-6">
+            {facilities.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentFacilityIndex(index);
+                  setCurrentImageIndex(0);
+                }}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentFacilityIndex ? "bg-primary" : "bg-gray-300"}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

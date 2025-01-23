@@ -5,11 +5,24 @@ import Image from "next/image";
 
 export function CertificationSection() {
   return (
-    <section className="relative py-32 min-h-[700px] overflow-hidden flex items-center">
-      <div className="absolute inset-0 z-0">
+    <section className="relative py-16 md:py-24 lg:py-32 min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden flex items-center w-full">
+      <div className="absolute inset-0 z-0 w-full h-full">
         <motion.div initial={{ scale: 1.1 }} whileInView={{ scale: 1 }} transition={{ duration: 1.5 }} className="relative w-full h-full">
-          <Image src="/section/sec7_bg.jpg" alt="배경 이미지" fill className="object-cover" />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative w-full h-full">
+            <Image
+              src="/section/sec7_bg.jpg"
+              alt="배경 이미지"
+              fill
+              sizes="100vw"
+              quality={100}
+              loading="eager"
+              className="object-cover w-full h-full scale-[1.2] md:scale-100"
+              style={{
+                objectPosition: "center",
+              }}
+            />
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
         </motion.div>
       </div>
 

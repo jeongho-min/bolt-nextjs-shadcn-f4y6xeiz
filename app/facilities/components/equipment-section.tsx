@@ -3,8 +3,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Activity, ArrowRight } from "lucide-react";
+import { Activity, ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 const specialEquipment = [
   {
@@ -63,42 +64,93 @@ const specialEquipment = [
   },
 ];
 
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+function ImageModal({ isOpen, onClose, equipment }: { isOpen: boolean; onClose: () => void; equipment: (typeof specialEquipment)[0] }) {
+  if (!isOpen) return null;
 
-const imageAnimation = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  },
-};
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={onClose}>
+      <button
+        onClick={onClose}
+        className="absolute right-6 top-6 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors z-10"
+      >
+        <X className="w-6 h-6" />
+      </button>
 
-const cardAnimation = {
-  initial: { opacity: 0, y: 20 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-  hover: {
-    y: -3,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
+      <div className="relative w-full h-full max-w-5xl max-h-[90vh] m-4 bg-white rounded-lg p-6 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="relative w-full aspect-video mb-6 bg-gray-50 rounded-lg overflow-hidden">
+          <Image src={equipment.image} alt={equipment.title} fill className="object-contain" sizes="(max-width: 1280px) 100vw, 1280px" priority />
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-2xl font-bold text-primary mb-2">{equipment.title}</h3>
+            <p className="text-gray-600 text-lg">{equipment.description}</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
+              <ArrowRight className="w-5 h-5 text-primary" />
+              주요 기능
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {equipment.features.map((feature) => (
+                <Badge key={feature} variant="secondary" className="font-normal px-4 py-2 text-sm bg-primary/5 hover:bg-primary/10 transition-colors">
+                  {feature}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
+              <Activity className="w-5 h-5 text-primary" />
+              치료 효과
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {equipment.effects.map((effect) => (
+                <Badge key={effect} variant="outline" className="font-normal px-4 py-2 text-sm border-primary/30 hover:bg-primary/5 transition-colors">
+                  {effect}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentCard({ equipment }: { equipment: (typeof specialEquipment)[0] }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <>
+      <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setIsModalOpen(true)}>
+        <div className="relative h-64">
+          <div className="relative w-full h-full">
+            <Image
+              src={equipment.image}
+              alt={equipment.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+              quality={75}
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <h3 className="text-xl font-bold text-white mb-2">{equipment.title}</h3>
+            <p className="text-white/90 text-sm line-clamp-2">{equipment.description}</p>
+          </div>
+        </div>
+      </Card>
+
+      <ImageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} equipment={equipment} />
+    </>
+  );
+}
 
 export function EquipmentSection() {
   return (
@@ -115,68 +167,19 @@ export function EquipmentSection() {
           <p className="text-gray-600 max-w-2xl mx-auto">최신 의료장비를 통해 정확한 진단과 효과적인 치료를 제공합니다</p>
         </motion.div>
 
-        {/* 특수 의료장비 섹션 */}
-        <motion.div className="mb-24" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true, margin: "50px" }}>
-          <div className="grid grid-cols-1 gap-8">
-            {specialEquipment.map((item, index) => (
-              <motion.div key={item.title} variants={cardAnimation} whileHover="hover" viewport={{ once: true }} className="will-change-transform">
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white">
-                  <div className="flex flex-col lg:flex-row">
-                    <div className="relative w-full lg:w-2/5 h-[300px] lg:h-[400px] bg-gray-50">
-                      <motion.div className="absolute inset-0 flex items-center justify-center p-8" variants={imageAnimation}>
-                        <div className="relative w-full h-full">
-                          <Image src={item.image} alt={item.title} fill className="object-contain" priority={index < 2} />
-                        </div>
-                      </motion.div>
-                    </div>
-                    <div className="flex-1 p-8">
-                      <div className="max-w-xl">
-                        <h4 className="text-2xl font-bold mb-2 text-primary">{item.title}</h4>
-                        <p className="text-gray-600 mb-6 text-lg">{item.description}</p>
-                        <div className="space-y-6">
-                          <div>
-                            <h5 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
-                              <ArrowRight className="w-5 h-5 text-primary" />
-                              주요 기능
-                            </h5>
-                            <div className="flex flex-wrap gap-2">
-                              {item.features.map((feature) => (
-                                <Badge
-                                  key={feature}
-                                  variant="secondary"
-                                  className="font-normal px-4 py-2 text-sm bg-primary/5 hover:bg-primary/10 transition-colors"
-                                >
-                                  {feature}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <h5 className="font-semibold mb-3 flex items-center gap-2 text-gray-800">
-                              <Activity className="w-5 h-5 text-primary" />
-                              치료 효과
-                            </h5>
-                            <div className="flex flex-wrap gap-2">
-                              {item.effects.map((effect) => (
-                                <Badge
-                                  key={effect}
-                                  variant="outline"
-                                  className="font-normal px-4 py-2 text-sm border-primary/30 hover:bg-primary/5 transition-colors"
-                                >
-                                  {effect}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {specialEquipment.map((equipment, index) => (
+            <motion.div
+              key={equipment.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+            >
+              <EquipmentCard equipment={equipment} />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
