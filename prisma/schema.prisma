@@ -1,127 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgres"
-  url = env("DATABASE_URL")
+  provider  = "postgres"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}
-
-enum ProviderType {
-  kakao
-  naver
-}
-
-enum ReservationStatus {
-  pending
-  confirmed
-  completed
-  cancelled
-}
-
-enum UserRole {
-  ADMIN
-  USER
-}
-
-enum SubjectType {
-  KOREAN    // 한방
-  WESTERN   // 양방
-}
-
-// 공지사항 카테고리 enum 추가
-enum NoticeCategory {
-  NOTICE    // 공지
-  INFO      // 안내
-  EVENT     // 이벤트
-}
-
-enum HolidayType {
-  REGULAR    // 정기 휴일 (예: 매주 일요일)
-  SPECIAL    // 특별 휴일 (예: 명절, 공휴일)
-  TEMPORARY  // 임시 휴진
-}
-
-enum RegularHolidayType {
-  WEEKLY     // 매주 반복
-  MONTHLY    // 매월 반복
-  YEARLY     // 매년 반복
 }
 
 model User {
   id            String        @id @default(cuid())
   name          String?
-  email         String?      @unique
-  emailVerified DateTime?    @map("email_verified")
+  email         String?       @unique
+  emailVerified DateTime?     @map("email_verified")
   phone         String?
   image         String?
-  role          UserRole     @default(USER)
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  
+  role          UserRole      @default(USER)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
   accounts      Account[]
-  sessions      Session[]
+  holidays      Holiday[]
+  notices       Notice[]
+  popupNotices  PopupNotice[]
   reservations  Reservation[]
-  notices       Notice[]      // 작성한 공지사항
-  popupNotices  PopupNotice[] // 작성한 팝업 공지사항
-  holidays      Holiday[]     // 작성한 휴일 정보
+  sessions      Session[]
 
   @@map("users")
 }
 
 model Department {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  doctors     Doctor[]
-  subjects    MedicalSubject[]
-  diseases    Disease[]
-  reservations Reservation[]
+  id                    String                 @id @default(cuid())
+  name                  String
+  description           String?
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  diseases              Disease[]
+  subjects              MedicalSubject[]
   nonMemberReservations NonMemberReservation[]
+  doctors               Doctor[]
+  reservations          Reservation[]
 
   @@map("departments")
 }
 
 model Disease {
-  id          String     @id @default(uuid())
-  name        String
-  description String?
-  symptoms    String?
-  causes      String?
-  treatments  String?
-  imageUrl    String?    @map("image_url")
-  isActive    Boolean    @default(true) @map("is_active")
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamptz
-  department  Department @relation(fields: [departmentId], references: [id])
-  departmentId String    @map("department_id")
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  symptoms     String?
+  causes       String?
+  treatments   String?
+  imageUrl     String?    @map("image_url")
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @default(now()) @map("updated_at") @db.Timestamptz(6)
+  departmentId String     @map("department_id")
+  department   Department @relation(fields: [departmentId], references: [id])
 
   @@map("Disease")
 }
 
 model Doctor {
-  id           String     @id @default(uuid())
-  departmentId String     @map("department_id")
-  name         String
-  position     String?
-  specialties  String?
-  imageUrl     String?    @map("image_url")
-  biography    String?
-  isActive     Boolean    @default(true) @map("is_active")
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime   @default(now()) @map("updated_at") @db.Timestamptz
-  department   Department @relation(fields: [departmentId], references: [id])
-  schedules    Schedule[]
-  reservations Reservation[]
+  id                    String                 @id @default(uuid())
+  departmentId          String                 @map("department_id")
+  name                  String
+  position              String?
+  specialties           String?
+  imageUrl              String?                @map("image_url")
+  biography             String?
+  isActive              Boolean                @default(true) @map("is_active")
+  createdAt             DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime               @default(now()) @map("updated_at") @db.Timestamptz(6)
   nonMemberReservations NonMemberReservation[]
-  subjects     DoctorSubject[]
+  schedules             Schedule[]
+  subjects              DoctorSubject[]
+  department            Department             @relation(fields: [departmentId], references: [id])
+  reservations          Reservation[]
 
   @@map("doctors")
 }
@@ -130,71 +85,69 @@ model Schedule {
   id          String   @id @default(uuid())
   doctorId    String   @map("doctor_id")
   date        DateTime @db.Date
-  startTime   DateTime @map("start_time") @db.Time
-  endTime     DateTime @map("end_time") @db.Time
+  startTime   DateTime @map("start_time") @db.Time(6)
+  endTime     DateTime @map("end_time") @db.Time(6)
   maxPatients Int      @map("max_patients")
   isAvailable Boolean  @default(true) @map("is_available")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
   doctor      Doctor   @relation(fields: [doctorId], references: [id])
 
   @@map("Schedule")
 }
 
 model Reservation {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   userId          String?
-  doctorId        String          @map("doctor_id")
-  departmentId    String          @map("department_id")
-  patientName     String          @map("patient_name")
+  doctorId        String            @map("doctor_id")
+  departmentId    String            @map("department_id")
+  patientName     String            @map("patient_name")
   phone           String
   symptoms        String
-  reservationDate DateTime        @map("reservation_date")
-  timeSlot        String          @map("time_slot")
+  reservationDate DateTime          @map("reservation_date")
+  timeSlot        String            @map("time_slot")
   status          ReservationStatus @default(pending)
   memo            String?
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  
-  user            User?            @relation(fields: [userId], references: [id])
-  doctor          Doctor           @relation(fields: [doctorId], references: [id])
-  department      Department       @relation(fields: [departmentId], references: [id])
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  department      Department        @relation(fields: [departmentId], references: [id])
+  doctor          Doctor            @relation(fields: [doctorId], references: [id])
+  user            User?             @relation(fields: [userId], references: [id])
 
   @@map("reservations")
 }
 
 model NonMemberReservation {
-  id                 String            @id @default(cuid())
-  patientName        String
-  phone              String
+  id                  String            @id @default(cuid())
+  patientName         String
+  phone               String
   reservationPassword String
-  symptoms           String
-  reservationDate    DateTime
-  timeSlot           String
-  status            ReservationStatus @default(pending)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  doctor            Doctor?          @relation(fields: [doctorId], references: [id])
-  doctorId          String?
-  department        Department?      @relation(fields: [departmentId], references: [id])
-  departmentId      String?
+  symptoms            String
+  reservationDate     DateTime
+  timeSlot            String
+  status              ReservationStatus @default(pending)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  doctorId            String?
+  departmentId        String?
+  department          Department?       @relation(fields: [departmentId], references: [id])
+  doctor              Doctor?           @relation(fields: [doctorId], references: [id])
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String  @map("user_id")
-  type               String
-  provider           String
-  providerAccountId  String  @map("provider_account_id")
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -220,203 +173,203 @@ model VerificationToken {
 }
 
 model MedicalSubject {
-  id           String     @id @default(cuid())
-  name         String     // 진료과목명
-  type         SubjectType? // 한방/양방 구분 (선택)
-  description  String?    // 진료과목 설명
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  id           String          @id @default(cuid())
+  name         String
+  type         SubjectType?
+  description  String?
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   departmentId String
+  department   Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   doctors      DoctorSubject[]
-  
+
   @@index([departmentId])
 }
 
 model HospitalInfo {
-  id              String   @id @default(cuid())
-  name            String   // 병원명
-  representative  String   // 대표자명
-  businessNumber  String   // 사업자등록번호
-  address         String   // 주소
-  addressDetail   String?  // 상세주소
-  parkingInfo     String?  // 주차 정보
-  
-  // 연락처 정보
-  mainPhone       String   // 대표 전화번호
-  specialtyPhone  String?  // 특수 진료 전화번호 (예: 이명치료)
-  
-  // 진료 시간
-  weekdayOpen     String   // 평일 시작 시간
-  weekdayClose    String   // 평일 종료 시간
-  saturdayOpen    String?  // 토요일 시작 시간
-  saturdayClose   String?  // 토요일 종료 시간
-  lunchStart      String   // 점심시간 시작
-  lunchEnd        String   // 점심시간 종료
-  closedDays      String   // 휴진일 (예: 일요일/공휴일)
-  
-  // 메타 정보
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  representative String
+  businessNumber String
+  address        String
+  addressDetail  String?
+  parkingInfo    String?
+  mainPhone      String
+  specialtyPhone String?
+  weekdayOpen    String
+  weekdayClose   String
+  saturdayOpen   String?
+  saturdayClose  String?
+  lunchStart     String
+  lunchEnd       String
+  closedDays     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@map("hospital_info")
 }
 
-// 의사-진료과목 다대다 관계를 위한 중간 테이블
 model DoctorSubject {
-  id              String        @id @default(cuid())
-  doctor          Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  doctorId        String
-  subject         MedicalSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectId       String
-  createdAt       DateTime      @default(now())
+  id        String         @id @default(cuid())
+  doctorId  String
+  subjectId String
+  createdAt DateTime       @default(now())
+  doctor    Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  subject   MedicalSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([doctorId, subjectId])
   @@map("doctor_subjects")
 }
 
-// 가격표 카테고리 테이블
 model PriceCategory {
-  id          String    @id @default(cuid())
-  name        String    // 카테고리명 (예: 한약/처방, 치료/처치, 제증명)
-  order       Int       // 정렬 순서
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // 계층 구조를 위한 필드 추가
-  parentId    String?   // 상위 카테고리 ID
-  parent      PriceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    PriceCategory[] @relation("CategoryHierarchy")
-  level       Int       @default(0)  // 계층 레벨 (0: 최상위, 1: 2단계, 2: 3단계)
-  
-  items       PriceItem[]
+  id        String          @id @default(cuid())
+  name      String
+  order     Int
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  level     Int             @default(0)
+  parentId  String?
+  parent    PriceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  PriceCategory[] @relation("CategoryHierarchy")
+  items     PriceItem[]
 
   @@map("price_categories")
 }
 
-// 가격표 항목 테이블
 model PriceItem {
-  id            String    @id @default(cuid())
-  categoryId    String    // 카테고리 ID
-  name          String    // 항목명 (예: 일반 탕약, 공진단, 도수치료 등)
-  description   String?   // 설명
-  specification String?   // 규격/용량 (예: 15일분, 30환 등)
-  priceType     String    // 가격 유형 (FIXED: 고정가격, RANGE: 가격범위, TEXT: 텍스트)
-  priceMin      Int?      // 최소 가격 (원 단위)
-  priceMax      Int?      // 최대 가격 (원 단위)
-  priceText     String?   // 텍스트형 가격 (예: "본인부담 30%", "상담 후 결정" 등)
-  order         Int       // 정렬 순서
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            String        @id @default(cuid())
+  categoryId    String
+  name          String
+  description   String?
+  specification String?
+  priceType     String
+  priceMin      Int?
+  priceMax      Int?
+  priceText     String?
+  order         Int
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   category      PriceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("price_items")
 }
 
-// 공지사항 테이블
 model Notice {
-  id          String        @id @default(cuid())
-  title       String        // 제목
-  content     String        // 내용
-  category    NoticeCategory // 카테고리
-  isImportant Boolean       @default(false) // 중요 공지 여부
-  isActive    Boolean       @default(true)  // 활성화 여부
-  viewCount   Int          @default(0)     // 조회수
-  startDate   DateTime?     // 게시 시작일
-  endDate     DateTime?     // 게시 종료일
-  attachments NoticeAttachment[] // 첨부파일
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  createdBy   User?        @relation(fields: [userId], references: [id])
+  id          String             @id @default(cuid())
+  title       String
+  content     String
+  category    NoticeCategory
+  isImportant Boolean            @default(false)
+  isActive    Boolean            @default(true)
+  viewCount   Int                @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
   userId      String?
+  attachments NoticeAttachment[]
+  createdBy   User?              @relation(fields: [userId], references: [id])
 
   @@map("notices")
 }
 
-// 공지사항 첨부파일 테이블
 model NoticeAttachment {
   id        String   @id @default(cuid())
-  noticeId  String   // 공지사항 ID
-  fileName  String   // 파일명
-  fileUrl   String   // 파일 URL
-  fileSize  Int      // 파일 크기 (bytes)
-  mimeType  String   // 파일 타입
+  noticeId  String
+  fileName  String
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
   createdAt DateTime @default(now()) @map("created_at")
   notice    Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
 
   @@map("notice_attachments")
 }
 
-// 팝업 공지사항 테이블
 model PopupNotice {
-  id          String        @id @default(cuid())
-  title       String        // 제목
-  content     String        // 내용
-  category    NoticeCategory // 카테고리
-  imageUrl    String?       // 팝업 이미지 URL
-  startDate   DateTime      // 팝업 시작일
-  endDate     DateTime      // 팝업 종료일
-  isActive    Boolean       @default(true)  // 활성화 여부
-  priority    Int          @default(0)      // 우선순위 (높을수록 먼저 표시)
-  width       Int          @default(320)    // 팝업 너비
-  height      Int?                          // 팝업 높이 (선택적)
-  position    Json?        // 팝업 위치 설정 (예: { "top": "10%", "left": "5%" })
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  createdBy   User?        @relation(fields: [userId], references: [id])
-  userId      String?
+  id        String         @id @default(cuid())
+  title     String
+  content   String
+  category  NoticeCategory
+  imageUrl  String?
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean        @default(true)
+  priority  Int            @default(0)
+  width     Int            @default(320)
+  height    Int?
+  position  Json?
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  userId    String?
+  createdBy User?          @relation(fields: [userId], references: [id])
 
   @@map("popup_notices")
 }
 
 model Hospital {
-  id              String    @id @default(cuid())
-  name            String
-  representative  String
-  businessNumber  String
-  address         String
-  addressDetail   String?
-  parkingInfo     String?
-  mainPhone       String
-  specialtyPhone  String?
-  weekdayOpen     String
-  weekdayClose    String
-  saturdayOpen    String?
-  saturdayClose   String?
-  lunchStart      String
-  lunchEnd        String
-  closedDays      String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  representative String
+  businessNumber String
+  address        String
+  addressDetail  String?
+  parkingInfo    String?
+  mainPhone      String
+  specialtyPhone String?
+  weekdayOpen    String
+  weekdayClose   String
+  saturdayOpen   String?
+  saturdayClose  String?
+  lunchStart     String
+  lunchEnd       String
+  closedDays     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
-// 휴일 관리 테이블
 model Holiday {
-  id              String    @id @default(cuid())
-  title           String    // 휴일 제목 (예: 설날, 추석, 임시휴진 등)
-  description     String?   // 휴일 설명
-  type            HolidayType // 휴일 유형
-  
-  // 정기 휴일인 경우
-  regularType     RegularHolidayType? // 정기 휴일 유형
-  dayOfWeek       Int?     // 요일 (0: 일요일, 1: 월요일, ..., 6: 토요일)
-  weekOfMonth     Int?     // 몇 번째 주 (1-5)
-  dayOfMonth      Int?     // 매월 몇 일
-  monthOfYear     Int?     // 매년 몇 월
-  
-  // 특별 휴일/임시 휴진인 경우
-  startDate       DateTime? // 시작일
-  endDate         DateTime? // 종료일
-  
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  createdBy       User?     @relation(fields: [userId], references: [id])
-  userId          String?
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String?
+  createdBy   User?     @relation(fields: [userId], references: [id])
 
   @@map("holidays")
 }
 
+enum ProviderType {
+  kakao
+  naver
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum SubjectType {
+  KOREAN
+  WESTERN
+}
+
+enum NoticeCategory {
+  NOTICE
+  INFO
+  EVENT
+}

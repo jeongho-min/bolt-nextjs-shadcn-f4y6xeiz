@@ -7,9 +7,6 @@ async function main() {
       data: {
         title: "일요일 정기 휴무",
         description: "매주 일요일은 정기 휴무일입니다.",
-        type: "REGULAR",
-        regularType: "WEEKLY",
-        dayOfWeek: 0,
         isActive: true,
       },
     });
@@ -19,7 +16,6 @@ async function main() {
       data: {
         title: "법정공휴일 휴무",
         description: "법정공휴일은 휴무입니다.",
-        type: "SPECIAL",
         isActive: true,
       },
     });
@@ -29,9 +25,6 @@ async function main() {
       data: {
         title: "점심시간",
         description: "평일 점심시간입니다.",
-        type: "REGULAR",
-        regularType: "WEEKLY",
-        dayOfWeek: 1, // 월요일부터
         isActive: true,
       },
     });

@@ -21,17 +21,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { HolidayCalendar } from "./components/holiday-calendar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Holiday {
   id: string;
   title: string;
   description: string | null;
-  type: "REGULAR" | "SPECIAL" | "TEMPORARY";
-  regularType: "WEEKLY" | "MONTHLY" | "YEARLY" | null;
-  dayOfWeek: number | null;
-  weekOfMonth: number | null;
-  dayOfMonth: number | null;
-  monthOfYear: number | null;
   startDate: string | null;
   endDate: string | null;
   isActive: boolean;
@@ -88,106 +84,80 @@ export default function HolidaysPage() {
   };
 
   const formatHolidayDate = (holiday: Holiday) => {
-    if (holiday.type === "REGULAR") {
-      switch (holiday.regularType) {
-        case "WEEKLY":
-          return `매주 ${["일", "월", "화", "수", "목", "금", "토"][holiday.dayOfWeek || 0]}요일`;
-        case "MONTHLY":
-          if (holiday.weekOfMonth) {
-            return `매월 ${holiday.weekOfMonth}번째 ${["일", "월", "화", "수", "목", "금", "토"][holiday.dayOfWeek || 0]}요일`;
-          }
-          return `매월 ${holiday.dayOfMonth}일`;
-        case "YEARLY":
-          return `매년 ${holiday.monthOfYear}월 ${holiday.dayOfMonth}일`;
-        default:
-          return "-";
-      }
-    } else {
-      if (holiday.startDate && holiday.endDate) {
-        const start = format(new Date(holiday.startDate), "yyyy.MM.dd", { locale: ko });
-        const end = format(new Date(holiday.endDate), "yyyy.MM.dd", { locale: ko });
-        return `${start} ~ ${end}`;
-      }
-      return "-";
+    if (holiday.startDate && holiday.endDate) {
+      const start = format(new Date(holiday.startDate), "yyyy.MM.dd", { locale: ko });
+      const end = format(new Date(holiday.endDate), "yyyy.MM.dd", { locale: ko });
+      return `${start} ~ ${end}`;
     }
-  };
-
-  const getHolidayTypeBadge = (type: Holiday["type"]) => {
-    switch (type) {
-      case "REGULAR":
-        return <Badge variant="outline">정기 휴일</Badge>;
-      case "SPECIAL":
-        return <Badge variant="secondary">특별 휴일</Badge>;
-      case "TEMPORARY":
-        return <Badge variant="destructive">임시 휴진</Badge>;
-    }
+    return "-";
   };
 
   return (
     <PageLayout title="휴일 관리" backUrl="/admin">
-      <div className="mb-4 flex justify-between items-center">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">휴일 목록</h2>
-          <p className="text-sm text-muted-foreground">정기 휴일과 특별 휴일, 임시 휴진을 관리합니다.</p>
-        </div>
-        <Button onClick={() => router.push("/admin/holidays/new")}>
-          <Plus className="mr-2 h-4 w-4" />새 휴일
-        </Button>
-      </div>
+      <Tabs defaultValue="calendar" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="calendar">캘린더</TabsTrigger>
+          <TabsTrigger value="list">목록</TabsTrigger>
+        </TabsList>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>유형</TableHead>
-              <TableHead>제목</TableHead>
-              <TableHead>날짜/기간</TableHead>
-              <TableHead>설명</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>등록자</TableHead>
-              <TableHead className="text-right">관리</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {holidays.map((holiday) => (
-              <TableRow key={holiday.id}>
-                <TableCell>{getHolidayTypeBadge(holiday.type)}</TableCell>
-                <TableCell>{holiday.title}</TableCell>
-                <TableCell>{formatHolidayDate(holiday)}</TableCell>
-                <TableCell>{holiday.description || "-"}</TableCell>
-                <TableCell>
-                  <Badge variant={holiday.isActive ? "default" : "secondary"}>{holiday.isActive ? "활성" : "비활성"}</Badge>
-                </TableCell>
-                <TableCell>{holiday.createdBy?.name || "-"}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/holidays/${holiday.id}`)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
+        <TabsContent value="calendar" className="space-y-4">
+          <HolidayCalendar holidays={holidays} onHolidayCreate={fetchHolidays} onHolidayUpdate={fetchHolidays} />
+        </TabsContent>
+
+        <TabsContent value="list">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>제목</TableHead>
+                  <TableHead>기간</TableHead>
+                  <TableHead>설명</TableHead>
+                  <TableHead>상태</TableHead>
+                  <TableHead>등록자</TableHead>
+                  <TableHead className="text-right">관리</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {holidays.map((holiday) => (
+                  <TableRow key={holiday.id}>
+                    <TableCell>{holiday.title}</TableCell>
+                    <TableCell>{formatHolidayDate(holiday)}</TableCell>
+                    <TableCell>{holiday.description || "-"}</TableCell>
+                    <TableCell>
+                      <Badge variant={holiday.isActive ? "default" : "secondary"}>{holiday.isActive ? "활성" : "비활성"}</Badge>
+                    </TableCell>
+                    <TableCell>{holiday.createdBy?.name || "-"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/holidays/${holiday.id}`)}>
+                          <Edit className="h-4 w-4" />
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>휴일 삭제</AlertDialogTitle>
-                          <AlertDialogDescription>정말로 이 휴일을 삭제하시겠습니까?</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>취소</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(holiday.id)}>삭제</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>휴일 삭제</AlertDialogTitle>
+                              <AlertDialogDescription>정말로 이 휴일을 삭제하시겠습니까?</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>취소</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(holiday.id)}>삭제</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
     </PageLayout>
   );
 }

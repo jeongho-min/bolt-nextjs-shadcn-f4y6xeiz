@@ -42,9 +42,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     const body = await req.json();
-    const { title, description, type, regularType, dayOfWeek, weekOfMonth, dayOfMonth, monthOfYear, startDate, endDate, isActive } = body;
+    const { title, description, startDate, endDate, isActive } = body;
 
-    if (!title || !type) {
+    if (!title) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -55,12 +55,6 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       data: {
         title,
         description,
-        type,
-        regularType,
-        dayOfWeek,
-        weekOfMonth,
-        dayOfMonth,
-        monthOfYear,
         startDate,
         endDate,
         isActive,

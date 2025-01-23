@@ -10,12 +10,6 @@ interface Holiday {
   id: string;
   title: string;
   description?: string;
-  type: "REGULAR" | "SPECIAL" | "TEMPORARY";
-  regularType?: "WEEKLY" | "MONTHLY" | "YEARLY";
-  dayOfWeek?: number;
-  weekOfMonth?: number;
-  dayOfMonth?: number;
-  monthOfYear?: number;
   startDate?: Date;
   endDate?: Date;
   isActive: boolean;
@@ -39,12 +33,6 @@ export default function EditHolidayPage({ params }: { params: { id: string } }) 
           id: data.id,
           title: data.title,
           description: data.description || undefined,
-          type: data.type,
-          regularType: data.regularType || undefined,
-          dayOfWeek: data.dayOfWeek || undefined,
-          weekOfMonth: data.weekOfMonth || undefined,
-          dayOfMonth: data.dayOfMonth || undefined,
-          monthOfYear: data.monthOfYear || undefined,
           startDate: data.startDate ? new Date(data.startDate) : undefined,
           endDate: data.endDate ? new Date(data.endDate) : undefined,
           isActive: data.isActive,

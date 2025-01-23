@@ -11,14 +11,9 @@ export async function GET() {
     }
 
     const holidays = await prisma.holiday.findMany({
-      orderBy: [
-        {
-          type: "asc",
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
         createdBy: {
           select: {
@@ -43,9 +38,9 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, description, type, regularType, dayOfWeek, weekOfMonth, dayOfMonth, monthOfYear, startDate, endDate } = body;
+    const { title, description, startDate, endDate } = body;
 
-    if (!title || !type) {
+    if (!title) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -53,14 +48,9 @@ export async function POST(req: Request) {
       data: {
         title,
         description,
-        type,
-        regularType,
-        dayOfWeek,
-        weekOfMonth,
-        dayOfMonth,
-        monthOfYear,
         startDate,
         endDate,
+        isActive: true,
         createdBy: {
           connect: {
             id: session.user.id,

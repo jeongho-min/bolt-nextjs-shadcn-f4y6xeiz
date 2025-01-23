@@ -200,3 +200,117 @@ html {
     opacity: 0;
   }
 }
+
+/* FullCalendar 커스텀 스타일 */
+.fc {
+  --fc-border-color: #e5e7eb;
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: transparent;
+  --fc-neutral-text-color: #6b7280;
+  --fc-small-font-size: 0.875rem;
+}
+
+/* 헤더 스타일링 */
+.fc .fc-toolbar {
+  @apply flex flex-wrap items-center justify-between gap-4 mb-6;
+}
+
+.fc .fc-toolbar-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+/* 버튼 스타일링 */
+.fc .fc-button {
+  @apply px-4 py-2 text-sm font-medium rounded-lg border transition-all
+         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+}
+
+.fc .fc-button-primary {
+  @apply bg-white text-gray-700 border-gray-200 hover:bg-gray-50;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  @apply bg-gray-100 text-gray-900 border-gray-300;
+}
+
+/* 달력 그리드 스타일링 */
+.fc .fc-daygrid-day-frame {
+  @apply min-h-[120px];
+}
+
+.fc th {
+  @apply py-3 border-0;
+}
+
+.fc .fc-daygrid-day-top {
+  @apply p-2;
+}
+
+.fc .fc-daygrid-day-number {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.fc .fc-day-today {
+  @apply bg-blue-50/50;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  @apply text-blue-600 font-semibold;
+}
+
+.fc td {
+  @apply border border-gray-100;
+}
+
+/* 이벤트 스타일링 */
+.holiday-event {
+  @apply bg-red-500 text-white px-2 py-1 rounded-md shadow-sm 
+         border-none text-xs font-medium hover:bg-red-600 
+         transition-colors cursor-pointer;
+}
+
+.fc .fc-daygrid-event {
+  @apply mb-1 mx-1;
+}
+
+.fc .fc-daygrid-more-link {
+  @apply text-xs font-medium text-gray-500 hover:text-gray-700;
+}
+
+/* 더보기 팝오버 */
+.fc .fc-more-popover {
+  @apply rounded-lg shadow-lg border border-gray-200;
+}
+
+.fc .fc-more-popover .fc-popover-header {
+  @apply bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 rounded-t-lg;
+}
+
+.fc .fc-more-popover .fc-popover-body {
+  @apply p-2 max-h-[300px] overflow-y-auto;
+}
+
+/* 요일 헤더 */
+.calendar-header {
+  @apply text-sm font-medium text-gray-600 uppercase tracking-wider;
+}
+
+/* 날짜 셀 호버 */
+.calendar-day {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+/* 이전/다음 달 날짜 */
+.fc .fc-day-other .fc-daygrid-day-top {
+  @apply opacity-40;
+}
+
+/* 주말 색상 */
+.fc-day-sun {
+  @apply text-red-500;
+}
+
+.fc-day-sat {
+  @apply text-blue-500;
+}
