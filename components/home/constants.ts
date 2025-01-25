@@ -6,7 +6,7 @@ export const HOSPITAL_LNG = 126.89739;
 export const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/map/${HOSPITAL_NAME},${HOSPITAL_LAT},${HOSPITAL_LNG}`;
 export const KAKAO_MAPS_NAVI_URL = `kakaomap://route?ep=${HOSPITAL_LAT},${HOSPITAL_LNG}&by=CAR`;
 export const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_wZaxbn/chat";
-export const KAKAO_CHANNEL_MOBILE_URL = "kakaoopen://plusfriend/chat/@soricheong";
+export const KAKAO_CHANNEL_MOBILE_URL = "https://pf.kakao.com/_wZaxbn/chat";
 
 // 사용자 환경 체크 함수
 const isMobileDevice = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -47,10 +47,11 @@ export const QUICK_LINKS: QuickLink[] = [
     icon: MessageCircle,
     label: "상담하기",
     onClick: () => {
+      const url = KAKAO_CHANNEL_URL;
       if (isMobileDevice()) {
-        window.location.href = KAKAO_CHANNEL_MOBILE_URL;
+        window.location.href = url;
       } else {
-        window.open(KAKAO_CHANNEL_URL, "_blank");
+        window.open(url, "_blank");
       }
     },
     color: "text-blue-500",
