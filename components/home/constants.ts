@@ -5,8 +5,11 @@ export const HOSPITAL_LAT = 35.202698;
 export const HOSPITAL_LNG = 126.89739;
 export const KAKAO_MAPS_SEARCH_URL = `https://map.kakao.com/link/map/${HOSPITAL_NAME},${HOSPITAL_LAT},${HOSPITAL_LNG}`;
 export const KAKAO_MAPS_NAVI_URL = `kakaomap://route?ep=${HOSPITAL_LAT},${HOSPITAL_LNG}&by=CAR`;
-export const KAKAO_CHANNEL_ID = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID;
-export const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
+export const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_wZaxbn/chat";
+export const KAKAO_CHANNEL_MOBILE_URL = "kakaoopen://plusfriend/chat/@soricheong";
+
+// 사용자 환경 체크 함수
+const isMobileDevice = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 export type QuickLink = {
   icon: LucideIcon;
@@ -22,7 +25,7 @@ export const QUICK_LINKS: QuickLink[] = [
     icon: MapPin,
     label: "길찾기",
     onClick: () => {
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      if (isMobileDevice()) {
         window.location.href = KAKAO_MAPS_NAVI_URL;
       } else {
         window.open(KAKAO_MAPS_SEARCH_URL, "_blank");
@@ -44,10 +47,10 @@ export const QUICK_LINKS: QuickLink[] = [
     icon: MessageCircle,
     label: "상담하기",
     onClick: () => {
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.location.href = `kakaoopen://plusfriend/home/@${KAKAO_CHANNEL_ID}`;
+      if (isMobileDevice()) {
+        window.location.href = KAKAO_CHANNEL_MOBILE_URL;
       } else {
-        window.open(`https://pf.kakao.com/_${KAKAO_CHANNEL_ID}`, "_blank");
+        window.open(KAKAO_CHANNEL_URL, "_blank");
       }
     },
     color: "text-blue-500",
