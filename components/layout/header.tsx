@@ -2,7 +2,7 @@
 
 import { useHeader } from "@/app/providers/header-provider";
 import { Button } from "@/components/ui/button";
-import { Calendar, LogIn, LogOut, Menu, MoreVertical, X } from "lucide-react";
+import { Calendar, LogIn, LogOut, Menu, MoreVertical, X, User, UserX } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -112,8 +112,8 @@ export function Header() {
               </Link>
             </div>
 
-            {/* Desktop Navigation (lg 이상) */}
-            <div className="hidden lg:flex lg:items-center lg:space-x-6">
+            {/* Desktop Navigation (1100px 이상) */}
+            <div className="hidden xl:flex xl:items-center xl:space-x-6">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href} className="nav-link">
                   {item.name}
@@ -163,7 +163,7 @@ export function Header() {
             </div>
 
             {/* Mobile & Tablet menu button */}
-            <div className="flex lg:hidden">
+            <div className="flex xl:hidden">
               <button type="button" className="text-gray-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -172,7 +172,7 @@ export function Header() {
 
           {/* Mobile & Tablet Navigation */}
           {mobileMenuOpen && (
-            <div className="lg:hidden">
+            <div className="xl:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2">
                 {navigation.map((item) => (
                   <Link
@@ -185,6 +185,8 @@ export function Header() {
                   </Link>
                 ))}
 
+                <div className="my-2 border-t border-gray-200" />
+
                 {status === "authenticated" ? (
                   <>
                     <button
@@ -195,6 +197,24 @@ export function Header() {
                       className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
                       예약내역
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenuDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      정보수정
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenuDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-base font-medium text-red-500 hover:bg-red-50"
+                    >
+                      회원탈퇴
                     </button>
                     <button
                       onClick={() => {

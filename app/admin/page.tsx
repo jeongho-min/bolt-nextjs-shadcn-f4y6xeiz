@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Building2, Users, Stethoscope, Calendar, ClipboardList, Receipt, Bell, MessageSquareMore } from "lucide-react";
+import { Building2, Users, Stethoscope, Calendar, ClipboardList, Receipt, Bell, MessageSquareMore, ListTree, FileText } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -67,6 +67,24 @@ export default function AdminPage() {
       description: "정기 휴일과 특별 휴일, 임시 휴진을 관리합니다.",
       icon: Calendar,
       href: "/admin/holidays",
+    },
+    {
+      title: "진료과목 관리",
+      description: "진료과목 정보를 관리합니다.",
+      href: "/admin/department-info",
+      icon: ListTree,
+    },
+    {
+      title: "치료 사례 카테고리",
+      description: "치료 사례의 카테고리를 관리합니다.",
+      href: "/admin/treatment-categories",
+      icon: ListTree,
+    },
+    {
+      title: "치료 사례",
+      description: "치료 사례를 관리합니다.",
+      href: "/admin/treatment-cases",
+      icon: FileText,
     },
   ];
 

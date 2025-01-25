@@ -1,7 +1,10 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import { AuthProvider } from "./providers/auth-provider";
 import ClientLayout from "./client-layout";
+import { TreatmentCaseProvider } from "./contexts/treatment-case-context";
+import "./globals.css";
+import { AuthProvider } from "./providers/auth-provider";
+import { DepartmentInfoProvider } from "./contexts/department-info-context";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "소리청 일곡에스한방병원",
@@ -29,11 +32,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="!scroll-smooth overflow-x-hidden">
+    <html lang="ko" className="!scroll-smooth overflow-x-hidden" suppressHydrationWarning>
       <body className="min-h-screen">
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </AuthProvider>
+        <DepartmentInfoProvider>
+          <TreatmentCaseProvider>
+            <AuthProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </AuthProvider>
+          </TreatmentCaseProvider>
+        </DepartmentInfoProvider>
+        <Toaster />
       </body>
     </html>
   );

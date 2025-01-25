@@ -1,18 +1,18 @@
 "use client";
 
-import { cases } from "@/app/cases/data";
+import { useTreatmentCases } from "@/app/contexts/treatment-case-context";
 import { CaseCard } from "@/components/cases/case-card";
 import { CaseFilter } from "@/components/cases/case-filter";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DepartmentList } from "./components/departments/department-list";
 import { ServicesHero } from "./components/hero";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 const ITEMS_PER_PAGE = 9;
-
-const CASE_CATEGORIES = ["전체", "이명", "어지럼증", "편두통", "돌발성난청", "메니에르", "이석증"];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,8 +41,17 @@ const itemVariants = {
 export default function ServicesPage() {
   const [activeCategory, setActiveCategory] = useState<string>("전체");
   const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState<string[]>(["전체"]);
+  const { cases, isLoading, error } = useTreatmentCases();
 
-  const filteredCases = cases.filter((caseItem) => activeCategory === "전체" || caseItem.category === activeCategory);
+  useEffect(() => {
+    if (cases.length > 0) {
+      const uniqueCategories = Array.from(new Set(cases.map((item) => item.treatment_categories.name)));
+      setCategories(["전체", ...uniqueCategories]);
+    }
+  }, [cases]);
+
+  const filteredCases = cases.filter((caseItem) => activeCategory === "전체" || caseItem.treatment_categories.name === activeCategory);
   const totalPages = Math.ceil(filteredCases.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
@@ -60,6 +69,34 @@ export default function ServicesPage() {
     setCurrentPage(1);
   };
 
+  if (isLoading) {
+    return (
+      <main className="min-h-screen">
+        <ServicesHero />
+        <DepartmentList />
+        <div className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4 text-center">
+            <p>로딩 중...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen">
+        <ServicesHero />
+        <DepartmentList />
+        <div className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen">
       <ServicesHero />
@@ -69,7 +106,7 @@ export default function ServicesPage() {
           <h2 className="text-3xl font-bold text-center mb-12">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">치료 사례</span>
           </h2>
-          <CaseFilter categories={CASE_CATEGORIES} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
+          <CaseFilter categories={categories} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} />
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory + currentPage}
@@ -80,7 +117,12 @@ export default function ServicesPage() {
             >
               {paginatedCases.map((caseItem) => (
                 <motion.div key={caseItem.id} variants={itemVariants}>
-                  <CaseCard {...caseItem} />
+                  <CaseCard
+                    title={caseItem.title}
+                    description={caseItem.description}
+                    date={format(new Date(caseItem.date), "yyyy년 M월 d일", { locale: ko })}
+                    category={caseItem.treatment_categories.name}
+                  />
                 </motion.div>
               ))}
             </motion.div>

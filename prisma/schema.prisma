@@ -29,17 +29,18 @@ model User {
 }
 
 model Department {
-  id                    String                 @id @default(cuid())
-  name                  String
-  description           String?
-  isActive              Boolean                @default(true)
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  diseases              Disease[]
-  subjects              MedicalSubject[]
-  nonMemberReservations NonMemberReservation[]
-  doctors               Doctor[]
-  reservations          Reservation[]
+  id                             String                           @id @default(cuid())
+  name                           String
+  description                    String?
+  isActive                       Boolean                          @default(true)
+  createdAt                      DateTime                         @default(now())
+  updatedAt                      DateTime                         @updatedAt
+  diseases                       Disease[]
+  subjects                       MedicalSubject[]
+  nonMemberReservations          NonMemberReservation[]
+  department_medical_departments department_medical_departments[]
+  doctors                        Doctor[]
+  reservations                   Reservation[]
 
   @@map("departments")
 }
@@ -344,6 +345,66 @@ model Holiday {
   createdBy   User?     @relation(fields: [userId], references: [id])
 
   @@map("holidays")
+}
+
+model department_medical_departments {
+  id                    String              @id
+  department_id         String
+  medical_department_id String
+  created_at            DateTime            @default(now())
+  updated_at            DateTime
+  departments           Department          @relation(fields: [department_id], references: [id])
+  medical_departments   medical_departments @relation(fields: [medical_department_id], references: [id])
+
+  @@unique([department_id, medical_department_id], map: "department_medical_departments_department_id_medical_department")
+  @@index([department_id], map: "idx_department_medical_departments_department_id")
+  @@index([medical_department_id], map: "idx_department_medical_departments_medical_department_id")
+}
+
+model medical_departments {
+  id                             String                           @id
+  name                           String
+  description                    String?
+  created_at                     DateTime                         @default(now())
+  updated_at                     DateTime
+  department_medical_departments department_medical_departments[]
+}
+
+model treatment_cases {
+  id                   String               @id
+  title                String
+  description          String
+  date                 DateTime
+  is_active            Boolean?             @default(true)
+  order_num            Int?                 @default(0)
+  created_at           DateTime?            @default(now())
+  updated_at           DateTime?            @default(now())
+  category_id          String
+  treatment_categories treatment_categories @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model treatment_categories {
+  id              String            @id
+  name            String
+  description     String?
+  order_num       Int?              @default(0)
+  is_active       Boolean?          @default(true)
+  created_at      DateTime?         @default(now())
+  updated_at      DateTime?         @default(now())
+  treatment_cases treatment_cases[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model department_info {
+  id          String    @id
+  name        String
+  type        String
+  icon        String
+  description String
+  order_num   Int?      @default(0)
+  is_active   Boolean?  @default(true)
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
 }
 
 enum ProviderType {

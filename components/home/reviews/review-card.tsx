@@ -1,25 +1,33 @@
-import { Star } from "lucide-react";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
-import type { Review } from "./review-data";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
-export function ReviewCard({ name, department, rating, content, date }: Review) {
+interface Props {
+  id: string;
+  title: string;
+  description: string;
+  date: Date;
+  category: string;
+}
+
+export function ReviewCard({ title, description, date, category }: Props) {
   return (
-    <Card className="p-6 w-full h-full bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 border-none shadow-lg hover:shadow-xl">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-bold text-lg">{name}</p>
-            <p className="text-sm text-primary/80">{department}</p>
-          </div>
-          <div className="flex gap-0.5">
-            {Array.from({ length: rating }).map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            ))}
-          </div>
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+      <Card className="p-8 w-[360px] h-[280px] bg-white shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="flex flex-col h-full">
+          <Badge className="w-fit mb-4" variant="secondary">
+            {category}
+          </Badge>
+
+          <h3 className="text-lg font-semibold mb-3 line-clamp-1">{title}</h3>
+
+          <p className="text-gray-600 text-sm leading-relaxed line-clamp-5 flex-1">{description}</p>
+
+          <time className="text-xs text-gray-400 mt-4 block">{format(date, "yyyy년 M월 d일", { locale: ko })}</time>
         </div>
-        <p className="text-gray-600 text-sm leading-relaxed">{content}</p>
-        <p className="text-xs text-gray-400 mt-auto">{date}</p>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
