@@ -25,7 +25,7 @@ export function DiseasesHero() {
     offset: ["start start", "end start"],
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 15]);
   const scale = useTransform(scrollYProgress, [0, 1], [1.1, 1.2]);
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.2, 0.5]);
   const brightness = useTransform(scrollYProgress, [0, 1], [1.1, 0.9]);
@@ -36,7 +36,10 @@ export function DiseasesHero() {
         initial={{ scale: 1.15, opacity: 0 }}
         animate={{ scale: 1.1, opacity: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        style={{ y, scale }}
+        style={{
+          y: `${y.get()}px`,
+          scale: scale,
+        }}
         className="absolute inset-0"
       >
         <motion.div style={{ filter: `brightness(${brightness})` }} className="relative w-full h-full">
