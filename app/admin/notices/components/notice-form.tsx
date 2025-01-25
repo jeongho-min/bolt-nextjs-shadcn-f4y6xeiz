@@ -57,9 +57,10 @@ interface NoticeWithAttachments extends Omit<Notice, "attachments"> {
 interface NoticeFormProps {
   initialData: NoticeWithAttachments | null;
   onSubmit: (data: Partial<NoticeWithAttachments>) => Promise<void>;
+  mode?: "create" | "edit";
 }
 
-export function NoticeForm({ initialData, onSubmit }: NoticeFormProps) {
+export function NoticeForm({ initialData, onSubmit, mode = "create" }: NoticeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
@@ -252,7 +253,7 @@ export function NoticeForm({ initialData, onSubmit }: NoticeFormProps) {
         <div className="flex justify-end gap-4">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? "수정하기" : "등록하기"}
+            {mode === "create" ? "작성하기" : "수정하기"}
           </Button>
         </div>
       </form>

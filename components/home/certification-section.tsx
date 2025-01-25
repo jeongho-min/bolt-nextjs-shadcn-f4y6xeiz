@@ -30,8 +30,8 @@ export function CertificationSection() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.8 }} className="text-white max-w-2xl space-y-6">
             <motion.div initial={{ y: 30, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }}>
-              <h3 className="text-sm font-medium tracking-[0.2em] mb-4">C E R T I F I C A T I O N & Q U A L I T Y</h3>
-              <h2 className="text-4xl font-bold">
+              <h3 className="text-xs md:text-sm font-medium tracking-[0.2em] mb-4">C E R T I F I C A T I O N & Q U A L I T Y</h3>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">
                 소리청은 검증되고 안전한
                 <br />
                 의약품만 사용합니다.
@@ -42,7 +42,7 @@ export function CertificationSection() {
               initial={{ y: 30, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-white/90 text-lg"
+              className="text-white/90 text-base md:text-lg"
             >
               소리청은 철저한 검사에서 합격된 안전한 의약품만 사용하고 있습니다.
             </motion.p>
@@ -51,7 +51,7 @@ export function CertificationSection() {
               initial={{ y: 30, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-white/80 text-sm leading-relaxed"
+              className="text-white/80 text-xs md:text-sm leading-relaxed"
             >
               소리청은 청정지역에서 채취한 의약품 하약재를 연구실에서 "잔류농약, 중금속, 곰팡이독소, 이산화항" 등을 보건복지부 및 식약청 고시, 대한약전 및 대한
               약전외 한약규격집에 의거 실험하고, 한약재 수급 및 유통관리 규정에 의거한 한약규격품만을 사용합니다.

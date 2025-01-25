@@ -66,12 +66,4 @@ export const QUICK_LINKS: QuickLink[] = [
     bgColor: "bg-rose-50",
     hoverColor: "hover:bg-rose-100",
   },
-  {
-    icon: ArrowUp,
-    label: "TOP",
-    onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }),
-    color: "text-gray-500",
-    bgColor: "bg-gray-50",
-    hoverColor: "hover:bg-gray-100",
-  },
 ];

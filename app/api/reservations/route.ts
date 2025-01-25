@@ -3,8 +3,46 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { ReservationStatus } from "@prisma/client";
+import axios from "axios";
 
 export const dynamic = "force-dynamic";
+
+// 카카오 비즈니스 채널 설정
+const KAKAO_API_KEY = process.env.KAKAO_ADMIN_KEY;
+const KAKAO_BIZMSG_SENDER = process.env.KAKAO_BIZMSG_SENDER;
+const KAKAO_TEMPLATE_CODE = process.env.KAKAO_TEMPLATE_CODE;
+
+// 알림톡 발송 함수
+async function sendKakaoNotification(phoneNumber: string, reservationData: any) {
+  try {
+    const response = await axios.post(
+      "https://api.bizm.kakao.com/alimtalk/v2/sender/send",
+      {
+        messages: [
+          {
+            templateCode: KAKAO_TEMPLATE_CODE,
+            phoneNumber: phoneNumber,
+            templateParams: {
+              예약자명: reservationData.name,
+              예약일시: `${reservationData.date} ${reservationData.timeSlot}`,
+              진료과목: reservationData.department,
+            },
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${KAKAO_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("카카오 알림톡 발송 실패:", error);
+    throw error;
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -62,9 +100,29 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(reservation);
+    // 카카오 알림톡 발송
+    if (session.user.phone) {
+      await sendKakaoNotification(session.user.phone, {
+        date: reservation.reservationDate.toISOString().split("T")[0],
+        name: session.user.name || "",
+        department: doctor.department.name || "",
+        timeSlot: reservation.timeSlot,
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "예약이 완료되었습니다.",
+      data: reservation,
+    });
   } catch (error) {
-    console.error("Reservation creation error:", error);
-    return NextResponse.json({ error: "예약 생성 중 오류가 발생했습니다." }, { status: 500 });
+    console.error("예약 처리 중 오류 발생:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "예약 처리 중 오류가 발생했습니다.",
+      },
+      { status: 500 }
+    );
   }
 }
