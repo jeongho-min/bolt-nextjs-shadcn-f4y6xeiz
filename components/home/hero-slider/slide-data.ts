@@ -29,6 +29,7 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 2,
     image: "/main/main_2.jpg",
+    mobileImage: "/main/main_2_mobile.jpg",
     title: "의료진",
     description: "최고의 실력과 정성으로 진료합니다.",
   },
