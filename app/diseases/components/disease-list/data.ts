@@ -1,6 +1,15 @@
 import { Ear, Brain, Activity, AlertCircle } from "lucide-react";
 import type { Disease } from "./types";
 
+enum CommonTreatmentMethods {
+  "한약치료" = "한약치료(탕약, 공진단, 현훈단, 이명환, 경옥고, 총명음 등)을 각자의 체질에 맞게 처방(태음인, 소음인, 소양인, 태양인 한자와 열자를 정확히 감별)",
+  "약침치료" = "약침치료(두개천골태반약침, 두개천골황현해독약침, 봉약침, 두개천골 산삼약침, 소염제통약침, 중성어혈 등 약침)",
+  "추나요볍" = "추나요법(X-RAY, CT, MRI 등 영상을 확인후 정확히 치료)",
+  "침" = "침, 뜸, 부항, 물리치료",
+  "도수치료" = "도수치료", 
+  "턱관절치료" = "턱관절치료"
+}
+
 export const diseases: Disease[] = [
   {
     id: "tinnitus",
@@ -38,7 +47,7 @@ export const diseases: Disease[] = [
     treatments: [
       {
         title: "한약 치료",
-        description: "한약치료를 통해 신체 오장육부의 기능을 촉진시켜 청력세포를 생성합니다. 생성된 청력세포는 약해진 기혈흐름을 바로잡습니다.",
+        description: "한약치료(탕약, 공진단, 현훈단, 이명환, 경옥고, 총명음 등)을 각자의 체질에 맞게 처방(태음인, )",
       },
       {
         title: "침 치료",
