@@ -5,29 +5,37 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const now = new Date();
-
-    const activePopups = await prisma.popupNotice.findMany({
-      where: {
+    // 더미 팝업 데이터
+    const dummyActivePopups = [
+      {
+        id: "popup-1",
+        title: "병원 휴무 안내",
+        content: "5월 1일은 근로자의 날로 휴무입니다.",
+        imageUrl: "https://picsum.photos/800/600",
+        startDate: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(),
+        endDate: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString(),
         isActive: true,
-        startDate: {
-          lte: now, // 현재 시간보다 이전에 시작
-        },
-        endDate: {
-          gte: now, // 현재 시간보다 이후에 종료
-        },
+        priority: 3,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: "user-1"
       },
-      orderBy: [
-        {
-          priority: "desc", // 우선순위 높은 순
-        },
-        {
-          createdAt: "desc", // 최신순
-        },
-      ],
-    });
+      {
+        id: "popup-2",
+        title: "코로나19 예방접종 안내",
+        content: "코로나19 예방접종은 예약제로 운영됩니다.",
+        imageUrl: "https://picsum.photos/800/600",
+        startDate: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(),
+        endDate: new Date(new Date().setDate(new Date().getDate() + 10)).toISOString(),
+        isActive: true,
+        priority: 2,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: "user-1"
+      }
+    ];
 
-    return new NextResponse(JSON.stringify(activePopups), {
+    return new NextResponse(JSON.stringify(dummyActivePopups), {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
